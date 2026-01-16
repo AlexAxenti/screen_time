@@ -44,6 +44,8 @@ impl WindowSegment {
     }
 }
 
+const IDLE_DURATION: u64 = 5000;
+
 pub fn start() {
     let mut main_segment: Option<WindowSegment> = None;
     loop {
@@ -52,151 +54,159 @@ pub fn start() {
         let sample_start_time = SystemTime::now();
         
         // Calculate time since last input
-        let last_input_duration = {
-            let mut last_input_info = LASTINPUTINFO {
-                cbSize: std::mem::size_of::<LASTINPUTINFO>() as u32,
-                dwTime: 0,
-            };
+        let last_input_duration = get_idle_duration();
 
-            let success = unsafe {
-                GetLastInputInfo(&mut last_input_info)
-            };
-
-            if !success.as_bool() {
-                eprintln!("Failed to get the last input info");
-                // last_input_duration = Duration::from_millis(0);
-                Duration::from_millis(0)
-            } else {
-                let tick_count = unsafe { GetTickCount64() };
-
-                let diff = tick_count - last_input_info.dwTime as u64;
-
-                // last_input_duration = Duration::from_millis(diff.into())
-                Duration::from_millis(diff.into())
-            }            
-        };
-
-        // println!("Time since last input: {:?}", last_input_duration);
-
-        if last_input_duration > Duration::from_millis(5000) {
+        if last_input_duration > Duration::from_millis(IDLE_DURATION) {
             flush_segment(&mut main_segment, sample_start_time);
-
-            // println!("Idle");
             continue;
         }
 
-        // Get foreground window HWND
-        let foreground_window_hwnd = unsafe {
-            GetForegroundWindow()
+        // Sample foreground
+        let Some((window_name, window_exe)) = sample_foreground() else {
+            continue;
         };
 
-        // Get foreground window text name
-        let window_text_length = unsafe {
-            GetWindowTextLengthW(foreground_window_hwnd)
-        };
+        let window_exe = get_exe_name_from_path(&window_exe).to_lowercase();
 
-        let mut buffer = vec![0u16; (window_text_length + 1) as usize];
-
-        // println!("Window length: {window_text_length}");
-
-        let chars_count = unsafe {
-            GetWindowTextW(foreground_window_hwnd, &mut buffer)
-        };
-
-        let window_text = String::from_utf16_lossy(&buffer[0..chars_count as usize]);
-
-        // println!("Window text: {:?}", window_text);
-
-        // Get PID
-        let mut hwnd_process_id: u32 = 0;
-        unsafe {
-            GetWindowThreadProcessId(foreground_window_hwnd, Some(&mut hwnd_process_id));
-        }
-
-        // println!("Window pid: {hwnd_process_id}");
-
-        // Get process handle
-        let process_handle = match unsafe {
-            OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, hwnd_process_id)
-        } {
-            Ok(handle) => {
-                handle
-            }
-            Err(e) => {
-                eprintln!("Failed to open process {e}");
-                continue;
-            }
-        };
-
-        // Get process exe path
-        let mut process_image_buffer = vec![0u16; 256];
-
-        let pwstr = PWSTR(process_image_buffer.as_mut_ptr());
-
-        let mut lpdwsize: u32 = 256;
-
-        if let Err(e) = unsafe {
-            QueryFullProcessImageNameW(process_handle, PROCESS_NAME_WIN32, pwstr, &mut lpdwsize)
-        } { 
-            eprintln!("Error {e}");
-        }
-
-        let process_exe = String::from_utf16_lossy(&process_image_buffer[0..lpdwsize as usize]);
-
-        // println!("Process exe: {process_exe}");
-
-        // Close handle
-        if let Err(e) = unsafe {
-            CloseHandle(process_handle)
-        } {
-            eprintln!("Failed to close handle {e}");
-        }
+        // Check if unfocused/empty explorer
+        let is_unfocused = is_unfocused(&window_exe, &window_name);
 
         // Construct sampled segment
-        // TODO Check for empty explorer first
-        let sampled_segment = WindowSegment::new(window_text, process_exe, sample_start_time);
+        let sampled_segment = WindowSegment::new(window_name, window_exe, sample_start_time);        
 
-        // check if unfocused/empty explorer
-        let exe_path = Path::new(&sampled_segment.window_exe);
+        // Update state
+        update_state(&mut main_segment, sampled_segment, is_unfocused, sample_start_time);
+    }
+}
 
-        let exe_name = exe_path
-            .file_name()
-            .map(|s| s.to_string_lossy().into_owned())
-            .unwrap_or_else(|| "Invalid filename".to_string())
-            .to_lowercase();
+fn sample_foreground() -> Option<(String, String)> {
+    let foreground_window_hwnd = unsafe {
+        GetForegroundWindow()
+    };
 
-        let is_unfocused = exe_name == "explorer.exe" && sampled_segment.window_name.is_empty();
+    // Get foreground window text name
+    let window_text_length = unsafe {
+        GetWindowTextLengthW(foreground_window_hwnd)
+    };
 
-        // println!("Length: {}", sampled_segment.window_name.len());
+    let mut buffer = vec![0u16; (window_text_length + 1) as usize];
 
-        // Compare to main_segment
+    let chars_count = unsafe {
+        GetWindowTextW(foreground_window_hwnd, &mut buffer)
+    };
 
-        if main_segment.is_none() {
-            if !is_unfocused {
-                println!("New focus: {} | {}", sampled_segment.window_name, sampled_segment.window_exe);
-                
-                main_segment = Some(sampled_segment);
-            }
+    let window_text = String::from_utf16_lossy(&buffer[0..chars_count as usize]);
+
+    // Get PID
+    let mut hwnd_process_id: u32 = 0;
+    unsafe {
+        GetWindowThreadProcessId(foreground_window_hwnd, Some(&mut hwnd_process_id));
+    }
+
+    // Get process handle
+    let process_handle = match unsafe {
+        OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, hwnd_process_id)
+    } {
+        Ok(handle) => {
+            handle
+        }
+        Err(e) => {
+            eprintln!("Failed to open process {e}");
+            return None;
+        }
+    };
+
+    // Get process exe path
+    let mut process_image_buffer = vec![0u16; 256];
+
+    let pwstr = PWSTR(process_image_buffer.as_mut_ptr());
+
+    let mut lpdwsize: u32 = 256;
+
+    if let Err(e) = unsafe {
+        QueryFullProcessImageNameW(process_handle, PROCESS_NAME_WIN32, pwstr, &mut lpdwsize)
+    } { 
+        eprintln!("Error {e}");
+    }
+
+    let process_exe = String::from_utf16_lossy(&process_image_buffer[0..lpdwsize as usize]);
+
+    // Close handle
+    if let Err(e) = unsafe {
+        CloseHandle(process_handle)
+    } {
+        eprintln!("Failed to close handle {e}");
+    }
+
+    Some((window_text, process_exe))
+}
+
+fn update_state(
+    main_segment: &mut Option<WindowSegment>, 
+    sampled_segment: WindowSegment, 
+    is_unfocused: bool, 
+    sample_start_time: SystemTime
+) {
+    if main_segment.is_none() {
+        if !is_unfocused {
+            println!("New focus: {} | {}", sampled_segment.window_name, sampled_segment.window_exe);
+            
+            *main_segment = Some(sampled_segment);
+        }
+    } else {
+        let same_exe = main_segment
+            .as_ref()
+            .map(|seg| seg.window_exe == sampled_segment.window_exe)
+            .unwrap_or(false);
+
+        if is_unfocused {
+            flush_segment(main_segment, sample_start_time);
+        } else if same_exe {
+            return;
         } else {
-            let same_exe = main_segment
-                .as_ref()
-                .map(|seg| seg.window_exe == sampled_segment.window_exe)
-                .unwrap_or(false);
+            flush_segment(main_segment, sample_start_time);
 
-            if is_unfocused {
-                //TODO: Write to SQL    
-                flush_segment(&mut main_segment, sample_start_time);
-            } else if same_exe {
-                continue;
-            } else {
-                flush_segment(&mut main_segment, sample_start_time);
+            println!("New focus: {} | {}", sampled_segment.window_name, sampled_segment.window_exe);
 
-                println!("New focus: {} | {}", sampled_segment.window_name, sampled_segment.window_exe);
-
-                main_segment = Some(sampled_segment);
-            }
+            *main_segment = Some(sampled_segment);
         }
     }
+}
+
+fn is_unfocused(exe_path: &str, window_name: &str) -> bool {
+    let exe_path = Path::new(&exe_path);
+
+    let exe_name = exe_path
+        .file_name()
+        .map(|s| s.to_string_lossy().into_owned())
+        .unwrap_or_else(|| "Invalid filename".to_string())
+        .to_lowercase();
+
+    exe_name == "explorer.exe" && window_name.is_empty()
+}
+
+fn get_idle_duration() -> Duration {
+    let mut last_input_info = LASTINPUTINFO {
+        cbSize: std::mem::size_of::<LASTINPUTINFO>() as u32,
+        dwTime: 0,
+    };
+
+    let success = unsafe {
+        GetLastInputInfo(&mut last_input_info)
+    };
+
+    if !success.as_bool() {
+        eprintln!("Failed to get the last input info");
+        // last_input_duration = Duration::from_millis(0);
+        Duration::from_millis(0)
+    } else {
+        let tick_count = unsafe { GetTickCount64() };
+
+        let diff = tick_count - last_input_info.dwTime as u64;
+
+        // last_input_duration = Duration::from_millis(diff.into())
+        Duration::from_millis(diff.into())
+    }            
 }
 
 fn flush_segment(
@@ -207,4 +217,11 @@ fn flush_segment(
         seg.finalize(end_time);
         save_segment_to_db(seg); // moves ownership
     }
+}
+
+fn get_exe_name_from_path(exe_path: &str) -> String {
+    Path::new(exe_path)
+        .file_name()
+        .map(|s| s.to_string_lossy().into_owned())
+        .unwrap_or_else(|| "unknown.exe".to_string())
 }
