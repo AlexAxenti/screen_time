@@ -53,16 +53,20 @@ fn main() {
             }            
         };
 
-        println!("Time since last input: {:?}", last_input_duration);
+        // println!("Time since last input: {:?}", last_input_duration);
 
         if last_input_duration > Duration::from_millis(5000) {
-            // let end_time = SystemTime::now();
-            // segment.focus_end_time = Some(end_time);
-            // //TODO: Write to SQL
 
-            // println!("Lost focus, duration: {:?}", end_time.duration_since(segment.focus_start_time));
-            // main_segment = None;
-            println!("Idle");
+            if let Some(segment) = main_segment.as_mut() {
+                let end_time = SystemTime::now();
+                segment.focus_end_time = Some(end_time);
+                //TODO: Write to SQL
+
+                println!("Went idle, duration: {:?}", end_time.duration_since(segment.focus_start_time));
+                main_segment = None;
+            }
+
+            // println!("Idle");
             continue;
         }
 
