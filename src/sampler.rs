@@ -173,14 +173,13 @@ fn get_idle_duration() -> Duration {
 
     if !success.as_bool() {
         eprintln!("Failed to get the last input info");
-        // last_input_duration = Duration::from_millis(0);
+
         Duration::from_millis(0)
     } else {
         let tick_count = unsafe { GetTickCount64() };
 
         let diff = tick_count - last_input_info.dwTime as u64;
 
-        // last_input_duration = Duration::from_millis(diff.into())
         Duration::from_millis(diff.into())
     }            
 }
@@ -191,7 +190,7 @@ fn flush_segment(
 ) {
     if let Some(mut seg) = segment.take() {
         seg.finalize(end_time);
-        save_segment_to_db(seg); // moves ownership
+        save_segment_to_db(seg);
     }
 }
 
