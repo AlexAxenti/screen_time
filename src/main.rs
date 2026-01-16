@@ -12,6 +12,8 @@ use windows::Win32::UI::WindowsAndMessaging::{
     GetForegroundWindow, GetWindowTextLengthW, GetWindowTextW, 
     GetWindowThreadProcessId
 };
+use windows::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
+use windows::Win32::System::SystemInformation::GetTickCount64;
 
 //TODO track exe name without path, and add Path variable
 struct WindowSegment {
@@ -24,8 +26,48 @@ struct WindowSegment {
 fn main() {
     let mut main_segment: Option<WindowSegment> = None;
     loop {
-        let start_time = SystemTime::now();
         sleep(Duration::from_millis(500));
+        
+        // Calculate time since last input
+        let last_input_duration = {
+            let mut last_input_info = LASTINPUTINFO {
+                cbSize: std::mem::size_of::<LASTINPUTINFO>() as u32,
+                dwTime: 0,
+            };
+
+            let success = unsafe {
+                GetLastInputInfo(&mut last_input_info)
+            };
+
+            if !success.as_bool() {
+                eprintln!("Failed to get the last input info");
+                // last_input_duration = Duration::from_millis(0);
+                Duration::from_millis(0)
+            } else {
+                let tick_count = unsafe { GetTickCount64() };
+
+                let diff = tick_count - last_input_info.dwTime as u64;
+
+                // last_input_duration = Duration::from_millis(diff.into())
+                Duration::from_millis(diff.into())
+            }            
+        };
+
+        println!("Time since last input: {:?}", last_input_duration);
+
+        if last_input_duration > Duration::from_millis(5000) {
+            // let end_time = SystemTime::now();
+            // segment.focus_end_time = Some(end_time);
+            // //TODO: Write to SQL
+
+            // println!("Lost focus, duration: {:?}", end_time.duration_since(segment.focus_start_time));
+            // main_segment = None;
+            println!("Idle");
+            continue;
+        }
+
+        // Track time for segment
+        let start_time = SystemTime::now();
 
         // Get foreground window HWND
         let foreground_window_hwnd = unsafe {
@@ -94,6 +136,8 @@ fn main() {
             eprintln!("Failed to close handle {e}");
         }
 
+        // Construct sampled segment
+        // TODO Check for empty explorer first
         let sampled_segment = WindowSegment {
             window_name: window_text,
             window_exe: process_exe,
@@ -101,6 +145,7 @@ fn main() {
             focus_end_time: None
         };
 
+        // check if unfocused/empty explorer
         let exe_path = Path::new(&sampled_segment.window_exe);
 
         let exe_name = exe_path
@@ -117,6 +162,7 @@ fn main() {
 
         // println!("Length: {}", sampled_segment.window_name.len());
 
+        // Compare to main_segment
         match main_segment.as_mut() {
             None => {
                 if is_unfocused {
