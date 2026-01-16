@@ -15,34 +15,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
 use windows::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
 use windows::Win32::System::SystemInformation::GetTickCount64;
 
-use crate::sql_layer::save_segment_to_db;
-
-//TODO track exe name without path, and add Path variable
-pub struct WindowSegment {
-    pub window_name: String,
-    pub window_exe: String,
-    focus_start_time: SystemTime,
-    focus_end_time: Option<SystemTime>,
-}
-
-impl WindowSegment {
-    pub fn new(window_name: String, window_exe: String, focus_start_time: SystemTime) -> WindowSegment {
-        Self {
-            window_name,
-            window_exe,
-            focus_start_time,
-            focus_end_time: None
-        }
-    }
-
-    pub fn finalize(&mut self, focus_end_time: SystemTime) {
-        self.focus_end_time = Some(focus_end_time);
-    }
-
-    pub fn duration(&self) -> Option<Duration> {
-        self.focus_end_time.and_then(|end_time| end_time.duration_since(self.focus_start_time).ok())
-    }
-}
+use crate::{WindowSegment, sql_layer::save_segment_to_db};
 
 const IDLE_DURATION: u64 = 5000;
 
@@ -104,6 +77,7 @@ fn sample_foreground() -> Option<(String, String)> {
     }
 
     // Get process handle
+    // TODO Handle none
     let process_handle = match unsafe {
         OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, hwnd_process_id)
     } {
@@ -117,6 +91,7 @@ fn sample_foreground() -> Option<(String, String)> {
     };
 
     // Get process exe path
+    // TODO Handle buffer too small
     let mut process_image_buffer = vec![0u16; 256];
 
     let pwstr = PWSTR(process_image_buffer.as_mut_ptr());
@@ -132,6 +107,7 @@ fn sample_foreground() -> Option<(String, String)> {
     let process_exe = String::from_utf16_lossy(&process_image_buffer[0..lpdwsize as usize]);
 
     // Close handle
+    // TODO handle error?
     if let Err(e) = unsafe {
         CloseHandle(process_handle)
     } {
