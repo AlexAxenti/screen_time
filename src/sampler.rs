@@ -64,7 +64,7 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
         let window_exe = get_exe_name_from_path(&window_exe).to_lowercase();
 
         // Check if unfocused/empty explorer
-        let is_unfocused = is_unfocused(&window_exe, &window_name);
+        let is_unfocused = is_unfocused(&window_exe);
 
         // Construct sampled segment
         let sampled_segment = WindowSegment::new(window_name, window_exe, sample_start_time);        
@@ -172,7 +172,7 @@ fn update_state(
     }
 }
 
-fn is_unfocused(exe_path: &str, window_name: &str) -> bool {
+fn is_unfocused(exe_path: &str) -> bool {
     let exe_path = Path::new(&exe_path);
 
     let exe_name = exe_path
@@ -181,7 +181,7 @@ fn is_unfocused(exe_path: &str, window_name: &str) -> bool {
         .unwrap_or_else(|| "Invalid filename".to_string())
         .to_lowercase();
 
-    exe_name == "explorer.exe" && window_name.is_empty()
+    exe_name == "explorer.exe"
 }
 
 fn get_idle_duration() -> Duration {
