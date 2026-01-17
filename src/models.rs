@@ -25,3 +25,9 @@ impl WindowSegment {
         self.focus_end_time.and_then(|end_time| end_time.duration_since(self.focus_start_time).ok())
     }
 }
+
+pub enum ControlMsg {
+    Pause,
+    Resume,
+    Shutdown
+}

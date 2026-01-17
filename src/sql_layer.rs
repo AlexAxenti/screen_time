@@ -11,13 +11,7 @@ pub fn save_segment_to_db(segment: WindowSegment) {
 }
 
 pub fn writer_loop(rx_segments: Receiver<WindowSegment>) {
-    loop {
-        let received_segment = rx_segments.recv();
-
-        let Ok(segment) = received_segment else {
-            continue;
-        };
-
+    while let Ok(segment) = rx_segments.recv() {
         save_segment_to_db(segment);
     }
 }

@@ -1,5 +1,5 @@
 use std::{
-    path::Path, sync::mpsc::Sender, thread::sleep, time::{Duration, SystemTime}
+    path::Path, sync::mpsc::{Receiver, Sender}, thread::sleep, time::{Duration, SystemTime}
 };
 
 use windows::core::PWSTR;
@@ -15,16 +15,38 @@ use windows::Win32::UI::WindowsAndMessaging::{
 use windows::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
 use windows::Win32::System::SystemInformation::GetTickCount64;
 
-use crate::{WindowSegment};
+use crate::{ControlMsg, WindowSegment};
 
 const IDLE_DURATION: u64 = 5000;
 
-pub fn start(tx_segments: Sender<WindowSegment>) {
+pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg>) {
     let mut main_segment: Option<WindowSegment> = None;
+    let mut running= true;
+
     loop {
         sleep(Duration::from_millis(500));
 
         let sample_start_time = SystemTime::now();
+
+        //TODO drain messages
+        if let Ok(ctrl) = rx_control.try_recv() {
+            match ctrl {
+                ControlMsg::Pause => {
+                    flush_segment(&mut main_segment, sample_start_time, &tx_segments);
+                    running = false;
+                    println!("Paused");
+                }
+                ControlMsg::Resume => running = true,
+                ControlMsg::Shutdown => {
+                    flush_segment(&mut main_segment, sample_start_time, &tx_segments);
+                    break;
+                }
+            }
+        }
+
+        if !running {
+            continue;
+        }
         
         // Calculate time since last input
         let last_input_duration = get_idle_duration();
