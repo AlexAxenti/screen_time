@@ -1,5 +1,5 @@
 use std::{
-    path::Path, thread::sleep, time::{Duration, SystemTime}
+    path::Path, sync::mpsc::Sender, thread::sleep, time::{Duration, SystemTime}
 };
 
 use windows::core::PWSTR;
@@ -15,11 +15,11 @@ use windows::Win32::UI::WindowsAndMessaging::{
 use windows::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
 use windows::Win32::System::SystemInformation::GetTickCount64;
 
-use crate::{WindowSegment, sql_layer::save_segment_to_db};
+use crate::{WindowSegment};
 
 const IDLE_DURATION: u64 = 5000;
 
-pub fn start() {
+pub fn start(tx_segments: Sender<WindowSegment>) {
     let mut main_segment: Option<WindowSegment> = None;
     loop {
         sleep(Duration::from_millis(500));
@@ -30,7 +30,7 @@ pub fn start() {
         let last_input_duration = get_idle_duration();
 
         if last_input_duration > Duration::from_millis(IDLE_DURATION) {
-            flush_segment(&mut main_segment, sample_start_time);
+            flush_segment(&mut main_segment, sample_start_time, &tx_segments);
             continue;
         }
 
@@ -48,7 +48,7 @@ pub fn start() {
         let sampled_segment = WindowSegment::new(window_name, window_exe, sample_start_time);        
 
         // Update state
-        update_state(&mut main_segment, sampled_segment, is_unfocused, sample_start_time);
+        update_state(&mut main_segment, sampled_segment, is_unfocused, sample_start_time, &tx_segments);
     }
 }
 
@@ -121,7 +121,8 @@ fn update_state(
     main_segment: &mut Option<WindowSegment>, 
     sampled_segment: WindowSegment, 
     is_unfocused: bool, 
-    sample_start_time: SystemTime
+    sample_start_time: SystemTime,
+    tx_segments: &Sender<WindowSegment>
 ) {
     if main_segment.is_none() {
         if !is_unfocused {
@@ -136,11 +137,11 @@ fn update_state(
             .unwrap_or(false);
 
         if is_unfocused {
-            flush_segment(main_segment, sample_start_time);
+            flush_segment(main_segment, sample_start_time, tx_segments);
         } else if same_exe {
             return;
         } else {
-            flush_segment(main_segment, sample_start_time);
+            flush_segment(main_segment, sample_start_time, tx_segments);
 
             println!("New focus: {} | {}", sampled_segment.window_name, sampled_segment.window_exe);
 
@@ -187,10 +188,11 @@ fn get_idle_duration() -> Duration {
 fn flush_segment(
     segment: &mut Option<WindowSegment>,
     end_time: SystemTime,
+    tx_segments: &Sender<WindowSegment>
 ) {
     if let Some(mut seg) = segment.take() {
         seg.finalize(end_time);
-        save_segment_to_db(seg);
+        tx_segments.send(seg).expect("Segment sending failed");
     }
 }
 
