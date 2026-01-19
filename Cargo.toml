@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 image = "0.25.9"
+rusqlite = { version = "0.38.0", features = ["bundled"] }
 tao = "0.34.5"
 tray-icon = "0.21.3"
 windows = { version = "0.62.2", features = [
