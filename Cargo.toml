@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+directories-next = "2.0.0"
 image = "0.25.9"
 rusqlite = { version = "0.38.0", features = ["bundled"] }
 tao = "0.34.5"

@@ -3,8 +3,8 @@ use std::time::{Duration, SystemTime};
 pub struct WindowSegment {
     pub window_name: String,
     pub window_exe: String,
-    focus_start_time: SystemTime,
-    focus_end_time: Option<SystemTime>,
+    pub focus_start_time: SystemTime,
+    pub focus_end_time: Option<SystemTime>,
 }
 
 impl WindowSegment {

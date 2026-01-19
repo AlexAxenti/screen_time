@@ -29,7 +29,7 @@ fn main() {
         (Sender<WindowSegment>, Receiver<WindowSegment>) = mpsc::channel();
 
     let sql_handle = thread::spawn(move || {
-        sql_layer::writer_loop(rx_segments);
+        sql_layer::run_sql_layer(rx_segments);
     });
 
     let (tx_control, rx_control): 
