@@ -1,5 +1,5 @@
 use std::{fs, sync::mpsc::Receiver};
-use std::time::{Duration, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use crate::WindowSegment;
 use directories_next::ProjectDirs;
 use rusqlite::{Connection, params};
@@ -48,15 +48,17 @@ fn save_segment_to_db(segment: WindowSegment, db_connection: &Connection) {
         window_exe,
         start_time,
         end_time,
-        duration_ms
+        duration_ms,
+        created_at
     ) 
-    VALUES (?1, ?2, ?3, ?4, ?5)", 
+    VALUES (?1, ?2, ?3, ?4, ?5, ?6)", 
     params![
         &segment.window_name, 
         &segment.window_exe,
         start_int, 
         end_int, 
-        duration_ms
+        duration_ms,
+        SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as i64
     ]).expect("Failed to write!");
 }
 
@@ -91,7 +93,8 @@ fn initialize_db(conn: &Connection) {
         window_exe TEXT NOT NULL,
         start_time INTEGER NOT NULL,
         end_time INTEGER NOT NULL,
-        duration_ms INTEGER NOT NULL
+        duration_ms INTEGER NOT NULL,
+        created_at INTEGER NOT NULL
     )", ()).expect("Failed to intialize table");
 
     conn.execute("CREATE INDEX IF NOT EXISTS idx_window_segments_start_time
