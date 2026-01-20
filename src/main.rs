@@ -25,6 +25,7 @@ enum UserEvent {
 fn main() {
     //TODO Thread error handling
 
+    // Create threads
     let (tx_segments, rx_segments): 
         (Sender<WindowSegment>, Receiver<WindowSegment>) = mpsc::channel();
 
@@ -39,10 +40,10 @@ fn main() {
         sampler::start(tx_segments, rx_control);
     });
 
-
+    // Set up event loops
     let mut event_loop: EventLoop<UserEvent> = EventLoopBuilder::<UserEvent>::with_user_event().build();
-    let proxy = event_loop.create_proxy();
 
+    let proxy = event_loop.create_proxy();
     TrayIconEvent::set_event_handler(Some(move |event| {
         let _ = proxy.send_event(UserEvent::Tray(event));
     }));
@@ -52,7 +53,8 @@ fn main() {
         let _ = proxy.send_event(UserEvent::Menu(event));
     }));
 
-     let menu = Menu::new();
+    // Create tray menu
+    let menu = Menu::new();
 
     let pause_item = MenuItem::new("Pause", true, None);
     let resume_item = MenuItem::new("Resume", true, None);
