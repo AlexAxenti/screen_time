@@ -77,6 +77,13 @@ fn main() {
         .expect("error while building tauri application")
         .run(move |_app_handle, event| {
             match event {
+                RunEvent::ExitRequested { api, code, .. } => {
+                    if code.is_none() {
+                        api.prevent_exit();
+                    } else {
+                        println!("exit code: {:?}", code);
+                    }
+                }
                 RunEvent::Exit => {
                     println!("Shutdown cleaning");
                     if let Some(h) = sampler_handle.take() {
