@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "identifier": "com.screen_time.screen_time",
   "build": {
-    "devUrl": "http://localhost:3000",
-    "beforeDevCommand": "",
-    "beforeBuildCommand": "",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
     "frontendDist": "../dist"
   },
   "bundle": {

@@ -2,7 +2,7 @@ use std::sync::mpsc::{self, Receiver, Sender};
 use std::{thread};
 
 use screen_time::{sql_layer, sampler, WindowSegment, ControlMsg};
-use tauri::{RunEvent};
+use tauri::{RunEvent, WebviewWindowBuilder};
 use tauri::menu::{MenuBuilder};
 use tauri::tray::{TrayIconBuilder};
 
@@ -38,6 +38,14 @@ fn main() {
                 .tooltip("Screen Time Tracker")
                 .build(app)
                 .expect("failed to build tray icon");
+
+            let _window = WebviewWindowBuilder::new(
+                app, 
+                "ScreenTime", 
+                tauri::WebviewUrl::App("index.html".into()))
+            .title("Screen Time")
+            .build()
+            .expect("failed to build window");
 
             app.on_menu_event(move |app_handle: &tauri::AppHandle, event| {
                 println!("Menu event: {:?}", event.id());
