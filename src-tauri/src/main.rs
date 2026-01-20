@@ -2,7 +2,7 @@ use std::sync::mpsc::{self, Receiver, Sender};
 use std::{thread};
 
 use screen_time::{sql_layer, sampler, WindowSegment, ControlMsg};
-use tauri::{RunEvent, WebviewWindowBuilder};
+use tauri::{Manager, RunEvent, WebviewWindowBuilder};
 use tauri::menu::{MenuBuilder};
 use tauri::tray::{TrayIconBuilder};
 
@@ -28,6 +28,8 @@ fn main() {
                 .text("resume", "Resume")
                 .text("pause", "Pause")
                 .separator()
+                .text("dashboard", "Open Dashboard")
+                .separator()
                 .text("quit", "Quit")
                 .build()
                 .expect("failed to build menu");
@@ -38,14 +40,6 @@ fn main() {
                 .tooltip("Screen Time Tracker")
                 .build(app)
                 .expect("failed to build tray icon");
-
-            let _window = WebviewWindowBuilder::new(
-                app, 
-                "ScreenTime", 
-                tauri::WebviewUrl::App("index.html".into()))
-            .title("Screen Time")
-            .build()
-            .expect("failed to build window");
 
             app.on_menu_event(move |app_handle: &tauri::AppHandle, event| {
                 println!("Menu event: {:?}", event.id());
@@ -64,6 +58,24 @@ fn main() {
                     "pause" => {
                         println!("Pausing");
                         tx_control.send(ControlMsg::Pause).ok();
+                    }
+                    "dashboard" => {
+                        if let Some(win) = app_handle.get_webview_window("main") {
+                            let _ = win.show();
+                            let _ = win.set_focus();
+                        } else {
+                            let win = WebviewWindowBuilder::new(
+                                app_handle, 
+                                "main", 
+                                tauri::WebviewUrl::App("index.html".into()))
+                            .title("Screen Time")
+                            .build();
+
+                            if let Ok(win) = win {
+                                let _ = win.show();
+                                let _ = win.set_focus();
+                            }
+                        }
                     }
                     _ => {
                         println!("Unhandled event");
