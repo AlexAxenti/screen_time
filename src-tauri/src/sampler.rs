@@ -181,7 +181,7 @@ fn is_unfocused(exe_path: &str) -> bool {
         .unwrap_or_else(|| "Invalid filename".to_string())
         .to_lowercase();
 
-    exe_name == "explorer.exe" || exe_name == "screen_time"
+    exe_name == "explorer.exe" || exe_name == "screen_time.exe"
 }
 
 fn get_idle_duration() -> Duration {
