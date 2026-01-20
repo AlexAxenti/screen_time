@@ -1,13 +1,14 @@
 [package]
 name = "screen_time"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 directories-next = "2.0.0"
 image = "0.25.9"
 rusqlite = { version = "0.38.0", features = ["bundled"] }
 tao = "0.34.5"
+tauri = { version = "2.9.5", features = ["tray-icon"] }
 tray-icon = "0.21.3"
 windows = { version = "0.62.2", features = [
     "Win32_Foundation",
@@ -16,3 +17,5 @@ windows = { version = "0.62.2", features = [
     "Win32_UI_Input_KeyboardAndMouse",
     "Win32_System_SystemInformation",
 ] }
+[build-dependencies]
+tauri-build = { version = "2.0", features = ["config-json5"] }
