@@ -8,7 +8,6 @@ use tauri::tray::{TrayIconBuilder};
 
 fn main() {
     //TODO Thread error handling
-
     let (tx_segments, rx_segments): 
         (Sender<WindowSegment>, Receiver<WindowSegment>) = mpsc::channel();
 
