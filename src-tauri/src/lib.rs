@@ -2,4 +2,4 @@ mod models;
 pub mod sampler;
 pub mod sql_layer;
 
-pub use models::{WindowSegment, ControlMsg};
+pub use models::{WindowSegment, WindowSegmentDTO, ControlMsg};
