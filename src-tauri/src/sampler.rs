@@ -17,7 +17,7 @@ use windows::Win32::System::SystemInformation::GetTickCount64;
 
 use crate::{ControlMsg, WindowSegment};
 
-const IDLE_DURATION: u64 = 5000;
+const IDLE_DURATION: u64 = 120000;
 
 pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg>) {
     let mut main_segment: Option<WindowSegment> = None;
