@@ -6,7 +6,7 @@ const getTheme = (mode: PaletteMode) => createTheme({
     ...(mode === 'dark' ? {
       background: {
         default: '#242424',
-        paper: '#1e1e1e',
+        paper: '#222222',
       },
       text: {
         primary: 'rgba(255, 255, 255, 0.87)',

@@ -23,6 +23,7 @@ fn main() {
     }));
 
     tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![greet])
         .setup(|app| {
             let menu = MenuBuilder::new(app)
                 .text("resume", "Resume")
@@ -110,4 +111,9 @@ fn main() {
                 _ => {}
             }
         });
+}
+
+#[tauri::command]
+fn greet() -> String {
+    "Hello there!".to_string()
 }
