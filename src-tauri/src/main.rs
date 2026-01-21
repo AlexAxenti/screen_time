@@ -2,7 +2,7 @@ use std::sync::mpsc::{self, Receiver, Sender};
 use std::{thread};
 
 use screen_time::{sql_layer, sampler, WindowSegment, ControlMsg};
-use tauri::{RunEvent};
+use tauri::{Manager, RunEvent, WebviewWindowBuilder};
 use tauri::menu::{MenuBuilder};
 use tauri::tray::{TrayIconBuilder};
 
@@ -23,10 +23,13 @@ fn main() {
     }));
 
     tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![greet])
         .setup(|app| {
             let menu = MenuBuilder::new(app)
                 .text("resume", "Resume")
                 .text("pause", "Pause")
+                .separator()
+                .text("dashboard", "Open Dashboard")
                 .separator()
                 .text("quit", "Quit")
                 .build()
@@ -57,6 +60,24 @@ fn main() {
                         println!("Pausing");
                         tx_control.send(ControlMsg::Pause).ok();
                     }
+                    "dashboard" => {
+                        if let Some(win) = app_handle.get_webview_window("main") {
+                            let _ = win.show();
+                            let _ = win.set_focus();
+                        } else {
+                            let win = WebviewWindowBuilder::new(
+                                app_handle, 
+                                "main", 
+                                tauri::WebviewUrl::App("index.html".into()))
+                            .title("Screen Time")
+                            .build();
+
+                            if let Ok(win) = win {
+                                let _ = win.show();
+                                let _ = win.set_focus();
+                            }
+                        }
+                    }
                     _ => {
                         println!("Unhandled event");
                     }
@@ -69,6 +90,13 @@ fn main() {
         .expect("error while building tauri application")
         .run(move |_app_handle, event| {
             match event {
+                RunEvent::ExitRequested { api, code, .. } => {
+                    if code.is_none() {
+                        api.prevent_exit();
+                    } else {
+                        println!("exit code: {:?}", code);
+                    }
+                }
                 RunEvent::Exit => {
                     println!("Shutdown cleaning");
                     if let Some(h) = sampler_handle.take() {
@@ -83,4 +111,9 @@ fn main() {
                 _ => {}
             }
         });
+}
+
+#[tauri::command]
+fn greet() -> String {
+    "Hello there!".to_string()
 }
