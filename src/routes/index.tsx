@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Card, Typography } from '@mui/material'
 import './index.css'
-import { invoke } from '@tauri-apps/api/core';
-import { useEffect, useState } from 'react';
+import useGetUsage from '../queries/getUsage';
 
 
 
@@ -32,20 +31,7 @@ export const Route = createFileRoute('/')({
 
 
 function Index() {
-  const [greeting, setGreeting] = useState<string>("");
-
-  const callIPC = async () => {
-    try {
-      const result: string = await invoke('greet');
-      setGreeting(result);
-    } catch (error) {
-      console.error("Error calling IPC:", error);
-    }
-  }
-
-  useEffect(() => {
-    callIPC();
-  }, [])
+  const { data: greeting } = useGetUsage();
 
   return (
     <div>    

@@ -9,7 +9,13 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+    }
+  }
+})
 
 const router = createRouter({
   routeTree,
@@ -36,7 +42,7 @@ function Root() {
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
         <CssBaseline />
-        <ReactQueryDevtools />
+        <ReactQueryDevtools initialIsOpen={false} />
         <RouterProvider router={router} />
       </QueryClientProvider>
     </ThemeProvider>
