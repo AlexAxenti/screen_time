@@ -3415,6 +3415,7 @@ dependencies = [
  "directories-next",
  "image",
  "rusqlite",
+ "serde",
  "tao",
  "tauri",
  "tauri-build",

@@ -1,10 +1,35 @@
 import { StrictMode, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.tsx'
 import { ThemeProvider, useMediaQuery } from '@mui/material'
 import CssBaseline from '@mui/material/CssBaseline'
 import getTheme from './theme.ts'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+    }
+  }
+})
+
+const router = createRouter({
+  routeTree,
+  context: {
+    queryClient,
+  },
+  defaultPreload: 'intent',
+})
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
 
 function Root() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
@@ -15,8 +40,11 @@ function Root() {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <App />
+      <QueryClientProvider client={queryClient}>
+        <CssBaseline />
+        <ReactQueryDevtools initialIsOpen={false} />
+        <RouterProvider router={router} />
+      </QueryClientProvider>
     </ThemeProvider>
   )
 }

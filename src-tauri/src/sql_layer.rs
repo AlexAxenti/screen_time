@@ -1,6 +1,7 @@
 use std::{fs, sync::mpsc::Receiver};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use crate::WindowSegment;
+use crate::models::WindowSegmentDTO;
 use directories_next::ProjectDirs;
 use rusqlite::{Connection, params};
 
@@ -60,6 +61,32 @@ fn save_segment_to_db(segment: WindowSegment, db_connection: &Connection) {
         duration_ms,
         SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as i64
     ]).expect("Failed to write!");
+}
+
+pub fn read_usage() -> rusqlite::Result<Vec<WindowSegmentDTO>> {
+    let conn = connect_db_file();
+
+    println!("Reading from db");
+
+    let mut stmt = conn.prepare("SELECT 
+        window_exe, 
+        SUM(duration_ms) AS duration
+    FROM window_segments
+    GROUP BY window_exe")?;
+
+    let segment_iter = stmt.query_map(params![], |row| {
+        Ok(WindowSegmentDTO {
+            window_exe: row.get(0)?,
+            duration: row.get(1)?
+        })
+    })?;
+
+    let mut segments = Vec::new();
+    for segment in segment_iter {
+        segments.push(segment?);
+    }
+
+    Ok(segments)
 }
 
 fn connect_db_file() -> Connection {
