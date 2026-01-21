@@ -1,7 +1,10 @@
+import { createFileRoute } from '@tanstack/react-router'
 import { Card, Typography } from '@mui/material'
-import './App.css'
+import './index.css'
 import { invoke } from '@tauri-apps/api/core';
 import { useEffect, useState } from 'react';
+
+
 
 interface WindowSegment {
   appExe: string,
@@ -23,7 +26,12 @@ const MOCK_DATA: WindowSegment[] = [
   }
 ]
 
-function App() {
+export const Route = createFileRoute('/')({
+  component: Index,
+})
+
+
+function Index() {
   const [greeting, setGreeting] = useState<string>("");
 
   const callIPC = async () => {
@@ -59,5 +67,3 @@ function App() {
     </div>
   )
 }
-
-export default App
