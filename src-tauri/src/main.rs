@@ -1,8 +1,14 @@
-use std::sync::mpsc::{self, Receiver, Sender};
-use std::{thread};
+use std::{
+    sync::mpsc::{self, Receiver, Sender},
+    thread
+};
 
-use screen_time::sql_layer::{query_usage_summary, read_usage};
-use screen_time::{ControlMsg, UsageSummaryDTO, WindowSegment, WindowSegmentDTO, sampler, sql_layer};
+use screen_time::{
+    sampler,
+    sql_client::{self, reader::{query_usage, query_usage_summary}},
+    ControlMsg, UsageSummaryDTO, WindowSegment, WindowSegmentDTO
+};
+
 use tauri::{Manager, RunEvent, WebviewWindowBuilder};
 use tauri::menu::{MenuBuilder};
 use tauri::tray::{TrayIconBuilder};
@@ -13,7 +19,7 @@ fn main() {
         (Sender<WindowSegment>, Receiver<WindowSegment>) = mpsc::channel();
 
     let mut sql_handle = Some(thread::spawn(move || {
-        sql_layer::run_sql_layer(rx_segments);
+        sql_client::run_sql_client(rx_segments);
     }));
 
     let (tx_control, rx_control): 
@@ -121,7 +127,7 @@ fn greet() -> String {
 
 #[tauri::command]
 fn get_usage() -> Vec<WindowSegmentDTO> {
-    let window_segments = read_usage().expect("Failed to read from DB");
+    let window_segments = query_usage().expect("Failed to read from DB");
 
     window_segments
 }
