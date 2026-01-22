@@ -3,7 +3,7 @@ use std::time::Duration;
 use directories_next::ProjectDirs;
 use rusqlite::Connection;
 
-pub(super) fn connect_db_file() -> Connection {
+pub fn connect_db_file() -> Connection {
     let proj_dir = ProjectDirs::from("com", "screen_time", "screen_time")
         .expect("Failed to connect to db file");
 
@@ -27,7 +27,7 @@ pub(super) fn connect_db_file() -> Connection {
     conn
 }
 
-pub(super) fn initialize_db(conn: &Connection) {
+pub fn initialize_db(conn: &Connection) {
     conn.execute("CREATE TABLE IF NOT EXISTS window_segments (
         id INTEGER PRIMARY KEY,
         window_name TEXT,

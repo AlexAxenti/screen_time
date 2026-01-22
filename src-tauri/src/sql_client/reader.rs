@@ -1,11 +1,9 @@
-use crate::{UsageSummaryDTO, WindowSegmentDTO, sql_client::initialize_db};
+use crate::{UsageSummaryDTO, WindowSegmentDTO};
 use rusqlite::{params};
 use crate::sql_client::init::{connect_db_file};
 
 pub fn query_usage() -> rusqlite::Result<Vec<WindowSegmentDTO>> {
     let conn = connect_db_file();
-
-    initialize_db(&conn);
 
     println!("Reading from db");
 

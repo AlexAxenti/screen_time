@@ -19,7 +19,7 @@ fn main() {
         (Sender<WindowSegment>, Receiver<WindowSegment>) = mpsc::channel();
 
     let mut sql_handle = Some(thread::spawn(move || {
-        sql_client::run_sql_client(rx_segments);
+        sql_client::start_sql_client(rx_segments);
     }));
 
     let (tx_control, rx_control): 
