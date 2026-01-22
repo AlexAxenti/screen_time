@@ -33,6 +33,13 @@ pub struct WindowSegmentDTO {
     pub duration: i64,
 }
 
+#[derive(Serialize)]
+pub struct UsageSummaryDTO {
+    pub total_duration: i64,
+    pub segments_count: i64,
+    pub exe_count: i64,
+}
+
 pub enum ControlMsg {
     Pause,
     Resume,

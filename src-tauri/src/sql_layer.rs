@@ -1,6 +1,6 @@
 use std::{fs, sync::mpsc::Receiver};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use crate::WindowSegment;
+use crate::{UsageSummaryDTO, WindowSegment};
 use crate::models::WindowSegmentDTO;
 use directories_next::ProjectDirs;
 use rusqlite::{Connection, params};
@@ -87,6 +87,29 @@ pub fn read_usage() -> rusqlite::Result<Vec<WindowSegmentDTO>> {
     }
 
     Ok(segments)
+}
+
+pub fn query_usage_summary(start_time: i64) -> rusqlite::Result<UsageSummaryDTO> {
+    let conn = connect_db_file();
+
+    println!("Reading summary from db");
+
+    let mut stmt = conn.prepare("SELECT 
+        COALESCE(SUM(duration_ms), 0) AS total_duration,
+        COUNT(*) AS segments_count, 
+        COUNT(DISTINCT window_exe) AS exe_count
+    FROM window_segments 
+    WHERE start_time > ?1").expect("Failed to create sql query");
+
+    let summary = stmt.query_row(params![start_time], |row| {
+        Ok(UsageSummaryDTO {
+            total_duration: row.get(0)?,
+            segments_count: row.get(1)?,
+            exe_count: row.get(2)?,
+        })
+    });
+
+    summary
 }
 
 fn connect_db_file() -> Connection {

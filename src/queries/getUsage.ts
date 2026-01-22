@@ -6,8 +6,13 @@ let useGetUsage = () => {
   return useQuery({
     queryKey: ['usage'],
     queryFn: async () => {
-      let windowSegments: WindowSegment[] = await invoke('get_usage')
-      return windowSegments;
+      try { 
+        let windowSegments: WindowSegment[] = await invoke('get_usage')
+        return windowSegments;
+      } catch (e) {
+        console.error("get usage failed");
+        throw e;
+      }
     }
   })
 }

@@ -1,8 +1,8 @@
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::{thread};
 
-use screen_time::sql_layer::read_usage;
-use screen_time::{sql_layer, sampler, WindowSegment, WindowSegmentDTO, ControlMsg};
+use screen_time::sql_layer::{query_usage_summary, read_usage};
+use screen_time::{ControlMsg, UsageSummaryDTO, WindowSegment, WindowSegmentDTO, sampler, sql_layer};
 use tauri::{Manager, RunEvent, WebviewWindowBuilder};
 use tauri::menu::{MenuBuilder};
 use tauri::tray::{TrayIconBuilder};
@@ -24,7 +24,7 @@ fn main() {
     }));
 
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet, get_usage])
+        .invoke_handler(tauri::generate_handler![greet, get_usage, get_usage_summary])
         .setup(|app| {
             let menu = MenuBuilder::new(app)
                 .text("resume", "Resume")
@@ -124,4 +124,12 @@ fn get_usage() -> Vec<WindowSegmentDTO> {
     let window_segments = read_usage().expect("Failed to read from DB");
 
     window_segments
+}
+
+#[tauri::command]
+fn get_usage_summary(start_time: i64) -> UsageSummaryDTO {
+    println!("Received command");
+    let usage_summary = query_usage_summary(start_time).expect("Failed to read from DB");
+
+    usage_summary
 }
