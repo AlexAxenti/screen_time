@@ -1,5 +1,4 @@
-use std::fs;
-use std::time::Duration;
+use std::{fs, time::Duration};
 use directories_next::ProjectDirs;
 use rusqlite::Connection;
 

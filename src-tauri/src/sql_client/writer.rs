@@ -1,9 +1,8 @@
-use std::{sync::mpsc::Receiver};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{sync::mpsc::Receiver, time::{SystemTime, UNIX_EPOCH}};
 use crate::{WindowSegment};
 use rusqlite::{Connection, params};
 
-pub fn writer_loop(rx_segments: Receiver<WindowSegment>, db_connection: &Connection) {
+pub fn run_writer_loop(rx_segments: Receiver<WindowSegment>, db_connection: &Connection) {
     while let Ok(segment) = rx_segments.recv() {
         save_segment_to_db(segment, db_connection);
     }
