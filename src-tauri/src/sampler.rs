@@ -64,6 +64,7 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
         let window_exe = get_exe_name_from_path(&window_exe).to_lowercase();
 
         // Check if unfocused/empty explorer
+        // TODO change from unfocused to ignore list or something
         let is_unfocused = is_unfocused(&window_exe);
 
         // Construct sampled segment

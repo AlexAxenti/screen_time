@@ -2,11 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Card, Typography } from '@mui/material'
 import './index.css'
 import useGetUsage from '../queries/getUsage';
-
-export interface WindowSegment {
-  window_exe: string,
-  duration: number
-}
+import useGetUsageSummary from '../queries/getUsageSummary';
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -15,6 +11,9 @@ export const Route = createFileRoute('/')({
 
 function Index() {
   const { data: WindowSegments } = useGetUsage();
+  const { data: UsageSummary } = useGetUsageSummary();
+
+  console.log("UsageSummary:", UsageSummary);
 
   return (
     <div>    
