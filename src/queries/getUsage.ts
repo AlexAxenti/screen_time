@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import type { WindowSegment } from "../routes";
+import type { WindowSegment } from "../types/dto";
 
 let useGetUsage = () => { 
   return useQuery({

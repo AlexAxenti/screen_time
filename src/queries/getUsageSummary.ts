@@ -1,11 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-
-export interface UsageSummary {
-  total_duration: number,
-  segments_count: number,
-  exe_count: number,
-}
+import type { UsageSummary } from "../types/dto";
 
 let useGetUsageSummary = () => { 
   return useQuery({

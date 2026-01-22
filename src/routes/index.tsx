@@ -4,11 +4,6 @@ import './index.css'
 import useGetUsage from '../queries/getUsage';
 import useGetUsageSummary from '../queries/getUsageSummary';
 
-export interface WindowSegment {
-  window_exe: string,
-  duration: number
-}
-
 export const Route = createFileRoute('/')({
   component: Index,
 })
@@ -17,6 +12,8 @@ export const Route = createFileRoute('/')({
 function Index() {
   const { data: WindowSegments } = useGetUsage();
   const { data: UsageSummary } = useGetUsageSummary();
+
+  console.log("UsageSummary:", UsageSummary);
 
   return (
     <div>    
