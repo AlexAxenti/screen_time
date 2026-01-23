@@ -13,9 +13,9 @@ use crate::ControlMsg;
 pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>>, mut sampler_handle: Option<JoinHandle<()>>) {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            commands::greet, 
             commands::get_top_usage, 
-            commands::get_usage_summary
+            commands::get_usage_summary,
+            commands::get_usage_fragmentation
         ])
         .setup(|app| {
             let menu = MenuBuilder::new(app)

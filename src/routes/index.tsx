@@ -3,6 +3,7 @@ import { Card, Typography } from '@mui/material'
 import './index.css'
 import useGetUsage from '../queries/getUsage';
 import useGetUsageSummary from '../queries/getUsageSummary';
+import useGetUsageFragmentation from '../queries/getUsageFragmentation';
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -16,8 +17,10 @@ function Index() {
 
   const { data: WindowSegments } = useGetUsage(epochStartOfDayMs);
   const { data: UsageSummary } = useGetUsageSummary(epochStartOfDayMs);
+  const { data: usageFragmentation } = useGetUsageFragmentation(epochStartOfDayMs);
 
   console.log("UsageSummary:", UsageSummary);
+  console.log("UsageFragmentation:", usageFragmentation);
 
   return (
     <div>    
