@@ -24,7 +24,7 @@ function Index() {
 
   return (
     <div>    
-      <h1>Screen Time</h1>
+      <Typography variant="h1" sx={{textAlign: 'center'}}>Screen Time</Typography>
       {WindowSegments && WindowSegments.map((segment, index) => (
         <Card key={index} sx={{ 
           display: 'flex', 

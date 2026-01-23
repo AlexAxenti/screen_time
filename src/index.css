@@ -1,8 +1,4 @@
 :root {
-  font-family: system-ui, 'Roboto', Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -13,13 +9,4 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: #242424;
-  color: rgba(255, 255, 255, 0.87);
-}
-
-@media (prefers-color-scheme: light) {
-  html, body {
-    background: #ffffff;
-    color: #213547;
-  }
 }

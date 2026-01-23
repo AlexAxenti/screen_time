@@ -23,6 +23,10 @@ const getTheme = (mode: PaletteMode) => createTheme({
   },
   typography: {
     fontFamily: 'system-ui, "Roboto", Arial, sans-serif',
+    h1: {
+      fontSize: '4rem',
+      fontFamily: '"Roboto", Arial, sans-serif',
+    }
   }
 })
 
