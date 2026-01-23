@@ -1,6 +1,8 @@
-use crate::{UsageSummaryDTO, WindowSegmentDTO};
 use rusqlite::{params};
-use crate::sql_client::init::{connect_db_file};
+use crate::{
+    sql_client::init::connect_db_file, 
+    tauri_app::dtos::{UsageSummaryDTO, WindowSegmentDTO}
+};
 
 pub fn query_usage() -> rusqlite::Result<Vec<WindowSegmentDTO>> {
     let conn = connect_db_file();

@@ -1,5 +1,4 @@
 use std::time::{Duration, SystemTime};
-use serde::{Serialize};
 
 pub struct WindowSegment {
     pub window_name: String,
@@ -25,19 +24,6 @@ impl WindowSegment {
     pub fn duration(&self) -> Option<Duration> {
         self.focus_end_time.and_then(|end_time| end_time.duration_since(self.focus_start_time).ok())
     }
-}
-
-#[derive(Serialize)]
-pub struct WindowSegmentDTO {
-    pub window_exe: String,
-    pub duration: i64,
-}
-
-#[derive(Serialize)]
-pub struct UsageSummaryDTO {
-    pub total_duration: i64,
-    pub segments_count: i64,
-    pub exe_count: i64,
 }
 
 pub enum ControlMsg {
