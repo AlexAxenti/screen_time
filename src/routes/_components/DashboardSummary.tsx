@@ -1,5 +1,7 @@
-import { Box, Card, Typography } from '@mui/material'
+import { Box } from '@mui/material'
 import useGetUsageSummary from '../../queries/getUsageSummary'
+import SimpleDataCard from '../../components/UI/SimpleDataCard'
+import { formatMsToHoursAndMinutes } from '../../lib/durationHelpers'
 
 interface DashboardSummaryProps {
   epochStartOfDayMs: number
@@ -10,12 +12,6 @@ function DashboardSummary({ epochStartOfDayMs }: DashboardSummaryProps) {
 
   if (!usageSummary) return null
 
-  const formatDuration = (ms: number) => {
-    const hours = Math.floor(ms / 3600000)
-    const minutes = Math.floor((ms % 3600000) / 60000)
-    return `${hours}h ${minutes}m`
-  }
-
   return (
     <Box sx={{ 
       display: 'grid', 
@@ -23,41 +19,11 @@ function DashboardSummary({ epochStartOfDayMs }: DashboardSummaryProps) {
       gap: 2,
       marginBottom: 4
     }}>
-      <Card sx={{ 
-        padding: 2,
-        textAlign: 'center'
-      }}>
-        <Typography variant="h4" color="text.secondary">
-          {formatDuration(usageSummary.total_duration)}
-        </Typography>
-        <Typography variant="body2" color="text.primary" sx={{ marginTop: 1 }}>
-          Total Focus Time
-        </Typography>
-      </Card>
+      <SimpleDataCard dataValue={formatMsToHoursAndMinutes(usageSummary.total_duration)} dataLabel="Total Focus Time" />
 
-      <Card sx={{ 
-        padding: 2,
-        textAlign: 'center'
-      }}>
-        <Typography variant="h4" color="text.secondary">
-          {usageSummary.segments_count - 1}
-        </Typography>
-        <Typography variant="body2" color="text.primary" sx={{ marginTop: 1 }}>
-          Focus Switches
-        </Typography>
-      </Card>
+      <SimpleDataCard dataValue={usageSummary.segments_count - 1} dataLabel="Focus Switches" />
 
-      <Card sx={{ 
-        padding: 2,
-        textAlign: 'center'
-      }}>
-        <Typography variant="h4" color="text.secondary">
-          {usageSummary.exe_count}
-        </Typography>
-        <Typography variant="body2" color="text.primary" sx={{ marginTop: 1 }}>
-          Unique Apps
-        </Typography>
-      </Card>
+      <SimpleDataCard dataValue={usageSummary.exe_count} dataLabel="Unique Apps" />
     </Box>
   )
 }
