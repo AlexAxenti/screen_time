@@ -4,7 +4,7 @@ use crate::{
     tauri_app::dtos::{UsageSummaryDTO, WindowSegmentDTO}
 };
 
-pub fn query_usage() -> rusqlite::Result<Vec<WindowSegmentDTO>> {
+pub fn query_top_usage(start_time: i64) -> rusqlite::Result<Vec<WindowSegmentDTO>> {
     let conn = connect_db_file();
 
     println!("Reading from db");
@@ -13,9 +13,11 @@ pub fn query_usage() -> rusqlite::Result<Vec<WindowSegmentDTO>> {
         window_exe, 
         SUM(duration_ms) AS duration
     FROM window_segments
-    GROUP BY window_exe")?;
+    WHERE start_time > ?1
+    GROUP BY window_exe
+    ORDER BY duration DESC;")?;
 
-    let segment_iter = stmt.query_map(params![], |row| {
+    let segment_iter = stmt.query_map(params![start_time], |row| {
         Ok(WindowSegmentDTO {
             window_exe: row.get(0)?,
             duration: row.get(1)?
@@ -36,11 +38,11 @@ pub fn query_usage_summary(start_time: i64) -> rusqlite::Result<UsageSummaryDTO>
     println!("Reading summary from db");
 
     let mut stmt = conn.prepare("SELECT 
-        COALESCE(SUM(duration_ms), 0) AS total_duration,
-        COUNT(*) AS segments_count, 
-        COUNT(DISTINCT window_exe) AS exe_count
-    FROM window_segments 
-    WHERE start_time > ?1").expect("Failed to create sql query");
+            COALESCE(SUM(duration_ms), 0) AS total_duration,
+            COUNT(*) AS segments_count, 
+            COUNT(DISTINCT window_exe) AS exe_count
+        FROM window_segments 
+        WHERE start_time > ?1")?;
 
     let summary = stmt.query_row(params![start_time], |row| {
         Ok(UsageSummaryDTO {
@@ -52,3 +54,6 @@ pub fn query_usage_summary(start_time: i64) -> rusqlite::Result<UsageSummaryDTO>
 
     summary
 }
+
+
+

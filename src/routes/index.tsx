@@ -8,10 +8,14 @@ export const Route = createFileRoute('/')({
   component: Index,
 })
 
-
 function Index() {
-  const { data: WindowSegments } = useGetUsage();
-  const { data: UsageSummary } = useGetUsageSummary();
+  const now: Date = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  const epochStartOfDayMs = now.getTime();
+
+  const { data: WindowSegments } = useGetUsage(epochStartOfDayMs);
+  const { data: UsageSummary } = useGetUsageSummary(epochStartOfDayMs);
 
   console.log("UsageSummary:", UsageSummary);
 

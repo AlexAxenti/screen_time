@@ -14,7 +14,7 @@ pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             commands::greet, 
-            commands::get_usage, 
+            commands::get_top_usage, 
             commands::get_usage_summary
         ])
         .setup(|app| {

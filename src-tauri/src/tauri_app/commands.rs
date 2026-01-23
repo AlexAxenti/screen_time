@@ -1,5 +1,5 @@
 use crate::{
-    sql_client::reader::{query_usage, query_usage_summary}, 
+    sql_client::reader::{query_top_usage, query_usage_summary}, 
     tauri_app::dtos::{UsageSummaryDTO, WindowSegmentDTO}
 };
 
@@ -9,8 +9,8 @@ pub fn greet() -> String {
 }
 
 #[tauri::command]
-pub fn get_usage() -> Vec<WindowSegmentDTO> {
-    let window_segments = query_usage().expect("Failed to read from DB");
+pub fn get_top_usage(start_time: i64) -> Vec<WindowSegmentDTO> {
+    let window_segments = query_top_usage(start_time).expect("Failed to read from DB");
 
     window_segments
 }

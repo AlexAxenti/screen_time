@@ -2,12 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import type { UsageSummary } from "../types/dto";
 
-let useGetUsageSummary = () => { 
+let useGetUsageSummary = (startTime: number) => { 
   return useQuery({
-    queryKey: ['usage_summary'],
+    queryKey: ['usage_summary', startTime],
     queryFn: async () => {
       try {
-        let summary: UsageSummary = await invoke('get_usage_summary', { startTime: 0 })
+        let summary: UsageSummary = await invoke('get_usage_summary', { startTime })
         return summary;
       } catch (e) {
         console.error("get usage_summary invoke failed");
