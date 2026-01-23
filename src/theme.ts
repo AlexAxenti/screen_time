@@ -10,6 +10,7 @@ const getTheme = (mode: PaletteMode) => createTheme({
       },
       text: {
         primary: 'rgba(255, 255, 255, 0.87)',
+        secondary: '#90caf9',
       },
     } : {
       background: {
@@ -18,6 +19,7 @@ const getTheme = (mode: PaletteMode) => createTheme({
       },
       text: {
         primary: '#213547',
+        secondary: '#1976d2',
       },
     }),
   },

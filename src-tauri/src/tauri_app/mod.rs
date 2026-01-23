@@ -63,6 +63,8 @@ pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>
                                 "main", 
                                 tauri::WebviewUrl::App("index.html".into()))
                             .title("Screen Time")
+                            .inner_size(1200.0, 800.0)
+                            .center()
                             .build();
 
                             if let Ok(win) = win {
