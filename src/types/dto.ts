@@ -8,3 +8,8 @@ export interface WindowSegment {
   window_exe: string,
   duration: number
 }
+
+export interface UsageFragmentation {
+  duration_bucket: string,
+  count: number
+}

@@ -41,6 +41,9 @@ yarn-error.log*
 .vscode/
 .idea/
 
+# TanStack Router generated files
+.tanstack/
+
 # OS generated files
 .DS_Store
 Thumbs.db

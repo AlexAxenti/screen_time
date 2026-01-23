@@ -10,6 +10,7 @@ const getTheme = (mode: PaletteMode) => createTheme({
       },
       text: {
         primary: 'rgba(255, 255, 255, 0.87)',
+        secondary: '#90caf9',
       },
     } : {
       background: {
@@ -18,11 +19,16 @@ const getTheme = (mode: PaletteMode) => createTheme({
       },
       text: {
         primary: '#213547',
+        secondary: '#1976d2',
       },
     }),
   },
   typography: {
     fontFamily: 'system-ui, "Roboto", Arial, sans-serif',
+    h1: {
+      fontSize: '4rem',
+      fontFamily: '"Roboto", Arial, sans-serif',
+    }
   }
 })
 
