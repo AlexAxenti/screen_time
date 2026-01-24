@@ -13,3 +13,10 @@ export interface UsageFragmentation {
   duration_bucket: string,
   count: number
 }
+
+export interface WeeksDailyUsage {
+  day_start_ms: number,
+  total_duration_ms: number,
+  segment_count: number,
+  exe_count: number,
+}

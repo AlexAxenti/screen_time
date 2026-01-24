@@ -15,7 +15,8 @@ pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>
         .invoke_handler(tauri::generate_handler![
             commands::get_top_usage, 
             commands::get_usage_summary,
-            commands::get_usage_fragmentation
+            commands::get_usage_fragmentation,
+            commands::get_weeks_daily_usage
         ])
         .setup(|app| {
             let menu = MenuBuilder::new(app)

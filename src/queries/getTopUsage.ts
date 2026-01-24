@@ -4,7 +4,7 @@ import type { WindowSegment } from "../types/dto";
 
 let useGetTopUsage = (startTime: number) => { 
   return useQuery({
-    queryKey: ['topUsage', startTime],
+    queryKey: ['top_usage', startTime],
     queryFn: async () => {
       try { 
         let windowSegments: WindowSegment[] = await invoke('get_top_usage', { startTime })

@@ -4,6 +4,7 @@ import './index.css'
 import DashboardSummary from './_components/DashboardSummary';
 import TopExesChart from './_components/TopExesChart';
 import UsageFragmentationChart from './_components/UsageFragmentationChart';
+import useGetWeeksDailyUsage from '../queries/getWeeksDailyUsage';
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -11,10 +12,22 @@ export const Route = createFileRoute('/')({
 
 
 function Index() {
-  const now: Date = new Date();
-  now.setHours(0, 0, 0, 0);
+  const todayStart: Date = new Date();
+  todayStart.setHours(0, 0, 0, 0);
 
-  const epochStartOfDayMs = now.getTime();
+  const weekStart: Date = new Date(todayStart);
+  weekStart.setDate(todayStart.getDate() - 6);
+  const weekStartMs = weekStart.getTime();
+
+  const weekEnd: Date = new Date(todayStart);
+  weekEnd.setDate(todayStart.getDate() + 1);
+  const weekEndMs = weekEnd.getTime();  
+
+  const epochStartOfDayMs = todayStart.getTime();
+
+  const { data: weeksDailyUsage } = useGetWeeksDailyUsage(weekStartMs, weekEndMs);
+
+  console.log('weeksDailyUsage', weeksDailyUsage);
 
   return (
     <div>    

@@ -1,7 +1,7 @@
 use rusqlite::{params};
 use crate::{
     sql_client::init::connect_db_file, 
-    tauri_app::dtos::{UsageFragmentationDTO, UsageSummaryDTO, WindowSegmentDTO}
+    tauri_app::dtos::{DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, WindowSegmentDTO}
 };
 
 pub fn query_usage_summary(start_time: i64) -> rusqlite::Result<UsageSummaryDTO> {
@@ -92,3 +92,38 @@ pub fn query_usage_fragmentation(start_time: i64) -> rusqlite::Result<Vec<UsageF
     Ok(buckets)
 }
 
+pub fn query_weeks_daily_usage(start_time: i64, end_time: i64) -> rusqlite::Result<Vec<DailyUsageDTO>> {
+    let conn = connect_db_file();
+
+    let mut stmt = conn.prepare("SELECT
+    date(start_time / 1000, 'unixepoch', 'localtime') AS day,
+    CAST(strftime('%s', date(start_time / 1000, 'unixepoch', 'localtime')) AS INTEGER) * 1000
+        AS day_start_ms,
+
+    SUM(duration_ms) AS total_duration_ms,
+    COUNT(*) AS segment_count,
+    COUNT(DISTINCT window_exe) AS unique_exes
+    FROM window_segments
+    WHERE start_time >= ?1
+    AND start_time <  ?2
+    AND duration_ms IS NOT NULL
+    AND duration_ms > 0
+    GROUP BY day
+    ORDER BY day;")?;
+
+    let usage_iter = stmt.query_map(params![start_time, end_time], |row| {
+        Ok(DailyUsageDTO {
+            day_start_ms: row.get(1)?,
+            total_duration_ms: row.get(2)?,
+            segment_count: row.get(3)?,
+            exe_count: row.get(4)?
+        })
+    })?;
+
+    let mut daily_usage = Vec::new();
+    for day in usage_iter {
+        daily_usage.push(day?);
+    }
+
+    Ok(daily_usage)
+}
