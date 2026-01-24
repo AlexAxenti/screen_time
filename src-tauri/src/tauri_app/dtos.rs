@@ -18,3 +18,11 @@ pub struct UsageFragmentationDTO {
     pub duration_bucket: String,
     pub count: i64,
 }
+
+#[derive(Serialize)]
+pub struct DailyUsageDTO {
+    pub day_start_ms: i64,
+    pub total_duration_ms: i64,
+    pub segment_count: i64,
+    pub exe_count: i64
+}
