@@ -23,6 +23,7 @@ const TopExesChart = ({ epochStartOfDayMs }: TopExesChartProps) => {
           <BarChart
             data={windowSegments}
             layout="vertical"
+            barSize={60}
             margin={{
               top: 5,
               right: 20,
