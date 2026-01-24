@@ -3,3 +3,10 @@
   margin: 0 auto;
   padding: 2rem;
 }
+
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-surface:focus,
+.recharts-surface:focus-visible {
+  outline: none;
+}

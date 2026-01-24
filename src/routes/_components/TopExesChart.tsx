@@ -31,7 +31,6 @@ const TopExesChart = ({ epochStartOfDayMs }: TopExesChartProps) => {
               bottom: 5,
             }}
           >
-            {/* <CartesianGrid strokeDasharray="3 3" /> */}
             <XAxis
               type="number"
               tickFormatter={(v) => formatMsToHoursOrMinutes(Number(v))}
@@ -55,7 +54,7 @@ const TopExesChart = ({ epochStartOfDayMs }: TopExesChartProps) => {
             <Bar
               dataKey="duration"
               fill="#1976d2"
-              radius={[0, 10, 10, 0]} // rounded right edge
+              radius={[0, 10, 10, 0]}
             />
           </BarChart>
         </ResponsiveContainer>
