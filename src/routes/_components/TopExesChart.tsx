@@ -3,7 +3,6 @@ import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recha
 import { formatMsToHoursOrMinutes } from "../../lib/durationHelpers";
 import useGetTopUsage from "../../queries/getTopUsage";
 
-
 interface TopExesChartProps {
   epochStartOfDayMs: number
 }
