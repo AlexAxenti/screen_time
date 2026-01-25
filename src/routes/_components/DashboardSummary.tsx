@@ -14,9 +14,11 @@ function DashboardSummary({ epochStartOfDayMs }: DashboardSummaryProps) {
 
   return (
     <Box sx={{ 
-      display: 'grid', 
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
       gap: 2,
+      flex: 1,
       marginBottom: 4
     }}>
       <SimpleDataCard dataValue={formatMsToHoursAndMinutes(usageSummary.total_duration)} dataLabel="Total Focus Time" />

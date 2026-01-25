@@ -38,13 +38,15 @@ function Index() {
   return (
     <div>    
       <Typography variant="h1" sx={{textAlign: 'center'}}>Screen Time</Typography>
-      <DashboardSummary epochStartOfDayMs={startOfDayMs} />
 
-      <WeeklyUsageChart 
-        epochStartOfWeekMs={weekStartMs} 
-        epochEndOfWeekMs={weekEndMs} 
-        handleSetRange={handleSetRange}
-      />
+      <Box sx={{ width: '100%', display: 'flex', flexDirection: 'row', gap: 6 }}>  
+          <WeeklyUsageChart 
+            epochStartOfWeekMs={weekStartMs} 
+            epochEndOfWeekMs={weekEndMs} 
+            handleSetRange={handleSetRange}
+          />
+          <DashboardSummary epochStartOfDayMs={startOfDayMs} />
+      </Box>
 
       <Box sx={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>  
         <TopExesChart epochStartOfDayMs={startOfDayMs} />
