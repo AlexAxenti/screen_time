@@ -1,8 +1,9 @@
 import { Box, Typography } from "@mui/material";
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, Cell, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import useGetWeeksDailyUsage from "../../queries/getWeeksDailyUsage";
 import { getStartOfDayMs } from "../../lib/epochDayHelpers";
 import { formatMsToHoursOrMinutes } from "../../lib/durationHelpers";
+import { useMemo, useState } from "react";
 
 interface LastWeekScaffold {
   startOfDayMs: number;
@@ -13,27 +14,37 @@ interface LastWeekScaffold {
 interface UsageFragmentationChartProps {
   epochStartOfWeekMs: number,
   epochEndOfWeekMs: number,
+  handleSetRange: (startMs: number, endMs: number) => void,
 }
 
-const WeeklyUsageChart = ({ epochStartOfWeekMs, epochEndOfWeekMs }: UsageFragmentationChartProps) => {
+const WeeklyUsageChart = ({ 
+  epochStartOfWeekMs, 
+  epochEndOfWeekMs, 
+  handleSetRange 
+}: UsageFragmentationChartProps) => {
   const { data: weeksDailyUsage } = useGetWeeksDailyUsage(epochStartOfWeekMs, epochEndOfWeekMs);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
-  const lastWeekScaffold: LastWeekScaffold[] = [];
+  const lastWeekScaffold: LastWeekScaffold[] = useMemo(() => {
+    const scaffold: LastWeekScaffold[] = [];
+    const startOfWeekDate: Date = new Date(epochStartOfWeekMs);
 
-  const startOfWeekDate: Date = new Date(epochStartOfWeekMs);
-  for (let i = 0; i < 7; i++) {
-    startOfWeekDate.setDate(startOfWeekDate.getDate() + (i === 0 ? 0 : 1));
+    for (let i = 0; i < 7; i++) {
+      startOfWeekDate.setDate(startOfWeekDate.getDate() + (i === 0 ? 0 : 1));
 
-    const dayLabel = startOfWeekDate.toLocaleDateString('en-US', { weekday: 'short' });
+      const dayLabel = startOfWeekDate.toLocaleDateString('en-US', { weekday: 'short' });
 
-    lastWeekScaffold.push({
-      startOfDayMs: getStartOfDayMs(startOfWeekDate),
-      dayLabel,
-      order: i + 1,
-    });
-  }
+      scaffold.push({
+        startOfDayMs: getStartOfDayMs(startOfWeekDate),
+        dayLabel,
+        order: i + 1,
+      });
+    }
+    return scaffold;
+  }, [epochStartOfWeekMs]);  
 
-  const mergedWeeksDailyUsage = lastWeekScaffold.map((day) => {
+  const mergedWeeksDailyUsage = useMemo(() => {
+    return lastWeekScaffold.map((day) => {
     const match = weeksDailyUsage?.find((usage) => usage.day_start_ms === day.startOfDayMs);
     
     return {
@@ -43,6 +54,9 @@ const WeeklyUsageChart = ({ epochStartOfWeekMs, epochEndOfWeekMs }: UsageFragmen
       exeCount: match ? match.exe_count : 0,
     };
   });
+  }, [lastWeekScaffold, weeksDailyUsage]);
+  
+  const selectedLabel = selectedIndex !== null ? mergedWeeksDailyUsage[selectedIndex]?.dayLabel : null;
   
   return (
     <Box>
@@ -53,6 +67,16 @@ const WeeklyUsageChart = ({ epochStartOfWeekMs, epochEndOfWeekMs }: UsageFragmen
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={mergedWeeksDailyUsage}
+            onClick={(e) => {
+                const idx = e?.activeTooltipIndex;
+                if (idx === null || idx === undefined) return;
+
+                const d = mergedWeeksDailyUsage[Number(idx)];
+                if (!d) return;
+
+                handleSetRange(d.startOfDayMs ?? 0, (d.startOfDayMs ?? 0) + 24 * 60 * 60 * 1000);
+                setSelectedIndex(Number(idx) === selectedIndex ? null : Number(idx));
+              }}
             margin={{
               top: 5,
               right: 20,
@@ -60,6 +84,15 @@ const WeeklyUsageChart = ({ epochStartOfWeekMs, epochEndOfWeekMs }: UsageFragmen
               bottom: 5,
             }}
           >
+            {selectedLabel && (
+              <ReferenceArea
+                x1={selectedLabel}
+                x2={selectedLabel}
+                strokeOpacity={0}
+                fill="rgba(255,255,255,0.75)"
+              />
+            )}
+
             <XAxis
               type="category"
               dataKey="dayLabel"
@@ -80,7 +113,20 @@ const WeeklyUsageChart = ({ epochStartOfWeekMs, epochEndOfWeekMs }: UsageFragmen
               dataKey="totalDurationMs"
               fill="#1976d2"
               radius={[6, 6, 0, 0]}
-            />
+            >
+              {mergedWeeksDailyUsage.map((_, i) => {
+                const isSelected = selectedIndex == null || i === selectedIndex;
+
+                return (
+                  <Cell
+                    key={i}
+                    opacity={isSelected ? 1 : 0.35} // dim others
+                    stroke={i === selectedIndex ? "#fff" : undefined}
+                    strokeWidth={i === selectedIndex ? 2 : 0}
+                  />
+                );
+              })}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </Box>
