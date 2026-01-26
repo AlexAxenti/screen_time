@@ -30,7 +30,6 @@ const DashboardHeader = ({ rangeStartMs, rangeEndMs, weekStartMs, weekEndMs }: D
       return `${startFormatted} - ${endFormatted} (This Week)`;
     }
     
-    // Default range display
     const startFormatted = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     const endFormatted = new Date(rangeEndMs - 1).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     return `${startFormatted} - ${endFormatted}`;
