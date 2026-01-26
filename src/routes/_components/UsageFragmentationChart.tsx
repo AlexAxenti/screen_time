@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import useGetUsageFragmentation from "../../queries/getUsageFragmentation";
 import type { UsageFragmentation } from "../../types/dto";
@@ -44,46 +44,41 @@ const UsageFragmentationChart = ({ startOfRangeMs, endOfRangeMs }: UsageFragment
   }
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ textAlign: 'center', marginBottom: 2 }}>
-        Focus Time Blocks
-      </Typography>
-      <Box sx={{ width: '550px', height: '400px' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={normalizeBuckets(usageFragmentation ?? [])}
-            margin={{
-              top: 5,
-              right: 20,
-              left: 0,
-              bottom: 5,
-            }}
-          >
-            <XAxis
-              type="category"
-              dataKey="bucket"
-              tickFormatter={(v) => bucketLabel(String(v))}
-            />
-            <YAxis
-              type="number"
-              allowDecimals={false}
-              label={{ value: 'Segment Counts', angle: -90, position: 'insideLeft' }}
-            />
-            <Tooltip
-              labelFormatter={(label) => `Bucket: ${bucketLabel(String(label))}`}
-              contentStyle={{ background: '#111', border: '1px solid #333' }}
-              labelStyle={{ color: '#fff' }}
-              itemStyle={{ color: '#fff' }}
-              formatter={(value) => [`${value} segments`, 'Count']}
-            />
-            <Bar
-              dataKey="count"
-              fill="#1976d2"
-              radius={[6, 6, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </Box>
+    <Box sx={{ width: '100%', height: '300px' }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={normalizeBuckets(usageFragmentation ?? [])}
+          margin={{
+            top: 5,
+            right: 20,
+            left: 0,
+            bottom: 5,
+          }}
+        >
+          <XAxis
+            type="category"
+            dataKey="bucket"
+            tickFormatter={(v) => bucketLabel(String(v))}
+          />
+          <YAxis
+            type="number"
+            allowDecimals={false}
+            label={{ value: 'Segment Counts', angle: -90, position: 'insideLeft' }}
+          />
+          <Tooltip
+            labelFormatter={(label) => `Bucket: ${bucketLabel(String(label))}`}
+            contentStyle={{ background: '#111', border: '1px solid #333' }}
+            labelStyle={{ color: '#fff' }}
+            itemStyle={{ color: '#fff' }}
+            formatter={(value) => [`${value} segments`, 'Count']}
+          />
+          <Bar
+            dataKey="count"
+            fill="#1976d2"
+            radius={[6, 6, 0, 0]}
+          />
+        </BarChart>
+      </ResponsiveContainer>
     </Box>
   );
 }

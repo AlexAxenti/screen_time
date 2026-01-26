@@ -12,6 +12,7 @@ const SimpleDataCard  = ({ dataValue, dataLabel, sx }: SimpleDataCardProps) => {
     <Card sx={{ 
       padding: 2,
       textAlign: 'center',
+      backgroundColor: 'background.default',
       ...sx
     }}>
       <Typography variant="h4" color="text.secondary">
