@@ -12,10 +12,8 @@ const DashboardHeader = ({ rangeStartMs, rangeEndMs, weekStartMs, weekEndMs }: D
   const timeframeLabel = useMemo(() => {
     const startDate = new Date(rangeStartMs);
     
-    // Check if it's a single day (24 hours difference)
     const isSingleDay = (rangeEndMs - rangeStartMs) === 24 * 60 * 60 * 1000;
     
-    // Check if it's the full week
     const isFullWeek = rangeStartMs === weekStartMs && rangeEndMs === weekEndMs;
     
     if (isSingleDay) {

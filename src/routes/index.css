@@ -6,9 +6,6 @@
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
 }
 
-.recharts-wrapper:focus,
-.recharts-wrapper:focus-visible,
-.recharts-surface:focus,
-.recharts-surface:focus-visible {
-  outline: none;
+.recharts-wrapper * {
+  outline: none !important;
 }
