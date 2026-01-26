@@ -3,13 +3,13 @@ import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recha
 import { formatMsToHoursOrMinutes } from "../../lib/durationHelpers";
 import useGetTopUsage from "../../queries/getTopUsage";
 
-
 interface TopExesChartProps {
-  epochStartOfDayMs: number
+  startOfRangeMs: number,
+  endOfRangeMs: number,
 }
 
-const TopExesChart = ({ epochStartOfDayMs }: TopExesChartProps) => {
-  const { data: windowSegments } = useGetTopUsage(epochStartOfDayMs);
+const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
+  const { data: windowSegments } = useGetTopUsage(startOfRangeMs, endOfRangeMs);
 
   const truncate = (s: string, n = 12) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 

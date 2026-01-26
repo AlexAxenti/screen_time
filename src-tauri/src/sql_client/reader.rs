@@ -4,7 +4,7 @@ use crate::{
     tauri_app::dtos::{DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, WindowSegmentDTO}
 };
 
-pub fn query_usage_summary(start_time: i64) -> rusqlite::Result<UsageSummaryDTO> {
+pub fn query_usage_summary(start_time: i64, end_time: i64) -> rusqlite::Result<UsageSummaryDTO> {
     let conn = connect_db_file();
 
     let mut stmt = conn.prepare("SELECT 
@@ -12,9 +12,9 @@ pub fn query_usage_summary(start_time: i64) -> rusqlite::Result<UsageSummaryDTO>
             COUNT(*) AS segments_count, 
             COUNT(DISTINCT window_exe) AS exe_count
         FROM window_segments 
-        WHERE start_time > ?1")?;
+        WHERE start_time >= ?1 AND start_time < ?2")?;
 
-    let summary = stmt.query_row(params![start_time], |row| {
+    let summary = stmt.query_row(params![start_time, end_time], |row| {
         Ok(UsageSummaryDTO {
             total_duration: row.get(0)?,
             segments_count: row.get(1)?,
@@ -25,18 +25,18 @@ pub fn query_usage_summary(start_time: i64) -> rusqlite::Result<UsageSummaryDTO>
     summary
 }
 
-pub fn query_top_usage(start_time: i64) -> rusqlite::Result<Vec<WindowSegmentDTO>> {
+pub fn query_top_usage(start_time: i64, end_time: i64) -> rusqlite::Result<Vec<WindowSegmentDTO>> {
     let conn = connect_db_file();
 
     let mut stmt = conn.prepare("SELECT 
         window_exe, 
         SUM(duration_ms) AS duration
     FROM window_segments
-    WHERE start_time > ?1
+    WHERE start_time >= ?1 AND start_time < ?2
     GROUP BY window_exe
     ORDER BY duration DESC;")?;
 
-    let segment_iter = stmt.query_map(params![start_time], |row| {
+    let segment_iter = stmt.query_map(params![start_time, end_time], |row| {
         Ok(WindowSegmentDTO {
             window_exe: row.get(0)?,
             duration: row.get(1)?
@@ -51,7 +51,7 @@ pub fn query_top_usage(start_time: i64) -> rusqlite::Result<Vec<WindowSegmentDTO
     Ok(segments)
 }
 
-pub fn query_usage_fragmentation(start_time: i64) -> rusqlite::Result<Vec<UsageFragmentationDTO>> {
+pub fn query_usage_fragmentation(start_time: i64, end_time: i64) -> rusqlite::Result<Vec<UsageFragmentationDTO>> {
     let conn = connect_db_file();
 
     let mut stmt = conn.prepare("SELECT
@@ -73,11 +73,11 @@ pub fn query_usage_fragmentation(start_time: i64) -> rusqlite::Result<Vec<UsageF
     END AS bucket_order,
     COUNT(*) AS count
     FROM window_segments
-    WHERE start_time > ?1
+    WHERE start_time >= ?1 AND start_time < ?2
     GROUP BY duration_bucket, bucket_order
     ORDER BY bucket_order;")?;
 
-    let fragmentation_iter = stmt.query_map(params![start_time], |row| {
+    let fragmentation_iter = stmt.query_map(params![start_time, end_time], |row| {
         Ok(UsageFragmentationDTO {
             duration_bucket: row.get(0)?,
             count: row.get(2)?

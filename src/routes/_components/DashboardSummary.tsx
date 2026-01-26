@@ -4,19 +4,21 @@ import SimpleDataCard from '../../components/UI/SimpleDataCard'
 import { formatMsToHoursAndMinutes } from '../../lib/durationHelpers'
 
 interface DashboardSummaryProps {
-  epochStartOfDayMs: number
+  startOfRangeMs: number,
+  endOfRangeMs: number,
 }
 
-function DashboardSummary({ epochStartOfDayMs }: DashboardSummaryProps) {
-  const { data: usageSummary } = useGetUsageSummary(epochStartOfDayMs)
-
+function DashboardSummary({ startOfRangeMs, endOfRangeMs }: DashboardSummaryProps) {
+  const { data: usageSummary } = useGetUsageSummary(startOfRangeMs, endOfRangeMs)
   if (!usageSummary) return null
 
   return (
     <Box sx={{ 
-      display: 'grid', 
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
       gap: 2,
+      flex: 1,
       marginBottom: 4
     }}>
       <SimpleDataCard dataValue={formatMsToHoursAndMinutes(usageSummary.total_duration)} dataLabel="Total Focus Time" />

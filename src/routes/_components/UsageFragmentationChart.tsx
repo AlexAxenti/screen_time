@@ -22,11 +22,12 @@ const BUCKET_LABELS: Record<string, string> = {
 }
 
 interface UsageFragmentationChartProps {
-  epochStartOfDayMs: number
+  startOfRangeMs: number,
+  endOfRangeMs: number,
 }
 
-const UsageFragmentationChart = ({ epochStartOfDayMs }: UsageFragmentationChartProps) => {
-  const { data: usageFragmentation } = useGetUsageFragmentation(epochStartOfDayMs);
+const UsageFragmentationChart = ({ startOfRangeMs, endOfRangeMs }: UsageFragmentationChartProps) => {
+  const { data: usageFragmentation } = useGetUsageFragmentation(startOfRangeMs, endOfRangeMs);
 
   const normalizeBuckets = (rows: UsageFragmentation[]) => {
     const map = new Map(rows.map(r => [r.duration_bucket, r.count]));
