@@ -4,12 +4,12 @@ import SimpleDataCard from '../../components/UI/SimpleDataCard'
 import { formatMsToHoursAndMinutes } from '../../lib/durationHelpers'
 
 interface DashboardSummaryProps {
-  epochStartOfDayMs: number
+  startOfRangeMs: number,
+  endOfRangeMs: number,
 }
 
-function DashboardSummary({ epochStartOfDayMs }: DashboardSummaryProps) {
-  const { data: usageSummary } = useGetUsageSummary(epochStartOfDayMs)
-
+function DashboardSummary({ startOfRangeMs, endOfRangeMs }: DashboardSummaryProps) {
+  const { data: usageSummary } = useGetUsageSummary(startOfRangeMs, endOfRangeMs)
   if (!usageSummary) return null
 
   return (

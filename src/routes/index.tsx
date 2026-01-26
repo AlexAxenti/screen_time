@@ -4,7 +4,7 @@ import './index.css'
 import DashboardSummary from './_components/DashboardSummary';
 import TopExesChart from './_components/TopExesChart';
 import UsageFragmentationChart from './_components/UsageFragmentationChart';
-import { getStartOfDayMs, getWeekEndMs, getWeekStartMs } from '../lib/epochDayHelpers';
+import { getWeekEndMs, getWeekStartMs } from '../lib/epochDayHelpers';
 import WeeklyUsageChart from './_components/WeeklyUsageChart';
 import { useState } from 'react';
 
@@ -17,13 +17,9 @@ function Index() {
   
   const weekStartMs = getWeekStartMs(today);
   const weekEndMs = getWeekEndMs(today);
-  const startOfDayMs = getStartOfDayMs(today);
 
   const [rangeStartMs, setRangeStartMs] = useState<number>(weekStartMs);
   const [rangeEndMs, setRangeEndMs] = useState<number>(weekEndMs);
-
-  console.log("range start: ", rangeStartMs);
-  console.log("range end: ", rangeEndMs);
 
   const handleSetRange = (startMs: number, endMs: number) => {
     if (startMs === rangeStartMs) {
@@ -45,12 +41,12 @@ function Index() {
             epochEndOfWeekMs={weekEndMs} 
             handleSetRange={handleSetRange}
           />
-          <DashboardSummary epochStartOfDayMs={startOfDayMs} />
+          <DashboardSummary startOfRangeMs={rangeStartMs} endOfRangeMs={rangeEndMs} />
       </Box>
 
       <Box sx={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>  
-        <TopExesChart epochStartOfDayMs={startOfDayMs} />
-        <UsageFragmentationChart epochStartOfDayMs={startOfDayMs} />
+        <TopExesChart startOfRangeMs={rangeStartMs} endOfRangeMs={rangeEndMs} />
+        <UsageFragmentationChart startOfRangeMs={rangeStartMs} endOfRangeMs={rangeEndMs} />
       </Box>
     </div>
   );
