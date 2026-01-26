@@ -19,7 +19,6 @@ function DashboardSummary({ startOfRangeMs, endOfRangeMs }: DashboardSummaryProp
       justifyContent: 'center',
       gap: 2,
       flex: 1,
-      marginBottom: 4
     }}>
       <SimpleDataCard dataValue={formatMsToHoursAndMinutes(usageSummary.total_duration)} dataLabel="Total Focus Time" />
 

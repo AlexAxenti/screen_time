@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { Bar, BarChart, Cell, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import useGetWeeksDailyUsage from "../../queries/getWeeksDailyUsage";
 import { getStartOfDayMs } from "../../lib/epochDayHelpers";
@@ -59,77 +59,72 @@ const WeeklyUsageChart = ({
   const selectedLabel = selectedIndex !== null ? mergedWeeksDailyUsage[selectedIndex]?.dayLabel : null;
   
   return (
-    <Box>
-      <Typography variant="h4" sx={{ textAlign: 'center', marginBottom: 2 }}>
-        Focus Time Blocks
-      </Typography>
-      <Box sx={{ width: '750px', height: '400px' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={mergedWeeksDailyUsage}
-            onClick={(e) => {
-                const idx = e?.activeTooltipIndex;
-                if (idx === null || idx === undefined) return;
+    <Box sx={{ width: '100%', height: '400px' }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={mergedWeeksDailyUsage}
+          onClick={(e) => {
+              const idx = e?.activeTooltipIndex;
+              if (idx === null || idx === undefined) return;
 
-                const d = mergedWeeksDailyUsage[Number(idx)];
-                if (!d) return;
+              const d = mergedWeeksDailyUsage[Number(idx)];
+              if (!d) return;
 
-                handleSetRange(d.startOfDayMs ?? 0, (d.startOfDayMs ?? 0) + 24 * 60 * 60 * 1000);
-                setSelectedIndex(Number(idx) === selectedIndex ? null : Number(idx));
-              }}
-            margin={{
-              top: 5,
-              right: 20,
-              left: 40,
-              bottom: 5,
+              handleSetRange(d.startOfDayMs ?? 0, (d.startOfDayMs ?? 0) + 24 * 60 * 60 * 1000);
+              setSelectedIndex(Number(idx) === selectedIndex ? null : Number(idx));
             }}
+          margin={{
+            top: 5,
+            right: 20,
+            left: 40,
+            bottom: 5,
+          }}
+        >
+          {selectedLabel && (
+            <ReferenceArea
+              x1={selectedLabel}
+              x2={selectedLabel}
+              strokeOpacity={0}
+              fill="rgba(255,255,255,0.75)"
+            />
+          )}
+
+          <XAxis
+            type="category"
+            dataKey="dayLabel"
+          />
+          <YAxis
+            type="number"
+            allowDecimals={false}
+            label={{ value: 'Daily usage', angle: -90, position: 'left', offset: 20 }}
+            tickFormatter={(v) => formatMsToHoursOrMinutes(Number(v))}
+          />
+          <Tooltip
+            contentStyle={{ background: '#111', border: '1px solid #333' }}
+            labelStyle={{ color: '#fff' }}
+            itemStyle={{ color: '#fff' }}
+            formatter={(value) => [`${formatMsToHoursOrMinutes(Number(value))}`, 'Duration']}
+          />
+          <Bar
+            dataKey="totalDurationMs"
+            fill="#1976d2"
+            radius={[6, 6, 0, 0]}
           >
-            {selectedLabel && (
-              <ReferenceArea
-                x1={selectedLabel}
-                x2={selectedLabel}
-                strokeOpacity={0}
-                fill="rgba(255,255,255,0.75)"
-              />
-            )}
+            {mergedWeeksDailyUsage.map((_, i) => {
+              const isSelected = selectedIndex == null || i === selectedIndex;
 
-            <XAxis
-              type="category"
-              dataKey="dayLabel"
-            />
-            <YAxis
-              type="number"
-              allowDecimals={false}
-              label={{ value: 'Daily usage', angle: -90, position: 'left', offset: 20 }}
-              tickFormatter={(v) => formatMsToHoursOrMinutes(Number(v))}
-            />
-            <Tooltip
-              contentStyle={{ background: '#111', border: '1px solid #333' }}
-              labelStyle={{ color: '#fff' }}
-              itemStyle={{ color: '#fff' }}
-              formatter={(value) => [`${formatMsToHoursOrMinutes(Number(value))}`, 'Duration']}
-            />
-            <Bar
-              dataKey="totalDurationMs"
-              fill="#1976d2"
-              radius={[6, 6, 0, 0]}
-            >
-              {mergedWeeksDailyUsage.map((_, i) => {
-                const isSelected = selectedIndex == null || i === selectedIndex;
-
-                return (
-                  <Cell
-                    key={i}
-                    opacity={isSelected ? 1 : 0.35} // dim others
-                    stroke={i === selectedIndex ? "#fff" : undefined}
-                    strokeWidth={i === selectedIndex ? 2 : 0}
-                  />
-                );
-              })}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </Box>
+              return (
+                <Cell
+                  key={i}
+                  opacity={isSelected ? 1 : 0.35} // dim others
+                  stroke={i === selectedIndex ? "#fff" : undefined}
+                  strokeWidth={i === selectedIndex ? 2 : 0}
+                />
+              );
+            })}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </Box>
   );
 }

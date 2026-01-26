@@ -1,11 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Box, Typography } from '@mui/material'
+import { Box } from '@mui/material'
 import './index.css'
 import DashboardSummary from './_components/DashboardSummary';
 import TopExesChart from './_components/TopExesChart';
 import UsageFragmentationChart from './_components/UsageFragmentationChart';
 import { getWeekEndMs, getWeekStartMs } from '../lib/epochDayHelpers';
 import WeeklyUsageChart from './_components/WeeklyUsageChart';
+import DashboardHeader from './_components/DashboardHeader';
+import DashboardCard from '../components/UI/DashboardCard';
 import { useState } from 'react';
 
 export const Route = createFileRoute('/')({
@@ -32,22 +34,44 @@ function Index() {
   }
 
   return (
-    <div>    
-      <Typography variant="h1" sx={{textAlign: 'center'}}>Screen Time</Typography>
+    <Box>    
+      <DashboardHeader 
+        rangeStartMs={rangeStartMs} 
+        rangeEndMs={rangeEndMs}
+        weekStartMs={weekStartMs}
+        weekEndMs={weekEndMs}
+      />
 
-      <Box sx={{ width: '100%', display: 'flex', flexDirection: 'row', gap: 6 }}>  
+      {/* Top Row: Weekly Chart (2/3) + Summary Cards (1/3) */}
+      <Box sx={{ 
+        display: 'grid', 
+        gridTemplateColumns: '2fr 1fr', 
+        gap: 3,
+        marginBottom: 3
+      }}>  
+        <DashboardCard title="Weekly Overview">
           <WeeklyUsageChart 
             epochStartOfWeekMs={weekStartMs} 
             epochEndOfWeekMs={weekEndMs} 
             handleSetRange={handleSetRange}
           />
-          <DashboardSummary startOfRangeMs={rangeStartMs} endOfRangeMs={rangeEndMs} />
+        </DashboardCard>
+        <DashboardSummary startOfRangeMs={rangeStartMs} endOfRangeMs={rangeEndMs} />
       </Box>
 
-      <Box sx={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>  
-        <TopExesChart startOfRangeMs={rangeStartMs} endOfRangeMs={rangeEndMs} />
-        <UsageFragmentationChart startOfRangeMs={rangeStartMs} endOfRangeMs={rangeEndMs} />
+      {/* Bottom Row: Top Apps (1/2) + Fragmentation (1/2) */}
+      <Box sx={{ 
+        display: 'grid', 
+        gridTemplateColumns: '1fr 1fr', 
+        gap: 3
+      }}>  
+        <DashboardCard title="Top Applications Used">
+          <TopExesChart startOfRangeMs={rangeStartMs} endOfRangeMs={rangeEndMs} />
+        </DashboardCard>
+        <DashboardCard title="Focus Time Blocks">
+          <UsageFragmentationChart startOfRangeMs={rangeStartMs} endOfRangeMs={rangeEndMs} />
+        </DashboardCard>
       </Box>
-    </div>
+    </Box>
   );
 };
