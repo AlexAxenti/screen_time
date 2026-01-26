@@ -2,6 +2,8 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
+  min-height: 100vh;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
 }
 
 .recharts-wrapper:focus,

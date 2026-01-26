@@ -14,7 +14,7 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
   const truncate = (s: string, n = 12) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 
   return (
-    <Box sx={{ width: '100%', height: '400px' }}>
+    <Box sx={{ width: '100%', height: '300px' }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={windowSegments}

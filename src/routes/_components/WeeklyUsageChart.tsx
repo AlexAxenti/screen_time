@@ -59,7 +59,7 @@ const WeeklyUsageChart = ({
   const selectedLabel = selectedIndex !== null ? mergedWeeksDailyUsage[selectedIndex]?.dayLabel : null;
   
   return (
-    <Box sx={{ width: '100%', height: '400px' }}>
+    <Box sx={{ width: '100%', height: '300px' }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={mergedWeeksDailyUsage}
