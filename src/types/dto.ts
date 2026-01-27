@@ -9,6 +9,12 @@ export interface WindowSegment {
   duration: number
 }
 
+export interface TopUsage {
+  window_segments: WindowSegment[],
+  total_duration: number,
+  other_duration: number,
+}
+
 export interface UsageFragmentation {
   duration_bucket: string,
   count: number

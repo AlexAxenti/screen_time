@@ -1,11 +1,24 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { Box } from '@mui/material'
+import AppHeader from '../components/AppHeader'
 
 export const Route = createRootRoute({
   component: () => (
-    <>
-      <Outlet />
+    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <AppHeader />
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          width: '100%',
+          px: { xs: 2, sm: 3 },
+          py: 3,
+        }}
+      >
+        <Outlet />
+      </Box>
       <TanStackRouterDevtools />
-    </>
+    </Box>
   ),
 })

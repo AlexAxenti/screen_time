@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import type { WindowSegment } from "../types/dto";
+import type { TopUsage } from "../types/dto";
 
-let useGetTopUsage = (startTime: number, endTime: number) => { 
+let useGetTopUsage = (startTime: number, endTime: number, appCount: number) => { 
   return useQuery({
-    queryKey: ['top_usage', startTime, endTime],
+    queryKey: ['top_usage', startTime, endTime, appCount],
     queryFn: async () => {
       try { 
-        let windowSegments: WindowSegment[] = await invoke('get_top_usage', { startTime, endTime })
-        return windowSegments;
+        let topUsage: TopUsage = await invoke('get_top_usage', { startTime, endTime, appCount })
+        return topUsage;
       } catch (e) {
         console.error("get top usage failed");
         throw e;
