@@ -60,35 +60,41 @@ const AppHeader = () => {
     >
       {NAV_ITEMS.map((item) => {
         const isActive = isActiveRoute(item.to);
+
+        const isDashboard = item.to === '/';
         return (
-          <Box
+          <Link
             key={item.to}
-            component={Link}
-            to={item.to}
-            sx={{
-              px: 2,
-              py: 1,
-              borderRadius: 2,
-              textDecoration: 'none',
-              color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
-              backgroundColor: isActive 
-                ? theme.palette.mode === 'dark' 
-                  ? 'rgba(25, 118, 210, 0.15)' 
-                  : 'rgba(25, 118, 210, 0.08)'
-                : 'transparent',
-              fontWeight: isActive ? 600 : 400,
-              fontSize: '0.875rem',
-              transition: 'all 0.2s ease-in-out',
-              '&:hover': {
-                backgroundColor: theme.palette.mode === 'dark' 
-                  ? 'rgba(255, 255, 255, 0.08)' 
-                  : 'rgba(0, 0, 0, 0.04)',
-                color: theme.palette.primary.main,
-              },
-            }}
+            to={item.to as any}
+            preload={isDashboard ? false : undefined}
+            style={{ textDecoration: 'none' }}
           >
-            {item.label}
-          </Box>
+            <Box
+              sx={{
+                px: 2,
+                py: 1,
+                borderRadius: 2,
+                textDecoration: 'none',
+                color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
+                backgroundColor: isActive 
+                  ? theme.palette.mode === 'dark' 
+                    ? 'rgba(25, 118, 210, 0.15)' 
+                    : 'rgba(25, 118, 210, 0.08)'
+                  : 'transparent',
+                fontWeight: 500,
+                fontSize: '0.875rem',
+                transition: 'background-color 0.2s ease-in-out, color 0.2s ease-in-out',
+                '&:hover': {
+                  backgroundColor: theme.palette.mode === 'dark' 
+                    ? 'rgba(255, 255, 255, 0.08)' 
+                    : 'rgba(0, 0, 0, 0.04)',
+                  color: theme.palette.primary.main,
+                },
+              }}
+            >
+              {item.label}
+            </Box>
+          </Link>
         );
       })}
     </Box>
@@ -114,31 +120,38 @@ const AppHeader = () => {
       <List>
         {NAV_ITEMS.map((item) => {
           const isActive = isActiveRoute(item.to);
+
+          const isDashboard = item.to === '/';
           return (
-            <ListItem key={item.to} disablePadding>
-              <ListItemButton
-                component={Link}
-                to={item.to}
-                onClick={toggleDrawer(false)}
-                sx={{
-                  mx: 1,
-                  borderRadius: 2,
-                  backgroundColor: isActive 
-                    ? theme.palette.mode === 'dark' 
-                      ? 'rgba(25, 118, 210, 0.15)' 
-                      : 'rgba(25, 118, 210, 0.08)'
-                    : 'transparent',
-                }}
-              >
-                <ListItemText
-                  primary={item.label}
-                  primaryTypographyProps={{
-                    fontWeight: isActive ? 600 : 400,
-                    color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
+            <Link
+              key={item.to}
+              to={item.to as any}
+              preload={isDashboard ? false : undefined}
+              style={{ textDecoration: 'none' }}
+            >
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={toggleDrawer(false)}
+                  sx={{
+                    mx: 1,
+                    borderRadius: 2,
+                    backgroundColor: isActive 
+                      ? theme.palette.mode === 'dark' 
+                        ? 'rgba(25, 118, 210, 0.15)' 
+                        : 'rgba(25, 118, 210, 0.08)'
+                      : 'transparent',
                   }}
-                />
-              </ListItemButton>
-            </ListItem>
+                >
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{
+                      fontWeight: 500,
+                      color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            </Link>
           );
         })}
       </List>
