@@ -7,6 +7,7 @@ use crate::sql_client::{init::{connect_db_file, initialize_db}, writer::run_writ
 use crate::WindowSegment;
 
 //TODO batching and error handling
+//TODO add app name and icon table/caching
 pub fn start_sql_client(rx_segments: Receiver<WindowSegment>) {
     let conn = connect_db_file();
 

@@ -1,13 +1,32 @@
 use crate::{
     sql_client::reader::{query_top_usage, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage}, 
-    tauri_app::dtos::{DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, WindowSegmentDTO}
+    tauri_app::dtos::{DailyUsageDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, WindowSegmentDTO}
 };
 
+//TODO move logic to seperate file
 #[tauri::command]
-pub fn get_top_usage(start_time: i64, end_time: i64) -> Vec<WindowSegmentDTO> {
-    let window_segments = query_top_usage(start_time, end_time).expect("Failed to read from DB");
+pub fn get_top_usage(start_time: i64, end_time: i64, app_count: usize) -> TopUsageDTO {
+    let mut window_segments = query_top_usage(start_time, end_time).expect("Failed to read from DB");
 
-    window_segments
+    let total_time: i64 = window_segments.iter()
+        .map(|segment| segment.duration)
+        .sum();
+
+    let max_app_count = app_count.min(window_segments.len());
+
+    let other_window_segments = window_segments.split_off(max_app_count);
+
+    let other_time: i64 = other_window_segments.iter()
+        .map(|segment| segment.duration)
+        .sum();
+
+    let top_usage = TopUsageDTO {
+        window_segments: window_segments,
+        total_duration: total_time,
+        other_duration: other_time,
+    };
+
+    top_usage
 }
 
 #[tauri::command]

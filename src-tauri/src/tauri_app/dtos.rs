@@ -7,6 +7,13 @@ pub struct WindowSegmentDTO {
 }
 
 #[derive(Serialize)]
+pub struct TopUsageDTO {
+    pub window_segments: Vec<WindowSegmentDTO>,
+    pub other_duration: i64,
+    pub total_duration: i64
+}
+
+#[derive(Serialize)]
 pub struct UsageSummaryDTO {
     pub total_duration: i64,
     pub segments_count: i64,

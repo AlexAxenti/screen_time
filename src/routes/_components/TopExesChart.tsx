@@ -3,13 +3,15 @@ import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recha
 import { formatMsToHoursOrMinutes } from "../../lib/durationHelpers";
 import useGetTopUsage from "../../queries/getTopUsage";
 
+const TOP_APP_COUNT = 7;
+
 interface TopExesChartProps {
   startOfRangeMs: number,
-  endOfRangeMs: number,
+  endOfRangeMs: number, 
 }
 
 const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
-  const { data: windowSegments } = useGetTopUsage(startOfRangeMs, endOfRangeMs);
+  const { data: topUsage } = useGetTopUsage(startOfRangeMs, endOfRangeMs, TOP_APP_COUNT);
 
   const truncate = (s: string, n = 12) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 
@@ -17,7 +19,7 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
     <Box sx={{ width: '100%', height: '300px' }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={windowSegments}
+          data={topUsage?.window_segments || []}
           layout="vertical"
           barSize={60}
           margin={{
