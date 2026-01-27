@@ -3,6 +3,12 @@ import { createTheme, type PaletteMode } from "@mui/material/styles";
 const getTheme = (mode: PaletteMode) => createTheme({
   palette: {
     mode,
+    primary: {
+      main: mode === 'dark' ? '#90caf9' : '#1976d2',
+    },
+    secondary: {
+      main: mode === 'dark' ? '#ce93d8' : '#9c27b0',
+    },
     ...(mode === 'dark' ? {
       background: {
         default: '#1a1a2e',

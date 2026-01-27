@@ -40,19 +40,40 @@ const DashboardHeader = ({ rangeStartMs, rangeEndMs, weekStartMs, weekEndMs }: D
       display: 'flex', 
       justifyContent: 'space-between', 
       alignItems: 'center',
-      marginBottom: 4,
+      marginBottom: 3,
       paddingBottom: 2,
+      //TODO maybe remove below
       borderBottom: '1px solid',
       borderColor: 'divider'
     }}>
-      <Typography variant="h2" sx={{ fontWeight: 600 }}>
+      <Typography 
+        variant="h4" 
+        sx={{ 
+          fontWeight: 600,
+          color: "text.primary",
+        }}
+      >
         Dashboard
       </Typography>
       <Box sx={{ textAlign: 'right' }}>
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', marginBottom: 0.5 }}>
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            display: 'block', 
+            marginBottom: 0.25,
+            color: "text.secondary",
+            letterSpacing: '0.05em',
+          }}
+        >
           Selected Timeframe
         </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 500 }}>
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            fontWeight: 500,
+            color: "text.secondary",
+          }}
+        >
           {timeframeLabel}
         </Typography>
       </Box>
