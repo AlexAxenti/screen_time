@@ -1,6 +1,6 @@
 use crate::{
     sql_client::reader::{query_top_usage, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage}, 
-    tauri_app::dtos::{DailyUsageDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, WindowSegmentDTO}
+    tauri_app::dtos::{DailyUsageDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO}
 };
 
 //TODO move logic to seperate file
