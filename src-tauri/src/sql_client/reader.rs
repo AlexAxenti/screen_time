@@ -1,7 +1,7 @@
 use rusqlite::{params};
 use crate::{
     sql_client::init::connect_db_file, 
-    tauri_app::dtos::{DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, WindowSegmentDTO}
+    tauri_app::dtos::{DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, AppUsageDTO}
 };
 
 pub fn query_usage_summary(start_time: i64, end_time: i64) -> rusqlite::Result<UsageSummaryDTO> {
@@ -25,21 +25,52 @@ pub fn query_usage_summary(start_time: i64, end_time: i64) -> rusqlite::Result<U
     summary
 }
 
-pub fn query_top_usage(start_time: i64, end_time: i64) -> rusqlite::Result<Vec<WindowSegmentDTO>> {
-    let conn = connect_db_file();
+pub enum SortDirection {
+    Ascending,
+    Descending,
+}
 
-    let mut stmt = conn.prepare("SELECT 
+pub enum ApplicationSortValue {
+    Duration,
+    Exe,
+}
+
+//TODO rename from WindowSegmentDTO
+pub fn query_app_usage(
+    start_time: i64, 
+    end_time: i64, 
+    sort_value: ApplicationSortValue, 
+    sort_direction: SortDirection
+) -> rusqlite::Result<Vec<AppUsageDTO>> {
+    let conn = connect_db_file();
+    
+    let sort_direction = match sort_direction {
+        SortDirection::Ascending => "ASC",
+        SortDirection::Descending => "DESC"
+    };
+    
+    let order_by_clause = match sort_value {
+        ApplicationSortValue::Duration => format!("ORDER BY duration {}, window_exe COLLATE NOCASE {}", sort_direction, sort_direction),
+        _ => format!("ORDER BY window_exe COLLATE NOCASE {}, duration {}", sort_direction, sort_direction)
+    };
+    
+    let init_stmt = "SELECT 
         window_exe, 
-        SUM(duration_ms) AS duration
+        SUM(duration_ms) AS duration,
+        COUNT(*) AS segment_count
     FROM window_segments
     WHERE start_time >= ?1 AND start_time < ?2
-    GROUP BY window_exe
-    ORDER BY duration DESC;")?;
+    GROUP BY window_exe";
+    
+    let stmt_str = format!("{} {}", init_stmt, order_by_clause);
+    
+    let mut stmt = conn.prepare(&stmt_str)?;
 
     let segment_iter = stmt.query_map(params![start_time, end_time], |row| {
-        Ok(WindowSegmentDTO {
+        Ok(AppUsageDTO {
             window_exe: row.get(0)?,
-            duration: row.get(1)?
+            duration: row.get(1)?,
+            segment_count: row.get(2)?
         })
     })?;
 

@@ -4,13 +4,14 @@ export interface UsageSummary {
 	exe_count: number;
 }
 
-export interface WindowSegment {
+export interface ApplicationUsage {
 	window_exe: string;
 	duration: number;
+	segment_count: number;
 }
 
 export interface TopUsage {
-	window_segments: WindowSegment[];
+	window_segments: ApplicationUsage[];
 	total_duration: number;
 	other_duration: number;
 }

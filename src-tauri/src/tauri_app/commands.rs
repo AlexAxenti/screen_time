@@ -1,12 +1,16 @@
 use crate::{
-    sql_client::reader::{query_top_usage, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage}, 
-    tauri_app::dtos::{DailyUsageDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO}
+    sql_client::reader::{ApplicationSortValue, SortDirection, query_app_usage, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage}, 
+    tauri_app::dtos::{DailyUsageDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, AppUsageDTO}
 };
 
-//TODO move logic to seperate file
+//TODO move logic to seperate file?
 #[tauri::command]
 pub fn get_top_usage(start_time: i64, end_time: i64, app_count: usize) -> TopUsageDTO {
-    let mut window_segments = query_top_usage(start_time, end_time).expect("Failed to read from DB");
+    
+    let sort_value = ApplicationSortValue::Duration;
+    let sort_direction = SortDirection::Descending;
+
+    let mut window_segments = query_app_usage(start_time, end_time, sort_value, sort_direction).expect("Failed to read from DB");
 
     let total_time: i64 = window_segments.iter()
         .map(|segment| segment.duration)
@@ -27,6 +31,33 @@ pub fn get_top_usage(start_time: i64, end_time: i64, app_count: usize) -> TopUsa
     };
 
     top_usage
+}
+
+#[tauri::command]
+pub fn get_applications(
+    start_time: i64, 
+    end_time: i64, 
+    sort_value: Option<String>, 
+    sort_direction: Option<String>
+) -> Vec<AppUsageDTO> {
+    let sort_value = sort_value.unwrap_or("window_exe".to_string());
+    let sort_direction = sort_direction.unwrap_or("ASC".to_string());
+    
+    let sort_value = if sort_value.eq_ignore_ascii_case("window_exe") {
+        ApplicationSortValue::Exe
+    } else {
+        ApplicationSortValue::Duration
+    };
+    
+    let sort_direction = if sort_direction.eq_ignore_ascii_case("ASC") {
+        SortDirection::Ascending
+    } else {
+        SortDirection::Descending
+    };
+    
+    let window_segments = query_app_usage(start_time, end_time, sort_value, sort_direction).expect("Failed to read from DB");
+    
+    window_segments
 }
 
 #[tauri::command]

@@ -81,6 +81,39 @@ const getTheme = (mode: PaletteMode) =>
 					},
 				},
 			},
+			MuiTooltip: {
+				styleOverrides: {
+					tooltip: {
+						backgroundColor:
+							mode === "dark" ? "#1a1a2e" : "#ffffff",
+						color: mode === "dark" ? "#ffffffde" : "#213547",
+						border: `1px solid ${
+							mode === "dark"
+								? "rgba(255, 255, 255, 0.12)"
+								: "rgba(0, 0, 0, 0.12)"
+						}`,
+						padding: "12px 16px",
+						fontSize: "0.875rem",
+						lineHeight: 1.5,
+						maxWidth: 300,
+						boxShadow:
+							mode === "dark"
+								? "0 4px 20px rgba(0, 0, 0, 0.4)"
+								: "0 4px 20px rgba(0, 0, 0, 0.15)",
+						borderRadius: 8,
+					},
+					arrow: {
+						color: mode === "dark" ? "#1a1a2e" : "#ffffff",
+						"&::before": {
+							border: `1px solid ${
+								mode === "dark"
+									? "rgba(255, 255, 255, 0.12)"
+									: "rgba(0, 0, 0, 0.12)"
+							}`,
+						},
+					},
+				},
+			},
 		},
 	});
 
