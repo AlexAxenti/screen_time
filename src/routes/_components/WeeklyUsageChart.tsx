@@ -141,7 +141,7 @@ const WeeklyUsageChart = ({
 							return (
 								<Cell
 									key={usage.dayLabel}
-									opacity={isSelected ? 1 : 0.35} // dim others
+									opacity={isSelected ? 1 : 0.35}
 									stroke={i === selectedIndex ? "#fff" : undefined}
 									strokeWidth={i === selectedIndex ? 2 : 0}
 								/>

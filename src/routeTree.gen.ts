@@ -15,7 +15,7 @@ const IndexRoute = IndexRouteImport.update({
 	id: "/",
 	path: "/",
 	getParentRoute: () => rootRouteImport,
-	// biome-ignore lint: biome-ignore
+	// biome-ignore lint: biome ignore
 } as any);
 
 export interface FileRoutesByFullPath {
