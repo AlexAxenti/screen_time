@@ -49,3 +49,6 @@ yarn-error.log*
 Thumbs.db
 
 todo.md
+
+# Src Tauri
+src-tauri/gen/

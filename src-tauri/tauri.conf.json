@@ -1,25 +1,23 @@
 {
-  "productName": "ScreenTime",
-  "version": "0.1.0",
-  "identifier": "com.screen_time.screen_time",
-  "build": {
-    "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
-    "frontendDist": "../dist"
-  },
-  "bundle": {
-    "active": true,
-    "targets": "all",
-    "icon": [
-      "icons/icon.png"
-    ]
-  },
-  "app": {
-    "withGlobalTauri": true,
-    "windows": [],
-    "security": {
-      "csp": null
-    }
-  }
+	"productName": "ScreenTime",
+	"version": "0.1.0",
+	"identifier": "com.screen_time.screen_time",
+	"build": {
+		"devUrl": "http://localhost:5173",
+		"beforeDevCommand": "npm run dev",
+		"beforeBuildCommand": "npm run build",
+		"frontendDist": "../dist"
+	},
+	"bundle": {
+		"active": true,
+		"targets": "all",
+		"icon": ["icons/icon.png"]
+	},
+	"app": {
+		"withGlobalTauri": true,
+		"windows": [],
+		"security": {
+			"csp": null
+		}
+	}
 }
