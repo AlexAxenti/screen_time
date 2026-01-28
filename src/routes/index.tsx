@@ -4,11 +4,11 @@ import "./index.css";
 import { useState } from "react";
 import DashboardCard from "../components/UI/DashboardCard";
 import { getWeekEndMs, getWeekStartMs } from "../lib/epochDayHelpers";
-import DashboardHeader from "./_components/DashboardHeader";
-import DashboardSummary from "./_components/DashboardSummary";
-import TopExesChart from "./_components/TopExesChart";
-import UsageFragmentationChart from "./_components/UsageFragmentationChart";
-import WeeklyUsageChart from "./_components/WeeklyUsageChart";
+import DashboardHeader from "./-components/DashboardHeader";
+import DashboardSummary from "./-components/DashboardSummary";
+import TopExesChart from "./-components/TopExesChart";
+import UsageFragmentationChart from "./-components/UsageFragmentationChart";
+import WeeklyUsageChart from "./-components/WeeklyUsageChart";
 
 export const Route = createFileRoute("/")({
 	component: Index,
