@@ -38,6 +38,7 @@ function DashboardSummary({
 				<SimpleDataCard
 					dataValue={usageSummary.segments_count - 1}
 					dataLabel="Focus Switches"
+					tooltip="Counts how often the active foreground application changed during tracked time."
 				/>
 
 				<SimpleDataCard
