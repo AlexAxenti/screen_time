@@ -4,25 +4,32 @@ const getTheme = (mode: PaletteMode) =>
 	createTheme({
 		palette: {
 			mode,
-			primary: {
-				main: mode === "dark" ? "#90caf9" : "#1976d2",
-			},
-			secondary: {
-				main: mode === "dark" ? "#ce93d8" : "#9c27b0",
-			},
+			// Clean consistency beneath
 			...(mode === "dark"
 				? {
+						primary: {
+							main: "#90caf9",
+						},
+						secondary: {
+							main: "#ce93d8",
+						},
 						background: {
 							default: "#1a1a2e",
 							paper: "#252540",
 						},
 						text: {
-							primary: "rgba(255, 255, 255, 0.87)",
+							primary: "#ffffffde",
 							secondary: "#90caf9",
 						},
 						divider: "rgba(255, 255, 255, 0.12)",
 					}
 				: {
+						primary: {
+							main: "#1976d2",
+						},
+						secondary: {
+							main: "#9c27b0",
+						},
 						background: {
 							default: "#f0f2f5",
 							paper: "#ffffff",
