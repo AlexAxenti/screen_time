@@ -5,8 +5,8 @@ import type { ApplicationUsage } from "../types/dto";
 const useGetApplications = (
 	startTime: number,
 	endTime: number,
-	sortValue?: string,
-	sortDirection?: string
+	sortValue?: "window_exe" | "duration",
+	sortDirection?: "ASC" | "DESC"
 ) => {
 	return useQuery({
 		queryKey: ["applications", startTime, endTime, sortValue, sortDirection],
