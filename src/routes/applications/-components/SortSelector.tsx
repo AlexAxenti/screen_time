@@ -1,10 +1,6 @@
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
-type SortOption =
-	| "name-asc"
-	| "name-desc"
-	| "duration-desc"
-	| "duration-asc";
+type SortOption = "name-asc" | "name-desc" | "duration-desc" | "duration-asc";
 
 const sortOptions: { value: SortOption; label: string }[] = [
 	{ value: "name-asc", label: "Application Name A-Z" },
@@ -39,7 +35,7 @@ const SortSelector = ({ value, onChange }: SortSelectorProps) => {
 };
 
 const parseSortOption = (
-	sortOption: SortOption
+	sortOption: SortOption,
 ): {
 	sortValue: "window_exe" | "duration";
 	sortDirection: "ASC" | "DESC";

@@ -22,4 +22,8 @@ const formatDateToYYYYMMDD = (date: Date): string => {
 	return date.toISOString().split("T")[0];
 };
 
-export { formatMsToHoursAndMinutes, formatMsToHoursOrMinutes, formatDateToYYYYMMDD };
+export {
+	formatMsToHoursAndMinutes,
+	formatMsToHoursOrMinutes,
+	formatDateToYYYYMMDD,
+};

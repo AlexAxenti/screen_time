@@ -84,8 +84,7 @@ const getTheme = (mode: PaletteMode) =>
 			MuiTooltip: {
 				styleOverrides: {
 					tooltip: {
-						backgroundColor:
-							mode === "dark" ? "#1a1a2e" : "#ffffff",
+						backgroundColor: mode === "dark" ? "#1a1a2e" : "#ffffff",
 						color: mode === "dark" ? "#ffffffde" : "#213547",
 						border: `1px solid ${
 							mode === "dark"

@@ -2,13 +2,13 @@ import { Box } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import PageHeader from "../../components/UI/PageHeader";
+import { formatDateToYYYYMMDD } from "../../lib/durationFormatHelpers";
 import { getEndOfDayMs, getStartOfDayMs } from "../../lib/epochDayHelpers";
 import useGetApplications from "../../queries/getApplications";
 import ApplicationsFilters from "./-components/ApplicationsFilters";
 import ApplicationsList from "./-components/ApplicationsList";
-import { type DateRangeOption } from "./-components/DateRangeSelector";
+import type { DateRangeOption } from "./-components/DateRangeSelector";
 import { parseSortOption, type SortOption } from "./-components/SortSelector";
-import { formatDateToYYYYMMDD } from "../../lib/durationFormatHelpers";
 
 export const Route = createFileRoute("/applications/")({
 	component: Index,
@@ -20,13 +20,13 @@ function Index() {
 	const [dateRangeOption, setDateRangeOption] =
 		useState<DateRangeOption>("last7days");
 	const [customStartDate, setCustomStartDate] = useState<string>(
-		formatDateToYYYYMMDD(new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000))
+		formatDateToYYYYMMDD(new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)),
 	);
 	const [customEndDate, setCustomEndDate] = useState<string>(
-		formatDateToYYYYMMDD(today)
+		formatDateToYYYYMMDD(today),
 	);
 
-  const { startTime, endTime } = useMemo(() => {
+	const { startTime, endTime } = useMemo(() => {
 		const nowMs = Date.now();
 		const todayStartMs = getStartOfDayMs(today);
 		const tomorrowMs = todayStartMs + 24 * 60 * 60 * 1000;
@@ -44,14 +44,16 @@ function Index() {
 			}
 			case "custom":
 				return {
-          startTime: getStartOfDayMs(new Date(customStartDate)),
+					startTime: getStartOfDayMs(new Date(customStartDate)),
 					endTime: getEndOfDayMs(new Date(customEndDate)),
 				};
 			default:
-				return { startTime: nowMs - 6 * 24 * 60 * 60 * 1000, endTime: tomorrowMs };
+				return {
+					startTime: nowMs - 6 * 24 * 60 * 60 * 1000,
+					endTime: tomorrowMs,
+				};
 		}
 	}, [dateRangeOption, customStartDate, customEndDate, today]);
-
 
 	const [sortOption, setSortOption] = useState<SortOption>("duration-desc");
 

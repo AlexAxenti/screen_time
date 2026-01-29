@@ -30,7 +30,7 @@ const getEndOfDayMs = (todayInput: Date): number => {
 	today.setHours(23, 59, 59, 999);
 
 	return today.getTime();
-}
+};
 
 const utcMidnightToLocalMidnight = (utcMidnightMs: number): number => {
 	const date = new Date(utcMidnightMs);

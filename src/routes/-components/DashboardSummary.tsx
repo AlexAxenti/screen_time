@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
-import TitledCard from "../../components/UI/TitledCard";
 import SimpleDataCard from "../../components/UI/SimpleDataCard";
+import TitledCard from "../../components/UI/TitledCard";
 import { formatMsToHoursAndMinutes } from "../../lib/durationFormatHelpers";
 import useGetUsageSummary from "../../queries/getUsageSummary";
 
