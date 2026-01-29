@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApplicationsIndexRouteImport } from './routes/applications/index'
+import { Route as ApplicationsExeIndexRouteImport } from './routes/applications/$exe/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const ApplicationsIndexRoute = ApplicationsIndexRouteImport.update({
   path: '/applications/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApplicationsExeIndexRoute = ApplicationsExeIndexRouteImport.update({
+  id: '/applications/$exe/',
+  path: '/applications/$exe/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/applications/': typeof ApplicationsIndexRoute
+  '/applications/$exe/': typeof ApplicationsExeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/applications': typeof ApplicationsIndexRoute
+  '/applications/$exe': typeof ApplicationsExeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/applications/': typeof ApplicationsIndexRoute
+  '/applications/$exe/': typeof ApplicationsExeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/applications/'
+  fullPaths: '/' | '/applications/' | '/applications/$exe/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/applications'
-  id: '__root__' | '/' | '/applications/'
+  to: '/' | '/applications' | '/applications/$exe'
+  id: '__root__' | '/' | '/applications/' | '/applications/$exe/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApplicationsIndexRoute: typeof ApplicationsIndexRoute
+  ApplicationsExeIndexRoute: typeof ApplicationsExeIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApplicationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/applications/$exe/': {
+      id: '/applications/$exe/'
+      path: '/applications/$exe'
+      fullPath: '/applications/$exe/'
+      preLoaderRoute: typeof ApplicationsExeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApplicationsIndexRoute: ApplicationsIndexRoute,
+  ApplicationsExeIndexRoute: ApplicationsExeIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

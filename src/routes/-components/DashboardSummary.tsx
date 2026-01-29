@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
-import DashboardCard from "../../components/UI/DashboardCard";
 import SimpleDataCard from "../../components/UI/SimpleDataCard";
-import { formatMsToHoursAndMinutes } from "../../lib/durationHelpers";
+import TitledCard from "../../components/UI/TitledCard";
+import { formatMsToHoursAndMinutes } from "../../lib/durationFormatHelpers";
 import useGetUsageSummary from "../../queries/getUsageSummary";
 
 interface DashboardSummaryProps {
@@ -20,7 +20,7 @@ function DashboardSummary({
 	if (!usageSummary) return null;
 
 	return (
-		<DashboardCard>
+		<TitledCard>
 			<Box
 				sx={{
 					display: "flex",
@@ -46,7 +46,7 @@ function DashboardSummary({
 					dataLabel="Unique Apps"
 				/>
 			</Box>
-		</DashboardCard>
+		</TitledCard>
 	);
 }
 

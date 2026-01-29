@@ -27,3 +27,7 @@ export interface WeeksDailyUsage {
 	segment_count: number;
 	exe_count: number;
 }
+
+export interface ApplicationTitles {
+	window_exe: string;
+}

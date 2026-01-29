@@ -10,7 +10,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import { formatMsToHoursOrMinutes } from "../../lib/durationHelpers";
+import { formatMsToHoursOrMinutes } from "../../lib/durationFormatHelpers";
 import { getStartOfDayMs } from "../../lib/epochDayHelpers";
 import useGetWeeksDailyUsage from "../../queries/getWeeksDailyUsage";
 
