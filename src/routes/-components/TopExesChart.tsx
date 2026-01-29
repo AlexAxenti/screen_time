@@ -7,7 +7,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import { formatMsToHoursOrMinutes } from "../../lib/durationHelpers";
+import { formatMsToHoursOrMinutes } from "../../lib/durationFormatHelpers";
 import useGetTopUsage from "../../queries/getTopUsage";
 
 const TOP_APP_COUNT = 7;

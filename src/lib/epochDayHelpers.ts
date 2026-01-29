@@ -25,6 +25,13 @@ const getStartOfDayMs = (todayInput: Date): number => {
 	return today.getTime();
 };
 
+const getEndOfDayMs = (todayInput: Date): number => {
+	const today: Date = new Date(todayInput);
+	today.setHours(23, 59, 59, 999);
+
+	return today.getTime();
+}
+
 const utcMidnightToLocalMidnight = (utcMidnightMs: number): number => {
 	const date = new Date(utcMidnightMs);
 
@@ -39,5 +46,6 @@ export {
 	getWeekStartMs,
 	getWeekEndMs,
 	getStartOfDayMs,
+	getEndOfDayMs,
 	utcMidnightToLocalMidnight,
 };

@@ -18,4 +18,8 @@ const formatMsToHoursOrMinutes = (ms: number) => {
 	}
 };
 
-export { formatMsToHoursAndMinutes, formatMsToHoursOrMinutes };
+const formatDateToYYYYMMDD = (date: Date): string => {
+	return date.toISOString().split("T")[0];
+};
+
+export { formatMsToHoursAndMinutes, formatMsToHoursOrMinutes, formatDateToYYYYMMDD };
