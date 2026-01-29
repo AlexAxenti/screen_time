@@ -167,7 +167,7 @@ pub fn query_app_titles(
     let mut stmt = conn.prepare("SELECT 
         DISTINCT window_exe
     FROM window_segments
-    WHERE window_exe LIKE '%?1%'
+    WHERE window_exe LIKE '%' || ?1 || '%'
     ORDER BY window_exe COLLATE NOCASE ASC
     LIMIT 6")?;
 

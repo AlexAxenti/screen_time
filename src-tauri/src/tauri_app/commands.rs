@@ -87,6 +87,13 @@ pub fn search_applications(query: String) -> Vec<AppTitlesDTO> {
     let app_titles = query_app_titles(query).expect("Failed to read from DB");
 
     app_titles
+    // let v = vec![
+    //     AppTitlesDTO {
+    //         window_exe: "test".to_string()
+    //     }
+    // ];
+
+    // v
 }
 
 #[tauri::command]
