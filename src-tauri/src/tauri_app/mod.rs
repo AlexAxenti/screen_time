@@ -17,7 +17,8 @@ pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>
             commands::get_usage_summary,
             commands::get_usage_fragmentation,
             commands::get_weeks_daily_usage,
-            commands::get_applications
+            commands::get_applications,
+            commands::search_applications
         ])
         .setup(|app| {
             let menu = MenuBuilder::new(app)

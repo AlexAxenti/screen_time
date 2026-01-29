@@ -8,6 +8,11 @@ pub struct AppUsageDTO {
 }
 
 #[derive(Serialize)]
+pub struct AppTitlesDTO {
+    pub window_exe: String
+}
+
+#[derive(Serialize)]
 pub struct TopUsageDTO {
     pub window_segments: Vec<AppUsageDTO>,
     pub other_duration: i64,

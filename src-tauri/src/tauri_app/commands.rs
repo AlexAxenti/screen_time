@@ -1,6 +1,21 @@
 use crate::{
-    sql_client::reader::{ApplicationSortValue, SortDirection, query_app_usage, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage}, 
-    tauri_app::dtos::{DailyUsageDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, AppUsageDTO}
+    sql_client::reader::{
+        ApplicationSortValue, 
+        SortDirection, 
+        query_app_titles, 
+        query_app_usage, 
+        query_usage_fragmentation, 
+        query_usage_summary, 
+        query_weeks_daily_usage
+    }, 
+    tauri_app::dtos::{
+        AppTitlesDTO, 
+        AppUsageDTO, 
+        DailyUsageDTO, 
+        TopUsageDTO, 
+        UsageFragmentationDTO, 
+        UsageSummaryDTO
+    }
 };
 
 //TODO move logic to seperate file?
@@ -65,6 +80,13 @@ pub fn get_usage_summary(start_time: i64, end_time: i64) -> UsageSummaryDTO {
     let usage_summary = query_usage_summary(start_time, end_time).expect("Failed to read from DB");
 
     usage_summary
+}
+
+#[tauri::command]
+pub fn search_applications(query: String) -> Vec<AppTitlesDTO> {
+    let app_titles = query_app_titles(query).expect("Failed to read from DB");
+
+    app_titles
 }
 
 #[tauri::command]

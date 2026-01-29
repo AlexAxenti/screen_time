@@ -1,7 +1,7 @@
 use rusqlite::{params};
 use crate::{
     sql_client::init::connect_db_file, 
-    tauri_app::dtos::{DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, AppUsageDTO}
+    tauri_app::dtos::{AppTitlesDTO, AppUsageDTO, DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO}
 };
 
 pub fn query_usage_summary(start_time: i64, end_time: i64) -> rusqlite::Result<UsageSummaryDTO> {
@@ -157,4 +157,30 @@ pub fn query_weeks_daily_usage(start_time: i64, end_time: i64) -> rusqlite::Resu
     }
 
     Ok(daily_usage)
+}
+
+pub fn query_app_titles(
+    query: String
+) -> rusqlite::Result<Vec<AppTitlesDTO>> {
+    let conn = connect_db_file();
+    
+    let mut stmt = conn.prepare("SELECT 
+        DISTINCT window_exe
+    FROM window_segments
+    WHERE window_exe LIKE '%?1%'
+    ORDER BY window_exe COLLATE NOCASE ASC
+    LIMIT 6")?;
+
+    let apps_iter = stmt.query_map(params![query], |row| {
+        Ok(AppTitlesDTO {
+            window_exe: row.get(0)?
+        })
+    })?;
+
+    let mut apps = Vec::new();
+    for app in apps_iter {
+        apps.push(app?);
+    }
+
+    Ok(apps)
 }
