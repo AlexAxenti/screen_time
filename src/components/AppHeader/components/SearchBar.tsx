@@ -1,16 +1,16 @@
-import { useState, useRef } from "react";
 import {
+	ClickAwayListener,
 	InputAdornment,
+	MenuItem,
+	MenuList,
+	Paper,
+	Popper,
 	TextField,
 	useTheme,
-	Paper,
-	MenuList,
-	MenuItem,
-	Popper,
-	ClickAwayListener,
 } from "@mui/material";
-import { FiSearch } from "react-icons/fi";
 import { useNavigate } from "@tanstack/react-router";
+import { useRef, useState } from "react";
+import { FiSearch } from "react-icons/fi";
 import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
 import useSearchApplications from "../../../queries/searchApplications";
 
@@ -43,7 +43,10 @@ const SearchBar = () => {
 	};
 
 	const showDropdown =
-		isOpen && debouncedSearch.length > 0 && applications && applications.length > 0;
+		isOpen &&
+		debouncedSearch.length > 0 &&
+		applications &&
+		applications.length > 0;
 
 	return (
 		<ClickAwayListener onClickAway={handleClose}>
@@ -112,7 +115,9 @@ const SearchBar = () => {
 							mt: 0.5,
 							borderRadius: 2,
 							overflow: "hidden",
-							minWidth: anchorRef.current ? anchorRef.current.offsetWidth - 48 : 280,
+							minWidth: anchorRef.current
+								? anchorRef.current.offsetWidth - 48
+								: 280,
 						}}
 					>
 						<MenuList dense>

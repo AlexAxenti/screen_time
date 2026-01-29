@@ -29,5 +29,5 @@ export interface WeeksDailyUsage {
 }
 
 export interface ApplicationTitles {
-  window_exe: string;
+	window_exe: string;
 }
