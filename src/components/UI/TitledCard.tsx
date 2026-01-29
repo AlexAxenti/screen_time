@@ -3,11 +3,12 @@ import type { ReactNode } from "react";
 
 interface DashboardCardProps {
 	title?: string;
+	headerAction?: ReactNode;
 	children: ReactNode;
 	sx?: object;
 }
 
-const DashboardCard = ({ title, children, sx }: DashboardCardProps) => {
+const DashboardCard = ({ title, headerAction, children, sx }: DashboardCardProps) => {
 	return (
 		<Card
 			elevation={0}
@@ -20,17 +21,32 @@ const DashboardCard = ({ title, children, sx }: DashboardCardProps) => {
 				...sx,
 			}}
 		>
-			{title && (
-				<Typography
-					variant="h5"
+			{(title || headerAction) && (
+				<Box
 					sx={{
+						display: "flex",
+						justifyContent: title ? "center" : "flex-end",
+						alignItems: "flex-end",
 						marginBottom: 2,
-						fontWeight: 500,
-						textAlign: "center",
+						position: "relative",
 					}}
 				>
-					{title}
-				</Typography>
+					{title && (
+						<Typography
+							variant="h5"
+							sx={{
+								fontWeight: 500,
+							}}
+						>
+							{title}
+						</Typography>
+					)}
+					{headerAction && (
+						<Box sx={{ position: "absolute", right: 0 }}>
+							{headerAction}
+						</Box>
+					)}
+				</Box>
 			)}
 			<Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
 				{children}

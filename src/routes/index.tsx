@@ -1,5 +1,5 @@
-import { Box } from "@mui/material";
-import { createFileRoute } from "@tanstack/react-router";
+import { Box, Link } from "@mui/material";
+import { createFileRoute, Link as RouterLink } from "@tanstack/react-router";
 import "./index.css";
 import { useState } from "react";
 import TitledCard from "../components/UI/TitledCard";
@@ -72,7 +72,18 @@ function Index() {
 					gap: 3,
 				}}
 			>
-				<TitledCard title="Top Applications Used">
+				<TitledCard
+					title="Top Applications Used"
+					headerAction={
+						<Link
+							component={RouterLink}
+							to="/applications"
+							sx={{ fontSize: "0.875rem" }}
+						>
+							See more
+						</Link>
+					}
+				>
 					<TopExesChart
 						startOfRangeMs={rangeStartMs}
 						endOfRangeMs={rangeEndMs}
