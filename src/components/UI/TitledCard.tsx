@@ -8,7 +8,12 @@ interface DashboardCardProps {
 	sx?: object;
 }
 
-const DashboardCard = ({ title, headerAction, children, sx }: DashboardCardProps) => {
+const DashboardCard = ({
+	title,
+	headerAction,
+	children,
+	sx,
+}: DashboardCardProps) => {
 	return (
 		<Card
 			elevation={0}
@@ -42,9 +47,7 @@ const DashboardCard = ({ title, headerAction, children, sx }: DashboardCardProps
 						</Typography>
 					)}
 					{headerAction && (
-						<Box sx={{ position: "absolute", right: 0 }}>
-							{headerAction}
-						</Box>
+						<Box sx={{ position: "absolute", right: 0 }}>{headerAction}</Box>
 					)}
 				</Box>
 			)}

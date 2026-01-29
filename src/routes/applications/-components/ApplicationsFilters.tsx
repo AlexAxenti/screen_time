@@ -1,6 +1,6 @@
 import { Box, Card } from "@mui/material";
-import DateRangeSelector, { type DateRangeOption } from "./DateRangeSelector";
 import ApplicationsSearch from "./ApplicationsSearch";
+import DateRangeSelector, { type DateRangeOption } from "./DateRangeSelector";
 import SortSelector, { type SortOption } from "./SortSelector";
 
 interface ApplicationsFiltersProps {
