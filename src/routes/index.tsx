@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import "./index.css";
 import { useState } from "react";
-import DashboardCard from "../components/UI/DashboardCard";
+import TitledCard from "../components/UI/TitledCard";
 import { getWeekEndMs, getWeekStartMs } from "../lib/epochDayHelpers";
 import DashboardHeader from "./-components/DashboardHeader";
 import DashboardSummary from "./-components/DashboardSummary";
@@ -51,13 +51,13 @@ function Index() {
 					marginBottom: 3,
 				}}
 			>
-				<DashboardCard title="Weekly Overview">
+				<TitledCard title="Weekly Overview">
 					<WeeklyUsageChart
 						epochStartOfWeekMs={weekStartMs}
 						epochEndOfWeekMs={weekEndMs}
 						handleSetRange={handleSetRange}
 					/>
-				</DashboardCard>
+				</TitledCard>
 				<DashboardSummary
 					startOfRangeMs={rangeStartMs}
 					endOfRangeMs={rangeEndMs}
@@ -72,18 +72,18 @@ function Index() {
 					gap: 3,
 				}}
 			>
-				<DashboardCard title="Top Applications Used">
+				<TitledCard title="Top Applications Used">
 					<TopExesChart
 						startOfRangeMs={rangeStartMs}
 						endOfRangeMs={rangeEndMs}
 					/>
-				</DashboardCard>
-				<DashboardCard title="Focus Time Blocks">
+				</TitledCard>
+				<TitledCard title="Focus Time Blocks">
 					<UsageFragmentationChart
 						startOfRangeMs={rangeStartMs}
 						endOfRangeMs={rangeEndMs}
 					/>
-				</DashboardCard>
+				</TitledCard>
 			</Box>
 		</Box>
 	);
