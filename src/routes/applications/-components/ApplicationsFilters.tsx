@@ -1,5 +1,6 @@
 import { Box, Card } from "@mui/material";
 import DateRangeSelector, { type DateRangeOption } from "./DateRangeSelector";
+import ApplicationsSearch from "./ApplicationsSearch";
 import SortSelector, { type SortOption } from "./SortSelector";
 
 interface ApplicationsFiltersProps {
@@ -9,6 +10,8 @@ interface ApplicationsFiltersProps {
 	customEndDate: string;
 	onCustomStartChange: (date: string) => void;
 	onCustomEndChange: (date: string) => void;
+	searchQuery: string;
+	onSearchChange: (query: string) => void;
 	sortOption: SortOption;
 	onSortChange: (option: SortOption) => void;
 }
@@ -20,6 +23,8 @@ const ApplicationsFilters = ({
 	customEndDate,
 	onCustomStartChange,
 	onCustomEndChange,
+	searchQuery,
+	onSearchChange,
 	sortOption,
 	onSortChange,
 }: ApplicationsFiltersProps) => {
@@ -48,7 +53,16 @@ const ApplicationsFilters = ({
 					onCustomStartChange={onCustomStartChange}
 					onCustomEndChange={onCustomEndChange}
 				/>
-				<SortSelector value={sortOption} onChange={onSortChange} />
+				<Box
+					sx={{
+						display: "flex",
+						alignItems: "center",
+						gap: 2,
+					}}
+				>
+					<ApplicationsSearch value={searchQuery} onChange={onSearchChange} />
+					<SortSelector value={sortOption} onChange={onSortChange} />
+				</Box>
 			</Box>
 		</Card>
 	);

@@ -56,6 +56,7 @@ function Index() {
 	}, [dateRangeOption, customStartDate, customEndDate, today]);
 
 	const [sortOption, setSortOption] = useState<SortOption>("duration-desc");
+	const [searchQuery, setSearchQuery] = useState<string>("");
 
 	const { sortValue, sortDirection } = parseSortOption(sortOption);
 
@@ -64,6 +65,16 @@ function Index() {
 		isLoading,
 		isError,
 	} = useGetApplications(startTime, endTime, sortValue, sortDirection);
+
+	const filteredApplications = useMemo(() => {
+		if (!applications || !searchQuery.trim()) {
+			return applications;
+		}
+		const query = searchQuery.toLowerCase().trim();
+		return applications.filter((app) =>
+			app.window_exe.toLowerCase().includes(query),
+		);
+	}, [applications, searchQuery]);
 
 	return (
 		<Box>
@@ -76,12 +87,14 @@ function Index() {
 				customEndDate={customEndDate}
 				onCustomStartChange={setCustomStartDate}
 				onCustomEndChange={setCustomEndDate}
+				searchQuery={searchQuery}
+				onSearchChange={setSearchQuery}
 				sortOption={sortOption}
 				onSortChange={setSortOption}
 			/>
 
 			<ApplicationsList
-				applications={applications}
+				applications={filteredApplications}
 				isLoading={isLoading}
 				isError={isError}
 			/>
