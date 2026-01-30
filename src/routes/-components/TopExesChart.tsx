@@ -73,7 +73,7 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
 						tickFormatter={(v) => truncate(String(v))}
 					/>
 					<Tooltip
-						labelFormatter={(label) => `Executable: ${String(label)}`}
+						labelFormatter={(label) => `Application: ${String(label)}`}
 						contentStyle={{ background: "#111", border: "1px solid #333" }}
 						labelStyle={{ color: "#fff" }}
 						itemStyle={{ color: "#fff" }}

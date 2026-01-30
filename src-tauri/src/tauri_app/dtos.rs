@@ -41,6 +41,7 @@ pub struct DailyUsageDTO {
     pub exe_count: i64
 }
 
+// TODO: move somewhere else better
 pub fn parse_window_title_name(app_name: &str, fall_back: &str) -> String {
     let name_parts: Vec<&str> = app_name.split('-').collect();
 

@@ -13,7 +13,7 @@ const ApplicationsListHeader = () => {
 			>
 				<Box sx={{ flex: 1 }}>
 					<Typography variant="body2" sx={{ color: "text.secondary" }}>
-						Executable
+						Application
 					</Typography>
 				</Box>
 
