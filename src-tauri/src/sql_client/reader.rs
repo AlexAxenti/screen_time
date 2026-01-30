@@ -68,10 +68,15 @@ pub fn query_app_usage(
     let mut stmt = conn.prepare(&stmt_str)?;
 
     let segment_iter = stmt.query_map(params![start_time, end_time], |row| {
+        let window_exe: String = row.get(0)?;
+        let window_name: String = row.get(1)?;
+
+        let display_name = parse_window_title_name(&window_name, &window_exe);
+
         Ok(AppUsageDTO {
-            app_info: AppInfoDTO { 
-                app_exe: row.get(0)?, 
-                display_name: parse_window_title_name(row.get(1)?)
+            app_info: AppInfoDTO {
+                app_exe: window_exe,
+                display_name: display_name
             },
             duration: row.get(2)?,
             segment_count: row.get(3)?
@@ -177,9 +182,14 @@ pub fn query_app_titles(
     LIMIT 6;")?;
 
     let apps_iter = stmt.query_map(params![query], |row| {
+        let window_exe: String = row.get(0)?;
+        let window_name: String = row.get(1)?;
+
+        let display_name = parse_window_title_name(&window_name, &window_exe);
+
         Ok(AppInfoDTO {
-            app_exe: row.get(0)?,
-            display_name: parse_window_title_name(row.get(1)?)
+            app_exe: window_exe,
+            display_name: display_name
         })
     })?;
 
