@@ -1,7 +1,7 @@
 use rusqlite::{params};
 use crate::{
     sql_client::init::connect_db_file, 
-    tauri_app::dtos::{AppTitlesDTO, AppUsageDTO, DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO}
+    tauri_app::dtos::{AppInfoDTO, AppUsageDTO, DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, parse_window_title_name}
 };
 
 pub fn query_usage_summary(start_time: i64, end_time: i64) -> rusqlite::Result<UsageSummaryDTO> {
@@ -56,6 +56,7 @@ pub fn query_app_usage(
     
     let init_stmt = "SELECT 
         window_exe, 
+        MIN(window_name) AS window_name,
         SUM(duration_ms) AS duration,
         COUNT(*) AS segment_count
     FROM window_segments
@@ -67,10 +68,18 @@ pub fn query_app_usage(
     let mut stmt = conn.prepare(&stmt_str)?;
 
     let segment_iter = stmt.query_map(params![start_time, end_time], |row| {
+        let window_exe: String = row.get(0)?;
+        let window_name: String = row.get(1)?;
+
+        let display_name = parse_window_title_name(&window_name, &window_exe);
+
         Ok(AppUsageDTO {
-            window_exe: row.get(0)?,
-            duration: row.get(1)?,
-            segment_count: row.get(2)?
+            app_info: AppInfoDTO {
+                app_exe: window_exe,
+                display_name: display_name
+            },
+            duration: row.get(2)?,
+            segment_count: row.get(3)?
         })
     })?;
 
@@ -127,18 +136,17 @@ pub fn query_weeks_daily_usage(start_time: i64, end_time: i64) -> rusqlite::Resu
     let conn = connect_db_file();
 
     let mut stmt = conn.prepare("SELECT
-    date(start_time / 1000, 'unixepoch', 'localtime') AS day,
-    CAST(strftime('%s', date(start_time / 1000, 'unixepoch', 'localtime')) AS INTEGER) * 1000
-        AS day_start_ms,
-
-    SUM(duration_ms) AS total_duration_ms,
+        date(start_time / 1000, 'unixepoch', 'localtime') AS day,
+        CAST(strftime('%s', date(start_time / 1000, 'unixepoch', 'localtime')) AS INTEGER) * 1000
+            AS day_start_ms,
+        SUM(duration_ms) AS total_duration_ms,
     COUNT(*) AS segment_count,
     COUNT(DISTINCT window_exe) AS unique_exes
     FROM window_segments
     WHERE start_time >= ?1
-    AND start_time <  ?2
-    AND duration_ms IS NOT NULL
-    AND duration_ms > 0
+        AND start_time <  ?2
+        AND duration_ms IS NOT NULL
+        AND duration_ms > 0
     GROUP BY day
     ORDER BY day;")?;
 
@@ -161,19 +169,27 @@ pub fn query_weeks_daily_usage(start_time: i64, end_time: i64) -> rusqlite::Resu
 
 pub fn query_app_titles(
     query: String
-) -> rusqlite::Result<Vec<AppTitlesDTO>> {
+) -> rusqlite::Result<Vec<AppInfoDTO>> {
     let conn = connect_db_file();
     
-    let mut stmt = conn.prepare("SELECT 
-        DISTINCT window_exe
+    let mut stmt = conn.prepare("SELECT
+        window_exe,
+        MIN(window_name) AS window_name
     FROM window_segments
-    WHERE window_exe LIKE '%' || ?1 || '%'
-    ORDER BY window_exe COLLATE NOCASE ASC
-    LIMIT 6")?;
+    WHERE window_name LIKE '%' || ?1 || '%'
+    GROUP BY window_exe
+    ORDER BY COUNT(*) DESC
+    LIMIT 6;")?;
 
     let apps_iter = stmt.query_map(params![query], |row| {
-        Ok(AppTitlesDTO {
-            window_exe: row.get(0)?
+        let window_exe: String = row.get(0)?;
+        let window_name: String = row.get(1)?;
+
+        let display_name = parse_window_title_name(&window_name, &window_exe);
+
+        Ok(AppInfoDTO {
+            app_exe: window_exe,
+            display_name: display_name
         })
     })?;
 

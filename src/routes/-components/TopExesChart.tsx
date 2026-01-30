@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+import { useNavigate } from "@tanstack/react-router";
 import {
 	Bar,
 	BarChart,
@@ -18,6 +19,7 @@ interface TopExesChartProps {
 }
 
 const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
+	const navigate = useNavigate();
 	const { data: topUsage } = useGetTopUsage(
 		startOfRangeMs,
 		endOfRangeMs,
@@ -26,6 +28,15 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
 
 	const truncate = (s: string, n = 12) =>
 		s.length > n ? `${s.slice(0, n - 1)}…` : s;
+
+	const handleBarClick = (window_exe: string) => {
+		if (window_exe) {
+			navigate({
+				to: "/applications/$exe",
+				params: { exe: window_exe },
+			});
+		}
+	};
 
 	return (
 		<Box sx={{ width: "100%", height: "300px" }}>
@@ -40,6 +51,16 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
 						left: 0,
 						bottom: 5,
 					}}
+					onClick={(e) => {
+						const idx = e?.activeTooltipIndex;
+						if (idx === null || idx === undefined) return;
+
+						let selectedSegment = topUsage?.window_segments[Number(idx)];
+
+						if (!selectedSegment) return;
+
+						handleBarClick(selectedSegment.app_info.app_exe);
+					}}
 				>
 					<XAxis
 						type="number"
@@ -47,12 +68,12 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
 					/>
 					<YAxis
 						type="category"
-						dataKey="window_exe"
+						dataKey="app_info.display_name"
 						width={120}
 						tickFormatter={(v) => truncate(String(v))}
 					/>
 					<Tooltip
-						labelFormatter={(label) => `Executable: ${String(label)}`}
+						labelFormatter={(label) => `Application: ${String(label)}`}
 						contentStyle={{ background: "#111", border: "1px solid #333" }}
 						labelStyle={{ color: "#fff" }}
 						itemStyle={{ color: "#fff" }}
@@ -61,7 +82,12 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
 							"Duration",
 						]}
 					/>
-					<Bar dataKey="duration" fill="#1976d2" radius={[0, 10, 10, 0]} />
+					<Bar
+						dataKey="duration"
+						fill="#1976d2"
+						radius={[0, 10, 10, 0]}
+						cursor="pointer"
+					/>
 				</BarChart>
 			</ResponsiveContainer>
 		</Box>

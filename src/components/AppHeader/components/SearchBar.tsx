@@ -21,7 +21,7 @@ const SearchBar = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const anchorRef = useRef<HTMLDivElement>(null);
 
-	const debouncedSearch = useDebouncedValue(searchValue, 300);
+	const debouncedSearch = useDebouncedValue(searchValue, 250);
 	const { data: applications } = useSearchApplications(debouncedSearch);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +52,7 @@ const SearchBar = () => {
 		<ClickAwayListener onClickAway={handleClose}>
 			<div ref={anchorRef}>
 				<TextField
-					placeholder="Search..."
+					placeholder="Search applications..."
 					size="small"
 					value={searchValue}
 					onChange={handleInputChange}
@@ -123,14 +123,14 @@ const SearchBar = () => {
 						<MenuList dense>
 							{applications?.map((app) => (
 								<MenuItem
-									key={app.window_exe}
-									onClick={() => handleSelect(app.window_exe)}
+									key={app.app_exe}
+									onClick={() => handleSelect(app.app_exe)}
 									sx={{
 										fontSize: "0.875rem",
 										py: 1,
 									}}
 								>
-									{app.window_exe}
+									{app.display_name}
 								</MenuItem>
 							))}
 						</MenuList>
