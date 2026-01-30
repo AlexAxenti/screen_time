@@ -59,7 +59,7 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
 
 						if (!selectedSegment) return;
 
-						handleBarClick(selectedSegment.window_exe);
+						handleBarClick(selectedSegment.app_info.app_exe);
 					}}
 				>
 					<XAxis
@@ -68,7 +68,7 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
 					/>
 					<YAxis
 						type="category"
-						dataKey="window_exe"
+						dataKey="app_info.display_name"
 						width={120}
 						tickFormatter={(v) => truncate(String(v))}
 					/>

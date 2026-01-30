@@ -3,14 +3,16 @@ import { Link } from "@tanstack/react-router";
 import { formatMsToHoursOrMinutes } from "../../../lib/durationFormatHelpers";
 
 interface ApplicationCardProps {
-	name: string;
+	exe: string;
+	displayName: string;
 	segmentCount: number;
 	duration: number;
 	durationPercent: number;
 }
 
 const ApplicationCard = ({
-	name,
+	exe,
+	displayName,
 	segmentCount,
 	duration,
 	durationPercent,
@@ -18,7 +20,7 @@ const ApplicationCard = ({
 	return (
 		<Link
 			to="/applications/$exe"
-			params={{ exe: name }}
+			params={{ exe: exe }}
 			style={{
 				textDecoration: "none",
 			}}
@@ -52,7 +54,7 @@ const ApplicationCard = ({
 							whiteSpace: "nowrap",
 						}}
 					>
-						{name}
+						{displayName || exe}
 					</Typography>
 				</Box>
 

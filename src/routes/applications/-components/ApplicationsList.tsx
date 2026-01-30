@@ -75,8 +75,9 @@ const ApplicationsList = ({
 
 				return (
 					<ApplicationCard
-						key={app.window_exe}
-						name={app.window_exe}
+						key={app.app_info.app_exe}
+						exe={app.app_info.app_exe}
+						displayName={app.app_info.display_name}
 						segmentCount={app.segment_count}
 						duration={app.duration}
 						durationPercent={durationPercent}

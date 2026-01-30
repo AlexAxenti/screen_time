@@ -9,12 +9,7 @@ use crate::{
         query_weeks_daily_usage
     }, 
     tauri_app::dtos::{
-        AppTitlesDTO, 
-        AppUsageDTO, 
-        DailyUsageDTO, 
-        TopUsageDTO, 
-        UsageFragmentationDTO, 
-        UsageSummaryDTO
+        AppInfoDTO, AppUsageDTO, DailyUsageDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
     }
 };
 
@@ -83,17 +78,10 @@ pub fn get_usage_summary(start_time: i64, end_time: i64) -> UsageSummaryDTO {
 }
 
 #[tauri::command]
-pub fn search_applications(query: String) -> Vec<AppTitlesDTO> {
+pub fn search_applications(query: String) -> Vec<AppInfoDTO> {
     let app_titles = query_app_titles(query).expect("Failed to read from DB");
 
     app_titles
-    // let v = vec![
-    //     AppTitlesDTO {
-    //         window_exe: "test".to_string()
-    //     }
-    // ];
-
-    // v
 }
 
 #[tauri::command]

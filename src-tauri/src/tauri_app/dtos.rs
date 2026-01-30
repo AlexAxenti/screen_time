@@ -1,15 +1,16 @@
 use serde::Serialize;
 
 #[derive(Serialize)]
-pub struct AppUsageDTO {
-    pub window_exe: String,
-    pub duration: i64,
-    pub segment_count: i64,
+pub struct AppInfoDTO {
+    pub app_exe: String,
+    pub display_name: String
 }
 
 #[derive(Serialize)]
-pub struct AppTitlesDTO {
-    pub window_exe: String
+pub struct AppUsageDTO {
+    pub app_info: AppInfoDTO,
+    pub duration: i64,
+    pub segment_count: i64,
 }
 
 #[derive(Serialize)]
@@ -38,4 +39,14 @@ pub struct DailyUsageDTO {
     pub total_duration_ms: i64,
     pub segment_count: i64,
     pub exe_count: i64
+}
+
+pub fn parse_window_title_name(app_name: String) -> String {
+    let name_parts: Vec<&str> = app_name.split('-').collect();
+
+    let real_name = name_parts[name_parts.len() - 1];
+
+    let real_name = real_name.to_string();
+
+    real_name
 }

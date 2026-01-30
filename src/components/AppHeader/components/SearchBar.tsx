@@ -123,14 +123,14 @@ const SearchBar = () => {
 						<MenuList dense>
 							{applications?.map((app) => (
 								<MenuItem
-									key={app.window_exe}
-									onClick={() => handleSelect(app.window_exe)}
+									key={app.app_exe}
+									onClick={() => handleSelect(app.app_exe)}
 									sx={{
 										fontSize: "0.875rem",
 										py: 1,
 									}}
 								>
-									{app.window_exe}
+									{app.display_name}
 								</MenuItem>
 							))}
 						</MenuList>
