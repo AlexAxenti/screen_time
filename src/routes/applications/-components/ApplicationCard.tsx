@@ -66,12 +66,6 @@ const ApplicationCard = ({
 				>
 					<Box sx={{ textAlign: "center", minWidth: 80 }}>
 						<Typography
-							variant="body2"
-							sx={{ color: "text.secondary", fontSize: "0.75rem" }}
-						>
-							Segments
-						</Typography>
-						<Typography
 							variant="body1"
 							sx={{ fontWeight: 500, color: "text.primary" }}
 						>
@@ -81,12 +75,6 @@ const ApplicationCard = ({
 
 					<Box sx={{ textAlign: "center", minWidth: 80 }}>
 						<Typography
-							variant="body2"
-							sx={{ color: "text.secondary", fontSize: "0.75rem" }}
-						>
-							Duration
-						</Typography>
-						<Typography
 							variant="body1"
 							sx={{ fontWeight: 500, color: "text.primary" }}
 						>
@@ -95,12 +83,6 @@ const ApplicationCard = ({
 					</Box>
 
 					<Box sx={{ textAlign: "center", minWidth: 80 }}>
-						<Typography
-							variant="body2"
-							sx={{ color: "text.secondary", fontSize: "0.75rem" }}
-						>
-							% of Total
-						</Typography>
 						<Typography
 							variant="body1"
 							sx={{ fontWeight: 500, color: "primary.main" }}

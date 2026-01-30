@@ -1,6 +1,7 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import type { ApplicationUsage } from "../../../types/dto";
 import ApplicationCard from "./ApplicationCard";
+import ApplicationsListHeader from "./ApplicationsListHeader";
 
 interface ApplicationsListProps {
 	applications: ApplicationUsage[] | undefined;
@@ -67,6 +68,7 @@ const ApplicationsList = ({
 
 	return (
 		<Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+			<ApplicationsListHeader />
 			{applications.map((app) => {
 				const durationPercent =
 					totalDuration > 0 ? (app.duration / totalDuration) * 100 : 0;
