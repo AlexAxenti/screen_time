@@ -21,7 +21,7 @@ const SearchBar = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const anchorRef = useRef<HTMLDivElement>(null);
 
-	const debouncedSearch = useDebouncedValue(searchValue, 300);
+	const debouncedSearch = useDebouncedValue(searchValue, 250);
 	const { data: applications } = useSearchApplications(debouncedSearch);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +52,7 @@ const SearchBar = () => {
 		<ClickAwayListener onClickAway={handleClose}>
 			<div ref={anchorRef}>
 				<TextField
-					placeholder="Search..."
+					placeholder="Search applications..."
 					size="small"
 					value={searchValue}
 					onChange={handleInputChange}
