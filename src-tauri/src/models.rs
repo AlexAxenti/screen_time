@@ -1,6 +1,7 @@
 use std::time::{Duration, SystemTime};
 
 pub struct WindowSegment {
+    pub app_id: String,
     pub window_name: String,
     pub window_exe: String,
     pub focus_start_time: SystemTime,
@@ -8,8 +9,9 @@ pub struct WindowSegment {
 }
 
 impl WindowSegment {
-    pub fn new(window_name: String, window_exe: String, focus_start_time: SystemTime) -> WindowSegment {
+    pub fn new(app_id:String, window_name: String, window_exe: String, focus_start_time: SystemTime) -> WindowSegment {
         Self {
+            app_id,
             window_name,
             window_exe,
             focus_start_time,

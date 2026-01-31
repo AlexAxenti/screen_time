@@ -33,6 +33,7 @@ fn save_segment_to_db(segment: WindowSegment, db_connection: &Connection) {
     let duration_ms = segment.duration().unwrap().as_millis() as i64;
 
     db_connection.execute("INSERT INTO window_segments (
+        app_id,
         window_name,
         window_exe,
         start_time,
@@ -40,8 +41,9 @@ fn save_segment_to_db(segment: WindowSegment, db_connection: &Connection) {
         duration_ms,
         created_at
     ) 
-    VALUES (?1, ?2, ?3, ?4, ?5, ?6)", 
+    VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)", 
     params![
+        &segment.app_id,
         &segment.window_name, 
         &segment.window_exe,
         start_int, 

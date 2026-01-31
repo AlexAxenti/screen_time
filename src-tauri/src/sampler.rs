@@ -1,5 +1,5 @@
 use std::{
-    path::Path, sync::mpsc::{Receiver, Sender}, thread::sleep, time::{Duration, SystemTime}
+    collections::HashSet, path::Path, sync::mpsc::{Receiver, Sender}, thread::sleep, time::{Duration, SystemTime}
 };
 
 use windows::core::PWSTR;
@@ -22,6 +22,7 @@ const IDLE_DURATION: u64 = 120000;
 pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg>) {
     let mut main_segment: Option<WindowSegment> = None;
     let mut running= true;
+    let mut applications_found: HashSet<String> = HashSet::new();
 
     loop {
         sleep(Duration::from_millis(500));
@@ -57,18 +58,33 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
         }
 
         // Sample foreground
-        let Some((window_name, window_exe)) = sample_foreground() else {
+        let Some((window_name, window_exe_path)) = sample_foreground() else {
             continue;
         };
 
-        let window_exe = get_exe_name_from_path(&window_exe).to_lowercase();
+        let hash = blake3::hash(window_exe_path.as_bytes());
+
+        let full_bytes = hash.as_bytes();
+        let truncated = &full_bytes[..16];
+        let app_id = hex::encode(truncated);
+
+        if !applications_found.contains(&app_id) {
+            println!("Found {:?}", app_id);
+            applications_found.insert(app_id.clone());
+        }
+
+        let window_exe = get_exe_name_from_path(&window_exe_path).to_lowercase();
 
         // Check if unfocused/empty explorer
         // TODO change from unfocused to ignore list or something
         let is_unfocused = is_unfocused(&window_exe);
 
         // Construct sampled segment
-        let sampled_segment = WindowSegment::new(window_name, window_exe, sample_start_time);        
+        let sampled_segment = WindowSegment::new(
+            app_id,
+            window_name,
+            window_exe,
+            sample_start_time);        
 
         // Update state
         update_state(&mut main_segment, sampled_segment, is_unfocused, sample_start_time, &tx_segments);
@@ -156,7 +172,7 @@ fn update_state(
     } else {
         let same_exe = main_segment
             .as_ref()
-            .map(|seg| seg.window_exe == sampled_segment.window_exe)
+            .map(|seg| seg.app_id == sampled_segment.app_id)
             .unwrap_or(false);
 
         if is_unfocused {
@@ -173,6 +189,7 @@ fn update_state(
     }
 }
 
+// TODO reuse path -> name function
 fn is_unfocused(exe_path: &str) -> bool {
     let exe_path = Path::new(&exe_path);
 
