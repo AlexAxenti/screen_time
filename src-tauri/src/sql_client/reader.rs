@@ -4,6 +4,16 @@ use crate::{
     tauri_app::dtos::{AppInfoDTO, AppUsageDTO, DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, parse_window_title_name}
 };
 
+pub enum SortDirection {
+    Ascending,
+    Descending,
+}
+
+pub enum ApplicationSortValue {
+    Duration,
+    Exe,
+}
+
 pub fn query_usage_summary(start_time: i64, end_time: i64) -> rusqlite::Result<UsageSummaryDTO> {
     let conn = connect_db_file();
 
@@ -23,16 +33,6 @@ pub fn query_usage_summary(start_time: i64, end_time: i64) -> rusqlite::Result<U
     });
 
     summary
-}
-
-pub enum SortDirection {
-    Ascending,
-    Descending,
-}
-
-pub enum ApplicationSortValue {
-    Duration,
-    Exe,
 }
 
 //TODO rename from WindowSegmentDTO
