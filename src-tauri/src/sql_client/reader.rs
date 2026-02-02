@@ -1,4 +1,4 @@
-use rusqlite::{params};
+use rusqlite::{OptionalExtension, params};
 use crate::{
     sql_client::init::connect_db_file, 
     tauri_app::dtos::{AppInfoDTO, AppUsageDTO, DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, parse_window_title_name}
@@ -199,4 +199,19 @@ pub fn query_app_titles(
     }
 
     Ok(apps)
+}
+
+pub fn check_for_application(app_id: &str) -> rusqlite::Result<bool> {
+    let conn = connect_db_file();
+
+    let mut stmt = conn.prepare("SELECT 1 FROM applications
+    WHERE app_id = ?1 LIMIT 1")?;
+
+    let exists = stmt.query_row(params![app_id], |_| {
+        Ok(())
+    })
+    .optional()?
+    .is_some();
+
+   Ok(exists)
 }

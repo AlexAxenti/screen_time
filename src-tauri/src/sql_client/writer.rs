@@ -1,7 +1,8 @@
 use std::{sync::mpsc::Receiver, time::{SystemTime, UNIX_EPOCH}};
-use crate::{WindowSegment};
+use crate::{WindowSegment, sql_client::init::connect_db_file};
 use rusqlite::{Connection, params};
 
+//TODO error handling
 pub fn run_writer_loop(rx_segments: Receiver<WindowSegment>, db_connection: &Connection) {
     while let Ok(segment) = rx_segments.recv() {
         save_segment_to_db(segment, db_connection);
@@ -15,6 +16,7 @@ fn save_segment_to_db(segment: WindowSegment, db_connection: &Connection) {
         segment.duration()
     );
 
+    //TODO create helpers for below
     let epoch_start_time = segment
         .focus_start_time
         .duration_since(UNIX_EPOCH)
@@ -52,3 +54,27 @@ fn save_segment_to_db(segment: WindowSegment, db_connection: &Connection) {
         SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as i64
     ]).expect("Failed to write!");
 }
+
+pub fn save_application_to_db(app_id: &str, exe_path: &str, exe_name: &str, display_name: &str) {
+    let created_at = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as i64;
+
+    let conn = connect_db_file();
+
+    conn.execute("INSERT INTO applications(
+        app_id,
+        exe_path,
+        exe_name,
+        display_name,
+        created_at,
+        last_updated
+    )
+    VALUES(?1, ?2, ?3, ?4, ?5, ?6)", 
+    params![
+        app_id,
+        exe_path, 
+        exe_name,
+        display_name, 
+        created_at, 
+        created_at,
+    ]).expect("Failed to write!");
+} 

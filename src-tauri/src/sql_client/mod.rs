@@ -1,5 +1,5 @@
 pub mod reader;
-mod writer;
+pub mod writer;
 mod init;
 
 use std::sync::mpsc::Receiver;

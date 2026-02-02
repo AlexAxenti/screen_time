@@ -15,7 +15,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
 use windows::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
 use windows::Win32::System::SystemInformation::GetTickCount64;
 
-use crate::{ControlMsg, WindowSegment};
+use crate::{ControlMsg, WindowSegment, sql_client::{reader::check_for_application, writer::save_application_to_db}};
 
 const IDLE_DURATION: u64 = 120000;
 
@@ -62,6 +62,9 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
             continue;
         };
 
+        let window_exe = get_exe_name_from_path(&window_exe_path).to_lowercase();
+
+        // Hash window exe for app id key
         let hash = blake3::hash(window_exe_path.as_bytes());
 
         let full_bytes = hash.as_bytes();
@@ -70,10 +73,14 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
 
         if !applications_found.contains(&app_id) {
             println!("Found {:?}", app_id);
-            applications_found.insert(app_id.clone());
-        }
+            let app_exists = check_for_application(&app_id).expect("Failed to check if app exists");
 
-        let window_exe = get_exe_name_from_path(&window_exe_path).to_lowercase();
+            // If not exists, write to db
+            if !app_exists {
+                save_application_to_db(&app_id, &window_exe_path, &window_exe, &window_exe);
+                applications_found.insert(app_id.clone());
+            }
+        }
 
         // Check if unfocused/empty explorer
         // TODO change from unfocused to ignore list or something
