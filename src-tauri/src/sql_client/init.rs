@@ -3,6 +3,7 @@ use directories_next::ProjectDirs;
 use rusqlite::Connection;
 
 pub fn connect_db_file() -> Connection {
+    //TODO Create reusable method for getting local dir
     let proj_dir = ProjectDirs::from("com", "screen_time", "screen_time")
         .expect("Failed to connect to db file");
 
