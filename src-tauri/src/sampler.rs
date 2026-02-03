@@ -2,7 +2,8 @@ use std::{
     collections::HashSet, path::Path, sync::mpsc::{Receiver, Sender}, thread::sleep, time::{Duration, SystemTime}
 };
 
-use windows::{Win32::Storage::FileSystem::{GetFileVersionInfoSizeW, GetFileVersionInfoW, VerQueryValueW}, core::{BOOL, PWSTR}};
+use directories_next::ProjectDirs;
+use windows::{Win32::Storage::FileSystem::{FILE_ATTRIBUTE_NORMAL, GetFileVersionInfoSizeW, GetFileVersionInfoW, VerQueryValueW}, core::{BOOL, PWSTR}};
 use windows::Win32::Foundation::CloseHandle; 
 use windows::Win32::System::Threading::{
     OpenProcess, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION, 
@@ -75,15 +76,33 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
             println!("Found {:?}", app_id);
             let app_exists = check_for_application(&app_id).expect("Failed to check if app exists");
 
-            let display_name = get_exe_display_name_from_version_info(&window_exe_path)
-                .expect("Failed to get exe display name")
-                .unwrap_or(window_exe.clone());
-
-            println!("App display name found: {}", display_name);
-
             // If not exists, write to db
             if !app_exists {
-                save_application_to_db(&app_id, &window_exe_path, &window_exe, &window_exe);
+                let display_name = get_exe_display_name_from_version_info(&window_exe_path)
+                    .expect("Failed to get exe display name")
+                    .unwrap_or(window_exe.clone());
+
+                let proj_dir = ProjectDirs::from("com", "screen_time", "screen_time")
+                    .expect("Failed to connect to db file");
+
+                let app_data_dir = proj_dir.data_local_dir();
+
+                let icons_dir = app_data_dir.join("icons");
+
+                let created_icon = ensure_icon_png_from_exe(
+                    &icons_dir, 
+                    &app_id, 
+                    &window_exe_path, 
+                    48
+                );
+
+                if created_icon.is_err() {
+                    println!("Ayo icon errored");
+                }
+
+                println!("App display name found: {}", display_name);
+
+                save_application_to_db(&app_id, &window_exe_path, &window_exe, &display_name);
             }
             applications_found.insert(app_id.clone());
         }
@@ -257,6 +276,7 @@ fn get_exe_name_from_path(exe_path: &str) -> String {
 }
 
 //TODO clean up
+// Temp code for getting display name
 use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
 
@@ -383,4 +403,232 @@ pub fn get_exe_display_name_from_version_info(exe_path: &str) -> windows::core::
     }
 
     Ok(None)
+}
+
+// TODO Clean up
+//Temp extract icons code
+use std::fs;
+use std::path::{PathBuf};
+
+use windows::core::{Result as WinResult};
+use windows::Win32::Graphics::Gdi::*;
+use windows::Win32::UI::Shell::*;
+use windows::Win32::UI::WindowsAndMessaging::*;
+
+// ---- small helpers ----
+
+fn icon_out_path(icons_dir: &Path, app_id: &str) -> PathBuf {
+    icons_dir.join(format!("{app_id}.png"))
+}
+
+// ---- main entrypoint ----
+
+/// Ensures `<icons_dir>/<app_id>.png` exists. If it's already there, does nothing.
+/// Returns:
+/// - Ok(Some(path)) if the icon already existed or was created
+/// - Ok(None) if extraction failed (caller should use placeholder icon)
+pub fn ensure_icon_png_from_exe(
+    icons_dir: &Path,
+    app_id: &str,
+    exe_path: &str,
+    size_px: i32, // use 48 for your V1
+) -> WinResult<Option<PathBuf>> {
+    fs::create_dir_all(icons_dir).expect("Failed to create icons dir");
+
+    let out_path = icon_out_path(icons_dir, app_id);
+
+    // 1) Cache hit: if it exists, we're done
+    if out_path.exists() {
+        return Ok(Some(out_path));
+    }
+
+    // 2) Extract an HICON (Option A: from exe path)
+    let hicon = match extract_hicon_from_exe_path(exe_path) {
+        Some(h) => h,
+        None => return Ok(None),
+    };
+
+    // 3) Render HICON -> RGBA buffer at requested size
+    let rgba = match render_hicon_to_rgba(hicon, size_px, size_px) {
+        Some(buf) => buf,
+        None => {
+            unsafe { let _ = DestroyIcon(hicon); };
+            return Ok(None);
+        }
+    };
+
+    // Always destroy the icon handle we acquired.
+    unsafe { let _ = DestroyIcon(hicon); };
+
+    // 4) Write to PNG on disk
+    // (Use atomic write to avoid partial files if the app crashes mid-write.)
+    let tmp_path = out_path.with_extension("png.tmp");
+
+    match image::RgbaImage::from_raw(size_px as u32, size_px as u32, rgba) {
+        Some(img) => {
+            // Write PNG
+            if let Err(_) = img.save(&tmp_path) {
+                let _ = fs::remove_file(&tmp_path);
+                return Ok(None);
+            }
+            // Replace/commit
+            let _ = fs::remove_file(&out_path);
+            if fs::rename(&tmp_path, &out_path).is_err() {
+                let _ = fs::remove_file(&tmp_path);
+                return Ok(None);
+            }
+            Ok(Some(out_path))
+        }
+        None => Ok(None),
+    }
+}
+
+// ---- extraction (Option A) ----
+
+fn extract_hicon_from_exe_path(exe_path: &str) -> Option<HICON> {
+    let exe_w = to_wide_null(exe_path);
+
+    let mut sfi = SHFILEINFOW::default();
+
+    // SHGetFileInfoW returns an icon handle if successful.
+    // Note: SHGFI_LARGEICON is typically 32x32, but we’ll scale it to 48 when drawing.
+    let flags = SHGFI_ICON | SHGFI_LARGEICON;
+
+    let res = unsafe {
+        SHGetFileInfoW(
+            PCWSTR(exe_w.as_ptr()),
+            FILE_ATTRIBUTE_NORMAL,
+            Some(&mut sfi),
+            std::mem::size_of::<SHFILEINFOW>() as u32,
+            flags,
+        )
+    };
+
+    if res == 0 || sfi.hIcon.0.is_null() {
+        return None;
+    }
+
+    Some(sfi.hIcon)
+}
+
+// ---- HICON -> RGBA ----
+
+fn render_hicon_to_rgba(hicon: HICON, width: i32, height: i32) -> Option<Vec<u8>> {
+    if width <= 0 || height <= 0 {
+        return None;
+    }
+
+    unsafe {
+        // Create a memory DC and a 32-bit DIB section we can read back from.
+        let hdc_screen = GetDC(None);
+        if hdc_screen.0.is_null() {
+            return None;
+        }
+
+        let hdc_mem = CreateCompatibleDC(Some(hdc_screen));
+        if hdc_mem.0.is_null() {
+            ReleaseDC(None, hdc_screen);
+            return None;
+        }
+
+        // Top-down DIB: set negative height so we don't need to flip vertically.
+        let bmi = BITMAPINFO {
+            bmiHeader: BITMAPINFOHEADER {
+                biSize: std::mem::size_of::<BITMAPINFOHEADER>() as u32,
+                biWidth: width,
+                biHeight: -height,
+                biPlanes: 1,
+                biBitCount: 32,
+                biCompression: BI_RGB.0 as u32,
+                biSizeImage: 0,
+                biXPelsPerMeter: 0,
+                biYPelsPerMeter: 0,
+                biClrUsed: 0,
+                biClrImportant: 0,
+            },
+            bmiColors: [RGBQUAD {
+                rgbBlue: 0,
+                rgbGreen: 0,
+                rgbRed: 0,
+                rgbReserved: 0,
+            }],
+        };
+
+        let mut bits_ptr: *mut core::ffi::c_void = std::ptr::null_mut();
+        let hbm = CreateDIBSection(
+            Some(hdc_mem),
+            &bmi,
+            DIB_RGB_COLORS,
+            &mut bits_ptr,
+            None,
+            0,
+        );
+
+        let hbm = match hbm {
+            Ok(hbm) => hbm,
+            Err(_) => {
+                let _ = DeleteDC(hdc_mem);
+                ReleaseDC(None, hdc_screen);
+                return None;
+            }
+        };
+
+        if bits_ptr.is_null() {
+            let _ = DeleteObject(HGDIOBJ(hbm.0));
+            let _ = DeleteDC(hdc_mem);
+            ReleaseDC(None, hdc_screen);
+            return None;
+}
+
+        let old = SelectObject(hdc_mem, HGDIOBJ(hbm.0));
+        // Clear background to transparent (0)
+        // DIB is already zeroed by CreateDIBSection in practice, but don't rely on it.
+        let byte_len = (width * height * 4) as usize;
+        std::ptr::write_bytes(bits_ptr, 0, byte_len);
+
+        // Draw icon into our DIB (scales to width/height)
+        let ok = DrawIconEx(
+            hdc_mem,
+            0,
+            0,
+            hicon,
+            width,
+            height,
+            0,
+            None,
+            DI_NORMAL,
+        );
+
+        // Restore and cleanup GDI objects
+        SelectObject(hdc_mem, old);
+
+        if ok.is_err() {
+            let _ = DeleteObject(HGDIOBJ(hbm.0));
+            let _ = DeleteDC(hdc_mem);
+            ReleaseDC(None, hdc_screen);
+            return None;
+        }
+
+        // Copy BGRA -> RGBA
+        let src = std::slice::from_raw_parts(bits_ptr as *const u8, byte_len);
+        let mut out = vec![0u8; byte_len];
+
+        for i in (0..byte_len).step_by(4) {
+            // DIB32 is BGRA
+            let b = src[i];
+            let g = src[i + 1];
+            let r = src[i + 2];
+            let a = src[i + 3];
+            out[i] = r;
+            out[i + 1] = g;
+            out[i + 2] = b;
+            out[i + 3] = a;
+        }
+
+        let _ = DeleteObject(HGDIOBJ(hbm.0));
+        let _ = DeleteDC(hdc_mem);
+        ReleaseDC(None, hdc_screen);
+
+        Some(out)
+    }
 }
