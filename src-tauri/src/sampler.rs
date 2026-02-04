@@ -2,7 +2,6 @@ use std::{
     collections::HashSet, path::{Path, PathBuf}, sync::mpsc::{Receiver, Sender}, thread::sleep, time::{Duration, SystemTime}
 };
 
-use directories_next::ProjectDirs;
 use windows::{Win32::Storage::FileSystem::{GetFileVersionInfoSizeW, GetFileVersionInfoW, VerQueryValueW}, core::{BOOL, PWSTR}};
 use windows::Win32::Foundation::CloseHandle; 
 use windows::Win32::System::Threading::{
@@ -16,7 +15,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
 use windows::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
 use windows::Win32::System::SystemInformation::GetTickCount64;
 
-use crate::{ControlMsg, WindowSegment, sql_client::{reader::check_for_application, writer::save_application_to_db}};
+use crate::{ControlMsg, WindowSegment, paths::icons_dir, sql_client::{reader::check_for_application, writer::save_application_to_db}};
 
 const IDLE_DURATION: u64 = 120000;
 
@@ -82,12 +81,7 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
                     .expect("Failed to get exe display name")
                     .unwrap_or(window_exe.clone());
 
-                let proj_dir = ProjectDirs::from("com", "screen_time", "screen_time")
-                    .expect("Failed to connect to db file");
-
-                let app_data_dir = proj_dir.data_local_dir();
-
-                let icons_dir = app_data_dir.join("icons");
+                let icons_dir = icons_dir();
 
                 ensure_icon_png_from_exe(
                     &icons_dir, 

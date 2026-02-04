@@ -1,17 +1,15 @@
 use std::{fs, time::Duration};
-use directories_next::ProjectDirs;
 use rusqlite::Connection;
+
+use crate::paths::local_data_dir;
 
 pub fn connect_db_file() -> Connection {
     //TODO Create reusable method for getting local dir
-    let proj_dir = ProjectDirs::from("com", "screen_time", "screen_time")
-        .expect("Failed to connect to db file");
-
-    let app_data_dir = proj_dir.data_local_dir();
+    let app_data_dir = local_data_dir();
 
     if !app_data_dir.exists() { 
         println!("Creating dir");
-        fs::create_dir_all(app_data_dir).expect("failed to create folder");
+        fs::create_dir_all(&app_data_dir).expect("failed to create folder");
     }
 
     let sqlite_file_path = app_data_dir.join("usage.sqlite3");
