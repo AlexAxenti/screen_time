@@ -55,31 +55,30 @@ pub fn query_app_usage(
     };
     
     let init_stmt = "SELECT 
-        window_exe, 
-        MIN(window_name) AS window_name,
-        SUM(duration_ms) AS duration,
+        ws.app_id,
+        ws.window_exe, 
+        COALESCE(a.display_name, MIN(ws.window_exe))    AS display_name,
+        SUM(ws.duration_ms) AS duration,
         COUNT(*) AS segment_count
-    FROM window_segments
+    FROM window_segments ws
+    LEFT JOIN applications a
+        ON a.app_id = ws.app_id
     WHERE start_time >= ?1 AND start_time < ?2
-    GROUP BY window_exe";
+    GROUP BY ws.app_id";
     
     let stmt_str = format!("{} {}", init_stmt, order_by_clause);
     
     let mut stmt = conn.prepare(&stmt_str)?;
 
     let segment_iter = stmt.query_map(params![start_time, end_time], |row| {
-        let window_exe: String = row.get(0)?;
-        let window_name: String = row.get(1)?;
-
-        let display_name = parse_window_title_name(&window_name, &window_exe);
-
         Ok(AppUsageDTO {
             app_info: AppInfoDTO {
-                app_exe: window_exe,
-                display_name: display_name
+                app_id: row.get(0)?,
+                app_exe: row.get(1)?,
+                display_name: row.get(2)?
             },
-            duration: row.get(2)?,
-            segment_count: row.get(3)?
+            duration: row.get(3)?,
+            segment_count: row.get(4)?
         })
     })?;
 
@@ -188,6 +187,8 @@ pub fn query_app_titles(
         let display_name = parse_window_title_name(&window_name, &window_exe);
 
         Ok(AppInfoDTO {
+            //TODO fix
+            app_id: window_name,
             app_exe: window_exe,
             display_name: display_name
         })

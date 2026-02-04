@@ -2,6 +2,7 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct AppInfoDTO {
+    pub app_id: String,
     pub app_exe: String,
     pub display_name: String
 }
