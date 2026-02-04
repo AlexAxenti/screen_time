@@ -3,15 +3,49 @@ pub mod dtos;
 
 use std::thread::JoinHandle;
 use std::sync::mpsc::Sender;
+use std::{fs};
 
 use tauri::{Manager, RunEvent, WebviewWindowBuilder};
 use tauri::menu::{MenuBuilder};
 use tauri::tray::{TrayIconBuilder};
+use tauri::http::{header, Response, StatusCode};
 
 use crate::ControlMsg;
+use crate::paths::icons_dir;
 
 pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>>, mut sampler_handle: Option<JoinHandle<()>>) {
     tauri::Builder::default()
+        .register_uri_scheme_protocol("icons", move |_app, request| {
+            let mut name = request.uri().path().trim_start_matches('/');
+
+            if name.is_empty() {
+                if let Some(host) = request.uri().host() {
+                    name = host;
+                }
+            }
+
+            if name.is_empty() || !is_safe_icon_name(name) {
+                println!("Bad request!");
+                return Response::builder()
+                    .status(StatusCode::BAD_REQUEST)
+                    .body(Vec::new())
+                    .unwrap();
+            }
+
+            let path = icons_dir().join(name);
+
+             match fs::read(path) {
+                Ok(bytes) => Response::builder()
+                    .status(StatusCode::OK)
+                    .header(header::CONTENT_TYPE, "image/png")
+                    .body(bytes)
+                    .unwrap(),
+                Err(_) => Response::builder()
+                    .status(StatusCode::NOT_FOUND)
+                    .body(Vec::new())
+                    .unwrap(),
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             commands::get_top_usage, 
             commands::get_usage_summary,
@@ -109,4 +143,12 @@ pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>
                 _ => {}
             }
         });
+}
+
+fn is_safe_icon_name(s: &str) -> bool {
+    if !s.ends_with(".png") {
+        return false;
+    }
+    let stem = &s[..s.len() - 4]; // remove ".png"
+    !stem.is_empty() && stem.chars().all(|c| c.is_ascii_hexdigit())
 }

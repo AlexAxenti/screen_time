@@ -1,4 +1,5 @@
 export interface ApplicationInfo {
+	app_id: string;
 	app_exe: string;
 	display_name: string;
 }
