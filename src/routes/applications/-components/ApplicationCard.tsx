@@ -20,7 +20,6 @@ const ApplicationCard = ({
 	duration,
 	durationPercent,
 }: ApplicationCardProps) => {
-	console.log(getIconSrc(app_id));
 	return (
 		<Link
 			to="/applications/$exe"

@@ -25,7 +25,6 @@ pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>
             }
 
             if name.is_empty() || !is_safe_icon_name(name) {
-                println!("Bad request!");
                 return Response::builder()
                     .status(StatusCode::BAD_REQUEST)
                     .body(Vec::new())
