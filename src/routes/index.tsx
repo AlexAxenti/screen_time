@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import "./index.css";
 import { useState } from "react";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
 	const today: Date = new Date();
+	const theme = useTheme();
 
 	const weekStartMs = getWeekStartMs(today);
 	const weekEndMs = getWeekEndMs(today);
@@ -77,7 +78,7 @@ function Index() {
 					headerAction={
 						<Link
 							to="/applications"
-							style={{ fontSize: "0.875rem" }}
+							style={{ fontSize: "0.875rem", color: theme.palette.text.secondary, textDecoration: "none" }}
 						>
 							See more
 						</Link>
