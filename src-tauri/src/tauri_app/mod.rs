@@ -10,7 +10,7 @@ use tauri::tray::{TrayIconBuilder};
 use tauri::http::{header, Response, StatusCode};
 
 use crate::ControlMsg;
-use crate::paths::icons_dir;
+use crate::utils::paths::icons_dir;
 
 pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>>, mut sampler_handle: Option<JoinHandle<()>>) {
     tauri::Builder::default()

@@ -1,10 +1,9 @@
 use std::{fs, time::Duration};
 use rusqlite::Connection;
 
-use crate::paths::local_data_dir;
+use crate::utils::paths::local_data_dir;
 
 pub fn connect_db_file() -> Connection {
-    //TODO Create reusable method for getting local dir
     let app_data_dir = local_data_dir();
 
     if !app_data_dir.exists() { 

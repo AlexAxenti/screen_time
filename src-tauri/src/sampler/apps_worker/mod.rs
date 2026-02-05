@@ -1,6 +1,10 @@
 use std::sync::mpsc::Receiver;
 
-use crate::{AppInfo, paths::icons_dir, sampler::{ensure_icon_png_from_exe, get_exe_display_name_from_version_info}, sql_client::{reader::check_for_application, writer::save_application_to_db}};
+use crate::{
+    AppInfo, 
+    sampler::{ensure_icon_png_from_exe, get_exe_display_name_from_version_info}, 
+    sql_client::{reader::check_for_application, writer::save_application_to_db}, utils::paths::icons_dir
+};
 
 pub fn start(rx_apps: Receiver<AppInfo>) {
     while let Ok(app) = rx_apps.recv() {

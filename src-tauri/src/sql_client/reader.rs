@@ -35,7 +35,6 @@ pub fn query_usage_summary(start_time: i64, end_time: i64) -> rusqlite::Result<U
     summary
 }
 
-//TODO rename from WindowSegmentDTO
 pub fn query_app_usage(
     start_time: i64, 
     end_time: i64, 

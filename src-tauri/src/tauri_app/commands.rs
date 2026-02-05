@@ -13,10 +13,8 @@ use crate::{
     }
 };
 
-//TODO move logic to seperate file?
 #[tauri::command]
 pub fn get_top_usage(start_time: i64, end_time: i64, app_count: usize) -> TopUsageDTO {
-    
     let sort_value = ApplicationSortValue::Duration;
     let sort_direction = SortDirection::Descending;
 
