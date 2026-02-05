@@ -23,7 +23,7 @@ const ApplicationCard = ({
 	return (
 		<Link
 			to="/applications/$exe"
-			params={{ exe: exe }}
+			params={{ exe: app_id }}
 			style={{
 				textDecoration: "none",
 			}}

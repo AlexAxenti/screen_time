@@ -1,7 +1,7 @@
 use rusqlite::{OptionalExtension, params};
 use crate::{
     sql_client::init::connect_db_file, 
-    tauri_app::dtos::{AppInfoDTO, AppUsageDTO, DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, parse_window_title_name}
+    tauri_app::dtos::{AppInfoDTO, AppUsageDTO, DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO}
 };
 
 pub enum SortDirection {
@@ -172,25 +172,19 @@ pub fn query_app_titles(
     let conn = connect_db_file();
     
     let mut stmt = conn.prepare("SELECT
-        window_exe,
-        MIN(window_name) AS window_name
-    FROM window_segments
-    WHERE window_name LIKE '%' || ?1 || '%'
-    GROUP BY window_exe
-    ORDER BY COUNT(*) DESC
+        app_id,
+        exe_name,
+        display_name
+    FROM applications
+    WHERE display_name LIKE '%' || ?1 || '%'
+    ORDER BY display_name COLLATE NOCASE ASC
     LIMIT 6;")?;
 
     let apps_iter = stmt.query_map(params![query], |row| {
-        let window_exe: String = row.get(0)?;
-        let window_name: String = row.get(1)?;
-
-        let display_name = parse_window_title_name(&window_name, &window_exe);
-
         Ok(AppInfoDTO {
-            //TODO fix
-            app_id: window_name,
-            app_exe: window_exe,
-            display_name: display_name
+            app_id: row.get(0)?,
+            app_exe: row.get(1)?,
+            display_name: row.get(2)?
         })
     })?;
 

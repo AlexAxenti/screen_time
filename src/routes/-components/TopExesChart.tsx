@@ -29,11 +29,11 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
 	const truncate = (s: string, n = 12) =>
 		s.length > n ? `${s.slice(0, n - 1)}…` : s;
 
-	const handleBarClick = (window_exe: string) => {
-		if (window_exe) {
+	const handleBarClick = (app_id: string) => {
+		if (app_id) {
 			navigate({
 				to: "/applications/$exe",
-				params: { exe: window_exe },
+				params: { exe: app_id },
 			});
 		}
 	};
@@ -55,11 +55,11 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
 						const idx = e?.activeTooltipIndex;
 						if (idx === null || idx === undefined) return;
 
-						let selectedSegment = topUsage?.window_segments[Number(idx)];
+						let selectedApp = topUsage?.window_segments[Number(idx)];
 
-						if (!selectedSegment) return;
+						if (!selectedApp) return;
 
-						handleBarClick(selectedSegment.app_info.app_exe);
+						handleBarClick(selectedApp.app_info.app_id);
 					}}
 				>
 					<XAxis

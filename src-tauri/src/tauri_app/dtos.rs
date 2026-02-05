@@ -42,17 +42,17 @@ pub struct DailyUsageDTO {
     pub exe_count: i64
 }
 
-// TODO: move somewhere else better
-pub fn parse_window_title_name(app_name: &str, fall_back: &str) -> String {
-    let name_parts: Vec<&str> = app_name.split('-').collect();
+// TODO: clean up
+// pub fn parse_window_title_name(app_name: &str, fall_back: &str) -> String {
+//     let name_parts: Vec<&str> = app_name.split('-').collect();
 
-    let real_name = name_parts[name_parts.len() - 1];
+//     let real_name = name_parts[name_parts.len() - 1];
 
-    let real_name = real_name.trim();
+//     let real_name = real_name.trim();
 
-    if real_name == "" {
-        fall_back.to_string()
-    } else {
-        real_name.to_string()
-    }
-}
+//     if real_name == "" {
+//         fall_back.to_string()
+//     } else {
+//         real_name.to_string()
+//     }
+// }
