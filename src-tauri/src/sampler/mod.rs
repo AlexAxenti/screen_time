@@ -1,5 +1,7 @@
+mod apps_worker;
+
 use std::{
-    collections::HashSet, path::{Path, PathBuf}, sync::mpsc::{Receiver, Sender}, thread::sleep, time::{Duration, SystemTime}
+    collections::HashSet, path::{Path, PathBuf}, sync::mpsc::{self, Receiver, Sender}, thread::{self, sleep}, time::{Duration, SystemTime}
 };
 
 use windows::{Win32::Storage::FileSystem::{GetFileVersionInfoSizeW, GetFileVersionInfoW, VerQueryValueW}, core::{BOOL, PWSTR}};
@@ -15,7 +17,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
 use windows::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
 use windows::Win32::System::SystemInformation::GetTickCount64;
 
-use crate::{ControlMsg, WindowSegment, paths::icons_dir, sql_client::{reader::check_for_application, writer::save_application_to_db}};
+use crate::{AppInfo, ControlMsg, WindowSegment};
 
 const IDLE_DURATION: u64 = 120000;
 
@@ -23,6 +25,14 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
     let mut main_segment: Option<WindowSegment> = None;
     let mut running= true;
     let mut applications_found: HashSet<String> = HashSet::new();
+
+    //Init apps worker
+    let (tx_apps, rx_apps): 
+        (Sender<AppInfo>, Receiver<AppInfo>) = mpsc::channel();
+
+    let apps_worker_handle = thread::spawn(move || {
+        apps_worker::start(rx_apps);
+    });
 
     loop {
         sleep(Duration::from_millis(500));
@@ -73,26 +83,15 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
 
         if !applications_found.contains(&app_id) {
             println!("Found {:?}", app_id);
-            let app_exists = check_for_application(&app_id).expect("Failed to check if app exists");
 
-            // If not exists, write to db
-            if !app_exists {
-                let display_name = get_exe_display_name_from_version_info(&window_exe_path)
-                    .expect("Failed to get exe display name")
-                    .unwrap_or(window_exe.clone());
+            let new_app_info = AppInfo {
+                app_id: app_id.clone(),
+                app_exe_path: window_exe_path,
+                app_exe_name: window_exe.clone()
+            };
 
-                let icons_dir = icons_dir();
+            tx_apps.send(new_app_info).expect("Failed to send new app info");
 
-                ensure_icon_png_from_exe(
-                    &icons_dir, 
-                    &app_id, 
-                    &window_exe_path, 
-                );
-
-                println!("App display name found: {}", display_name);
-
-                save_application_to_db(&app_id, &window_exe_path, &window_exe, &display_name);
-            }
             applications_found.insert(app_id.clone());
         }
 
@@ -110,6 +109,10 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
         // Update state
         update_state(&mut main_segment, sampled_segment, is_unfocused, sample_start_time, &tx_segments);
     }
+
+    drop(tx_apps);
+    apps_worker_handle.join().expect("Failed to close apps worker thread");
+    println!("Apps thread closed");
 }
 
 fn sample_foreground() -> Option<(String, String)> {
