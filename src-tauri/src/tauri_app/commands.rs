@@ -8,7 +8,7 @@ use crate::{
         query_usage_summary, 
         query_weeks_daily_usage
     }, 
-    tauri_app::dtos::{
+    types::dtos::{
         AppInfoDTO, AppUsageDTO, DailyUsageDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
     }
 };

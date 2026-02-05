@@ -1,5 +1,4 @@
 mod commands;
-pub mod dtos;
 
 use std::thread::JoinHandle;
 use std::sync::mpsc::Sender;
