@@ -7,12 +7,9 @@ edition = "2021"
 blake3 = "1.8.3"
 directories-next = "2.0.0"
 hex = "0.4.3"
-image = "0.25.9"
 rusqlite = { version = "0.38.0", features = ["bundled"] }
 serde = "1.0.228"
-tao = "0.34.5"
 tauri = { version = "2.9.5", features = ["tray-icon"] }
-tray-icon = "0.21.3"
 windows = { version = "0.62.2", features = [
     "Win32_Foundation",
     "Win32_System_Threading",

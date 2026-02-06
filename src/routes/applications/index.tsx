@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import PageHeader from "../../components/UI/PageHeader";
 import { formatDateToYYYYMMDD } from "../../lib/durationFormatHelpers";
 import { getEndOfDayMs, getStartOfDayMs } from "../../lib/epochDayHelpers";
-import useGetApplications from "../../queries/getApplications";
+import useGetApplications from "../../hooks/queries/useGetApplications";
 import ApplicationsFilters from "./-components/ApplicationsFilters";
 import ApplicationsList from "./-components/ApplicationsList";
 import type { DateRangeOption } from "./-components/DateRangeSelector";
@@ -72,7 +72,7 @@ function Index() {
 		}
 		const query = searchQuery.toLowerCase().trim();
 		return applications.filter((app) =>
-			app.window_exe.toLowerCase().includes(query),
+			app.app_info.display_name.toLowerCase().includes(query),
 		);
 	}, [applications, searchQuery]);
 

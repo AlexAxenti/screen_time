@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import type { UsageFragmentation } from "../types/dto";
+import type { UsageFragmentation } from "../../types/dto";
 
 const useGetUsageFragmentation = (startTime: number, endTime: number) => {
 	return useQuery({

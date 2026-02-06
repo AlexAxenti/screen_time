@@ -8,7 +8,7 @@ import {
 	YAxis,
 } from "recharts";
 import InfoTooltip from "../../components/UI/InfoTooltip";
-import useGetUsageFragmentation from "../../queries/getUsageFragmentation";
+import useGetUsageFragmentation from "../../hooks/queries/useGetUsageFragmentation";
 import type { UsageFragmentation } from "../../types/dto";
 
 const BUCKETS = [

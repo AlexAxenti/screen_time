@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import SimpleDataCard from "../../components/UI/SimpleDataCard";
 import TitledCard from "../../components/UI/TitledCard";
 import { formatMsToHoursAndMinutes } from "../../lib/durationFormatHelpers";
-import useGetUsageSummary from "../../queries/getUsageSummary";
+import useGetUsageSummary from "../../hooks/queries/useGetUsageSummary";
 
 interface DashboardSummaryProps {
 	startOfRangeMs: number;

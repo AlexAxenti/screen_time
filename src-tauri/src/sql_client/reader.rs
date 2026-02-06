@@ -51,7 +51,7 @@ pub fn query_app_usage(
     
     let order_by_clause = match sort_value {
         ApplicationSortValue::Duration => format!("ORDER BY duration {}, window_exe COLLATE NOCASE {}", sort_direction, sort_direction),
-        _ => format!("ORDER BY window_exe COLLATE NOCASE {}, duration {}", sort_direction, sort_direction)
+        _ => format!("ORDER BY display_name COLLATE NOCASE {}, duration {}", sort_direction, sort_direction)
     };
     
     let init_stmt = "SELECT 
