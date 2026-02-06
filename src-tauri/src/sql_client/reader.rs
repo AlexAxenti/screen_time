@@ -4,6 +4,7 @@ use crate::{
     types::dtos::{AppInfoDTO, AppUsageDTO, DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO}
 };
 
+//TODO split up reader into domain based query modules
 pub enum SortDirection {
     Ascending,
     Descending,

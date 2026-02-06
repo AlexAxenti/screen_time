@@ -1,4 +1,5 @@
 mod apps_metadata;
+mod windows_utils;
 
 use std::{
     collections::HashSet, 
@@ -8,20 +9,7 @@ use std::{
     time::{Duration, SystemTime}
 };
 
-use windows::core::PWSTR;
-use windows::Win32::Foundation::CloseHandle; 
-use windows::Win32::System::Threading::{
-    OpenProcess, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION, 
-    QueryFullProcessImageNameW    
-};
-use windows::Win32::UI::WindowsAndMessaging::{
-    GetForegroundWindow, GetWindowTextLengthW, GetWindowTextW, 
-    GetWindowThreadProcessId
-};
-use windows::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
-use windows::Win32::System::SystemInformation::GetTickCount64;
-
-use crate::{AppInfo, ControlMsg, WindowSegment};
+use crate::{AppInfo, ControlMsg, WindowSegment, sampler::{windows_utils::{get_idle_duration, sample_foreground}}};
 
 const IDLE_DURATION: u64 = 120000;
 
@@ -76,14 +64,9 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
             continue;
         };
 
-        let window_exe = get_exe_name_from_path(&window_exe_path).to_lowercase();
+        let window_exe = get_exe_name_from_path(&window_exe_path, "unknown.exe").to_lowercase();
 
-        // Hash window exe for app id key
-        let hash = blake3::hash(window_exe_path.as_bytes());
-
-        let full_bytes = hash.as_bytes();
-        let truncated = &full_bytes[..16];
-        let app_id = hex::encode(truncated);
+        let app_id: String = hash_exe_path(&window_exe_path);
 
         if !applications_found.contains(&app_id) {
             println!("Found {:?}", app_id);
@@ -99,89 +82,20 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
             applications_found.insert(app_id.clone());
         }
 
-        // Check if unfocused/empty explorer
-        // TODO change from unfocused to ignore list or something
-        let is_unfocused = is_unfocused(&window_exe);
+        let is_tracked = app_is_tracked(&window_exe);
 
-        // Construct sampled segment
         let sampled_segment = WindowSegment::new(
             app_id,
             window_name,
             window_exe,
             sample_start_time);        
 
-        // Update state
-        update_state(&mut main_segment, sampled_segment, is_unfocused, sample_start_time, &tx_segments);
+        update_state(&mut main_segment, sampled_segment, is_tracked, sample_start_time, &tx_segments);
     }
 
     drop(tx_apps);
     apps_worker_handle.join().expect("Failed to close apps worker thread");
     println!("Apps thread closed");
-}
-
-fn sample_foreground() -> Option<(String, String)> {
-    let foreground_window_hwnd = unsafe {
-        GetForegroundWindow()
-    };
-
-    // Get foreground window text name
-    let window_text_length = unsafe {
-        GetWindowTextLengthW(foreground_window_hwnd)
-    };
-
-    let mut buffer = vec![0u16; (window_text_length + 1) as usize];
-
-    let chars_count = unsafe {
-        GetWindowTextW(foreground_window_hwnd, &mut buffer)
-    };
-
-    let window_text = String::from_utf16_lossy(&buffer[0..chars_count as usize]);
-
-    // Get PID
-    let mut hwnd_process_id: u32 = 0;
-    unsafe {
-        GetWindowThreadProcessId(foreground_window_hwnd, Some(&mut hwnd_process_id));
-    }
-
-    // Get process handle
-    // TODO Handle none
-    let process_handle = match unsafe {
-        OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, hwnd_process_id)
-    } {
-        Ok(handle) => {
-            handle
-        }
-        Err(e) => {
-            eprintln!("Failed to open process {e}");
-            return None;
-        }
-    };
-
-    // Get process exe path
-    // TODO Handle buffer too small
-    let mut process_image_buffer = vec![0u16; 256];
-
-    let pwstr = PWSTR(process_image_buffer.as_mut_ptr());
-
-    let mut lpdwsize: u32 = 256;
-
-    if let Err(e) = unsafe {
-        QueryFullProcessImageNameW(process_handle, PROCESS_NAME_WIN32, pwstr, &mut lpdwsize)
-    } { 
-        eprintln!("Error {e}");
-    }
-
-    let process_exe = String::from_utf16_lossy(&process_image_buffer[0..lpdwsize as usize]);
-
-    // Close handle
-    // TODO handle error?
-    if let Err(e) = unsafe {
-        CloseHandle(process_handle)
-    } {
-        eprintln!("Failed to close handle {e}");
-    }
-
-    Some((window_text, process_exe))
 }
 
 fn update_state(
@@ -217,42 +131,6 @@ fn update_state(
     }
 }
 
-// TODO reuse path -> name function
-fn is_unfocused(exe_path: &str) -> bool {
-    let exe_path = Path::new(&exe_path);
-
-    let exe_name = exe_path
-        .file_name()
-        .map(|s| s.to_string_lossy().into_owned())
-        .unwrap_or_else(|| "Invalid filename".to_string())
-        .to_lowercase();
-
-    exe_name == "explorer.exe" || exe_name == "screen_time.exe"
-}
-
-fn get_idle_duration() -> Duration {
-    let mut last_input_info = LASTINPUTINFO {
-        cbSize: std::mem::size_of::<LASTINPUTINFO>() as u32,
-        dwTime: 0,
-    };
-
-    let success = unsafe {
-        GetLastInputInfo(&mut last_input_info)
-    };
-
-    if !success.as_bool() {
-        eprintln!("Failed to get the last input info");
-
-        Duration::from_millis(0)
-    } else {
-        let tick_count = unsafe { GetTickCount64() };
-
-        let diff = tick_count - last_input_info.dwTime as u64;
-
-        Duration::from_millis(diff.into())
-    }            
-}
-
 fn flush_segment(
     segment: &mut Option<WindowSegment>,
     end_time: SystemTime,
@@ -264,9 +142,29 @@ fn flush_segment(
     }
 }
 
-fn get_exe_name_from_path(exe_path: &str) -> String {
+// TODO have a list from tauri in the future
+fn app_is_tracked(exe_path: &str) -> bool {
+    let default_unknown_name = "unknown.exe";
+
+    let mut exe_name = get_exe_name_from_path(exe_path, default_unknown_name);
+
+    exe_name = exe_name.to_lowercase();
+
+    exe_name == "explorer.exe" || exe_name == "screen_time.exe" || exe_name == "unknown.exe"
+}
+
+fn get_exe_name_from_path(exe_path: &str, default_name: &str) -> String {
     Path::new(exe_path)
         .file_name()
         .map(|s| s.to_string_lossy().into_owned())
-        .unwrap_or_else(|| "unknown.exe".to_string())
+        .unwrap_or_else(|| default_name.to_string())
+}
+
+fn hash_exe_path(exe_path: &str) -> String {
+    let hash = blake3::hash(exe_path.as_bytes());
+    let full_bytes = hash.as_bytes();
+    let truncated = &full_bytes[..16];
+    let app_id = hex::encode(truncated);
+
+    app_id
 }
