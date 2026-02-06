@@ -18,7 +18,6 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
     let mut running= true;
     let mut applications_found: HashSet<String> = HashSet::new();
 
-    //Init apps worker
     let (tx_apps, rx_apps): 
         (Sender<AppInfo>, Receiver<AppInfo>) = mpsc::channel();
 
@@ -51,15 +50,12 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
             continue;
         }
         
-        // Calculate time since last input
         let last_input_duration = get_idle_duration();
 
         if last_input_duration > Duration::from_millis(IDLE_DURATION) {
             flush_segment(&mut main_segment, sample_start_time, &tx_segments);
             continue;
         }
-
-        // Sample foreground
         let Some((window_name, window_exe_path)) = sample_foreground() else {
             continue;
         };
@@ -150,7 +146,8 @@ fn app_is_tracked(exe_path: &str) -> bool {
 
     exe_name = exe_name.to_lowercase();
 
-    exe_name == "explorer.exe" || exe_name == "screen_time.exe" || exe_name == "unknown.exe"
+    //TODO remove screen time when more polished
+    exe_name == "explorer.exe" || exe_name == "screen_time.exe" || exe_name == default_unknown_name
 }
 
 fn get_exe_name_from_path(exe_path: &str, default_name: &str) -> String {
