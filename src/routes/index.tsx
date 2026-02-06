@@ -6,7 +6,7 @@ import TitledCard from "../components/UI/TitledCard";
 import { getWeekEndMs, getWeekStartMs } from "../lib/epochDayHelpers";
 import DashboardHeader from "./-components/DashboardHeader";
 import DashboardSummary from "./-components/DashboardSummary";
-import TopExesChart from "./-components/TopExesChart";
+import TopExesChart from "./-components/TopExesChart/TopExesChart";
 import UsageFragmentationChart from "./-components/UsageFragmentationChart";
 import WeeklyUsageChart from "./-components/WeeklyUsageChart";
 

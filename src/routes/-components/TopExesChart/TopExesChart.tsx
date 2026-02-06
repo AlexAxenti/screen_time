@@ -8,8 +8,10 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import { formatMsToHoursOrMinutes } from "../../lib/durationFormatHelpers";
-import useGetTopUsage from "../../hooks/queries/useGetTopUsage";
+import { formatMsToHoursOrMinutes } from "../../../lib/durationFormatHelpers";
+import useGetTopUsage from "../../../hooks/queries/useGetTopUsage";
+import { CustomTooltip } from "./CustomTooltip";
+import { createCustomYAxisTick } from "./CustomYAxisTick";
 
 const TOP_APP_COUNT = 7;
 
@@ -25,9 +27,6 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
 		endOfRangeMs,
 		TOP_APP_COUNT,
 	);
-
-	const truncate = (s: string, n = 12) =>
-		s.length > n ? `${s.slice(0, n - 1)}…` : s;
 
 	const handleBarClick = (app_id: string) => {
 		if (app_id) {
@@ -69,19 +68,10 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
 					<YAxis
 						type="category"
 						dataKey="app_info.display_name"
-						width={120}
-						tickFormatter={(v) => truncate(String(v))}
+						width={130}
+						tick={createCustomYAxisTick(topUsage?.window_segments || [])}
 					/>
-					<Tooltip
-						labelFormatter={(label) => `Application: ${String(label)}`}
-						contentStyle={{ background: "#111", border: "1px solid #333" }}
-						labelStyle={{ color: "#fff" }}
-						itemStyle={{ color: "#fff" }}
-						formatter={(value) => [
-							formatMsToHoursOrMinutes(Number(value ?? 0)),
-							"Duration",
-						]}
-					/>
+					<Tooltip content={<CustomTooltip />} />
 					<Bar
 						dataKey="duration"
 						fill="#1976d2"
