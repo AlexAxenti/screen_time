@@ -1,10 +1,8 @@
 import { Box } from "@mui/material";
-import type { TooltipProps } from "recharts";
 import { getIconSrc } from "../../../lib/iconPaths";
 import { formatMsToHoursOrMinutes } from "../../../lib/durationFormatHelpers";
-import type { ApplicationUsage } from "../../../types/dto";
 
-export const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+export const CustomTooltip = ({ active, payload }: any) => {
 	if (!active || !payload || !payload[0]) return null;
 
 	const data = payload[0].payload;
