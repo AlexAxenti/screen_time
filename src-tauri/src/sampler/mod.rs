@@ -1,10 +1,14 @@
-mod apps_worker;
+mod apps_metadata;
 
 use std::{
-    collections::HashSet, path::{Path, PathBuf}, sync::mpsc::{self, Receiver, Sender}, thread::{self, sleep}, time::{Duration, SystemTime}
+    collections::HashSet, 
+    path::Path, 
+    sync::mpsc::{self, Receiver, Sender}, 
+    thread::{self, sleep}, 
+    time::{Duration, SystemTime}
 };
 
-use windows::{Win32::Storage::FileSystem::{GetFileVersionInfoSizeW, GetFileVersionInfoW, VerQueryValueW}, core::{BOOL, PWSTR}};
+use windows::core::PWSTR;
 use windows::Win32::Foundation::CloseHandle; 
 use windows::Win32::System::Threading::{
     OpenProcess, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION, 
@@ -31,7 +35,7 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
         (Sender<AppInfo>, Receiver<AppInfo>) = mpsc::channel();
 
     let apps_worker_handle = thread::spawn(move || {
-        apps_worker::start(rx_apps);
+        apps_metadata::start(rx_apps);
     });
 
     loop {
@@ -265,170 +269,4 @@ fn get_exe_name_from_path(exe_path: &str) -> String {
         .file_name()
         .map(|s| s.to_string_lossy().into_owned())
         .unwrap_or_else(|| "unknown.exe".to_string())
-}
-
-//TODO clean up
-// Temp code for getting display name
-use std::ffi::OsStr;
-use std::os::windows::ffi::OsStrExt;
-
-use windows::core::PCWSTR;
-
-fn to_wide_null(s: &str) -> Vec<u16> {
-    OsStr::new(s).encode_wide().chain(std::iter::once(0)).collect()
-}
-
-fn query_version_string(block: &[u8], sub_block: &str) -> Option<String> {
-    let sub_block_w = to_wide_null(sub_block);
-
-    let mut ptr: *mut core::ffi::c_void = core::ptr::null_mut();
-    let mut len: u32 = 0;
-
-    let ok: BOOL = unsafe {
-        VerQueryValueW(
-            block.as_ptr() as *const core::ffi::c_void,
-            PCWSTR(sub_block_w.as_ptr()),
-            &mut ptr,
-            &mut len,
-        )
-    };
-
-    if !ok.as_bool() || ptr.is_null() || len == 0 {
-        return None;
-    }
-
-    // len is in *wide chars* for string values (includes null terminator)
-    let wide = unsafe { std::slice::from_raw_parts(ptr as *const u16, len as usize) };
-
-    // Strip trailing null(s)
-    let trimmed_len = wide.iter().position(|&c| c == 0).unwrap_or(wide.len());
-    String::from_utf16(&wide[..trimmed_len]).ok().map(|s| s.trim().to_string())
-}
-
-fn get_translation_lang_codepage(block: &[u8]) -> Option<(u16, u16)> {
-    // Query translation table: \VarFileInfo\Translation
-    let sub_block_w = to_wide_null(r"\VarFileInfo\Translation");
-
-    let mut ptr: *mut core::ffi::c_void = core::ptr::null_mut();
-    let mut len: u32 = 0;
-
-    let ok: BOOL = unsafe {
-        VerQueryValueW(
-            block.as_ptr() as *const core::ffi::c_void,
-            PCWSTR(sub_block_w.as_ptr()),
-            &mut ptr,
-            &mut len,
-        )
-    };
-
-    if !ok.as_bool() || ptr.is_null() || len < 4 {
-        return None;
-    }
-
-    // Translation entries are pairs of u16: LANGID, CODEPAGE
-    let bytes = unsafe { std::slice::from_raw_parts(ptr as *const u8, len as usize) };
-
-    if bytes.len() < 4 {
-        return None;
-    }
-
-    // Read first LANGID/CODEPAGE pair (little endian)
-    let lang = u16::from_le_bytes([bytes[0], bytes[1]]);
-    let codepage = u16::from_le_bytes([bytes[2], bytes[3]]);
-    Some((lang, codepage))
-}
-
-/// Returns (FileDescription or ProductName) from EXE version metadata.
-/// Returns None if no version info or no matching strings.
-pub fn get_exe_display_name_from_version_info(exe_path: &str) -> windows::core::Result<Option<String>> {
-    let exe_w = to_wide_null(exe_path);
-
-    let mut handle: u32 = 0;
-    let size = unsafe { GetFileVersionInfoSizeW(PCWSTR(exe_w.as_ptr()), Some(&mut handle)) };
-
-    if size == 0 {
-        // No version info
-        return Ok(None);
-    }
-
-    let mut block = vec![0u8; size as usize];
-
-    let ok = unsafe {
-        GetFileVersionInfoW(
-            PCWSTR(exe_w.as_ptr()),
-            None,
-            size,
-            block.as_mut_ptr() as *mut core::ffi::c_void,
-        )
-    };
-
-    if ok.is_err() {
-        // Windows API failure; surface as "None" or you can return Err if you prefer
-        return Ok(None);
-    }
-
-    // Find the language/codepage
-    let (lang, codepage) = match get_translation_lang_codepage(&block) {
-        Some(v) => v,
-        None => {
-            // Some binaries omit translation info; you can try a common default if you want.
-            // 0x0409 = en-US, 0x04B0 = Unicode
-            (0x0409, 0x04B0)
-        }
-    };
-
-    // Build StringFileInfo queries
-    let file_desc_key = format!(r"\StringFileInfo\{:04x}{:04x}\FileDescription", lang, codepage);
-    let product_name_key = format!(r"\StringFileInfo\{:04x}{:04x}\ProductName", lang, codepage);
-
-    // Prefer FileDescription, fallback ProductName
-    if let Some(s) = query_version_string(&block, &file_desc_key) {
-        if !s.is_empty() {
-            return Ok(Some(s));
-        }
-    }
-
-    if let Some(s) = query_version_string(&block, &product_name_key) {
-        if !s.is_empty() {
-            return Ok(Some(s));
-        }
-    }
-
-    Ok(None)
-}
-
-// TODO Clean up
-//Temp extract icons code
-use std::fs;
-use windows_icons::get_icon_by_path;
-
-// ---- small helpers ----
-
-fn icon_out_path(icons_dir: &Path, app_id: &str) -> PathBuf {
-    icons_dir.join(format!("{app_id}.png"))
-}
-
-// ---- main entrypoint ----
-
-/// Ensures `<icons_dir>/<app_id>.png` exists. If it's already there, does nothing.
-/// Returns:
-/// - Ok(Some(path)) if the icon already existed or was created
-/// - Ok(None) if extraction failed (caller should use placeholder icon)
-pub fn ensure_icon_png_from_exe(
-    icons_dir: &Path,
-    app_id: &str,
-    exe_path: &str,
-) {
-    fs::create_dir_all(icons_dir).expect("Failed to create icons dir");
-
-    let out_path = icon_out_path(icons_dir, app_id);
-
-    // 1) Cache hit: if it exists, we're done
-    if out_path.exists() {
-        return;
-    }
-
-    let icon = get_icon_by_path(exe_path).expect("Failed to get icon");
-
-    icon.save(out_path).expect("Failed to save icon");
 }

@@ -1,9 +1,12 @@
-use std::sync::mpsc::Receiver;
+mod display_name;
+mod icons;
 
+use std::sync::mpsc::Receiver;
 use crate::{
     AppInfo, 
-    sampler::{ensure_icon_png_from_exe, get_exe_display_name_from_version_info}, 
-    sql_client::{reader::check_for_application, writer::save_application_to_db}, utils::paths::icons_dir
+    sampler::apps_metadata::{display_name::get_exe_display_name_from_version_info, icons::ensure_icon_png_from_exe}, 
+    sql_client::{reader::check_for_application, writer::save_application_to_db}, 
+    utils::paths::icons_dir
 };
 
 pub fn start(rx_apps: Receiver<AppInfo>) {
@@ -38,3 +41,4 @@ fn ensure_app_exists(app: AppInfo) {
         save_application_to_db(app_id, app_exe_path, app_exe_name, &display_name);
     }
 }
+

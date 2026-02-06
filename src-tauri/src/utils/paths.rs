@@ -1,4 +1,4 @@
-use std::path::{PathBuf};
+use std::path::{Path, PathBuf};
 
 use directories_next::ProjectDirs;
 
@@ -17,4 +17,8 @@ pub fn icons_dir() -> PathBuf {
     let icons_dir = local_dir.join("icons");
 
     icons_dir
+}
+
+pub fn icon_out_path(icons_dir: &Path, app_id: &str) -> PathBuf {
+    icons_dir.join(format!("{app_id}.png"))
 }
