@@ -12,7 +12,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
-import useSearchApplications from "../../../queries/searchApplications";
+import useSearchApplications from "../../../hooks/queries/useSearchApplications";
 
 const SearchBar = () => {
 	const theme = useTheme();

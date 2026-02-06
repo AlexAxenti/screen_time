@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import { formatMsToHoursOrMinutes } from "../../lib/durationFormatHelpers";
 import { getStartOfDayMs } from "../../lib/epochDayHelpers";
-import useGetWeeksDailyUsage from "../../queries/getWeeksDailyUsage";
+import useGetWeeksDailyUsage from "../../hooks/queries/useGetWeeksDailyUsage";
 
 interface LastWeekScaffold {
 	startOfDayMs: number;

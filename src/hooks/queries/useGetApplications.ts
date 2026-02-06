@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import type { ApplicationUsage } from "../types/dto";
+import type { ApplicationUsage } from "../../types/dto";
 
 const useGetApplications = (
 	startTime: number,
