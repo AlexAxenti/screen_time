@@ -29,12 +29,12 @@ const SearchBar = () => {
 		setIsOpen(true);
 	};
 
-	const handleSelect = (windowExe: string) => {
+	const handleSelect = (appId: string) => {
 		setIsOpen(false);
 		setSearchValue("");
 		navigate({
 			to: "/applications/$exe",
-			params: { exe: windowExe },
+			params: { exe: appId },
 		});
 	};
 
@@ -123,8 +123,8 @@ const SearchBar = () => {
 						<MenuList dense>
 							{applications?.map((app) => (
 								<MenuItem
-									key={app.app_exe}
-									onClick={() => handleSelect(app.app_exe)}
+									key={app.app_id}
+									onClick={() => handleSelect(app.app_id)}
 									sx={{
 										fontSize: "0.875rem",
 										py: 1,

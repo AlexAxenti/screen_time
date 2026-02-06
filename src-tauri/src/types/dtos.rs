@@ -2,6 +2,7 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct AppInfoDTO {
+    pub app_id: String,
     pub app_exe: String,
     pub display_name: String
 }
@@ -39,19 +40,4 @@ pub struct DailyUsageDTO {
     pub total_duration_ms: i64,
     pub segment_count: i64,
     pub exe_count: i64
-}
-
-// TODO: move somewhere else better
-pub fn parse_window_title_name(app_name: &str, fall_back: &str) -> String {
-    let name_parts: Vec<&str> = app_name.split('-').collect();
-
-    let real_name = name_parts[name_parts.len() - 1];
-
-    let real_name = real_name.trim();
-
-    if real_name == "" {
-        fall_back.to_string()
-    } else {
-        real_name.to_string()
-    }
 }

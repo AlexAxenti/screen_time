@@ -1,5 +1,5 @@
-import { Box, Link } from "@mui/material";
-import { createFileRoute, Link as RouterLink } from "@tanstack/react-router";
+import { Box, useTheme } from "@mui/material";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import "./index.css";
 import { useState } from "react";
 import TitledCard from "../components/UI/TitledCard";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
 	const today: Date = new Date();
+	const theme = useTheme();
 
 	const weekStartMs = getWeekStartMs(today);
 	const weekEndMs = getWeekEndMs(today);
@@ -76,9 +77,8 @@ function Index() {
 					title="Top Applications Used"
 					headerAction={
 						<Link
-							component={RouterLink}
 							to="/applications"
-							sx={{ fontSize: "0.875rem" }}
+							style={{ fontSize: "0.875rem", color: theme.palette.text.secondary, textDecoration: "none" }}
 						>
 							See more
 						</Link>
