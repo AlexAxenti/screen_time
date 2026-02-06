@@ -1,8 +1,10 @@
 import { Box, Card, Typography } from "@mui/material";
 import { Link } from "@tanstack/react-router";
 import { formatMsToHoursOrMinutes } from "../../../lib/durationFormatHelpers";
+import { getIconSrc } from "../../../lib/iconPaths";
 
 interface ApplicationCardProps {
+	app_id: string;
 	exe: string;
 	displayName: string;
 	segmentCount: number;
@@ -11,6 +13,7 @@ interface ApplicationCardProps {
 }
 
 const ApplicationCard = ({
+	app_id,
 	exe,
 	displayName,
 	segmentCount,
@@ -20,7 +23,7 @@ const ApplicationCard = ({
 	return (
 		<Link
 			to="/applications/$exe"
-			params={{ exe: exe }}
+			params={{ exe: app_id }}
 			style={{
 				textDecoration: "none",
 			}}
@@ -42,7 +45,28 @@ const ApplicationCard = ({
 					},
 				}}
 			>
-				<Box sx={{ flex: 1, minWidth: 0 }}>
+				<Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0, gap: 2 }}>
+					<Box
+						sx={{
+							width: 24,
+							height: 24,
+							flexShrink: 0,
+							overflow: "hidden",
+						}}
+					>
+						<img
+							src={getIconSrc(app_id)}
+							alt={displayName || exe}
+							onError={(e) => {
+								e.currentTarget.src = "/app_placeholder.png";
+							}}
+							style={{
+								width: "100%",
+								height: "100%",
+								objectFit: "cover",
+							}}
+						/>
+					</Box>
 					<Typography
 						variant="body1"
 						className="application-title"

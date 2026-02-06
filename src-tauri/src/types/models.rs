@@ -33,3 +33,9 @@ pub enum ControlMsg {
     Resume,
     Shutdown
 }
+
+pub struct AppInfo {
+    pub app_id: String,
+    pub app_exe_path: String,
+    pub app_exe_name: String
+}

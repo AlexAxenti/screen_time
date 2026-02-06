@@ -1,8 +1,19 @@
-use rusqlite::{params};
+use rusqlite::{OptionalExtension, params};
 use crate::{
     sql_client::init::connect_db_file, 
-    tauri_app::dtos::{AppInfoDTO, AppUsageDTO, DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO, parse_window_title_name}
+    types::dtos::{AppInfoDTO, AppUsageDTO, DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO}
 };
+
+//TODO split up reader into domain based query modules
+pub enum SortDirection {
+    Ascending,
+    Descending,
+}
+
+pub enum ApplicationSortValue {
+    Duration,
+    Exe,
+}
 
 pub fn query_usage_summary(start_time: i64, end_time: i64) -> rusqlite::Result<UsageSummaryDTO> {
     let conn = connect_db_file();
@@ -25,17 +36,6 @@ pub fn query_usage_summary(start_time: i64, end_time: i64) -> rusqlite::Result<U
     summary
 }
 
-pub enum SortDirection {
-    Ascending,
-    Descending,
-}
-
-pub enum ApplicationSortValue {
-    Duration,
-    Exe,
-}
-
-//TODO rename from WindowSegmentDTO
 pub fn query_app_usage(
     start_time: i64, 
     end_time: i64, 
@@ -55,31 +55,30 @@ pub fn query_app_usage(
     };
     
     let init_stmt = "SELECT 
-        window_exe, 
-        MIN(window_name) AS window_name,
-        SUM(duration_ms) AS duration,
+        ws.app_id,
+        ws.window_exe, 
+        COALESCE(a.display_name, MIN(ws.window_exe))    AS display_name,
+        SUM(ws.duration_ms) AS duration,
         COUNT(*) AS segment_count
-    FROM window_segments
+    FROM window_segments ws
+    LEFT JOIN applications a
+        ON a.app_id = ws.app_id
     WHERE start_time >= ?1 AND start_time < ?2
-    GROUP BY window_exe";
+    GROUP BY ws.app_id";
     
     let stmt_str = format!("{} {}", init_stmt, order_by_clause);
     
     let mut stmt = conn.prepare(&stmt_str)?;
 
     let segment_iter = stmt.query_map(params![start_time, end_time], |row| {
-        let window_exe: String = row.get(0)?;
-        let window_name: String = row.get(1)?;
-
-        let display_name = parse_window_title_name(&window_name, &window_exe);
-
         Ok(AppUsageDTO {
             app_info: AppInfoDTO {
-                app_exe: window_exe,
-                display_name: display_name
+                app_id: row.get(0)?,
+                app_exe: row.get(1)?,
+                display_name: row.get(2)?
             },
-            duration: row.get(2)?,
-            segment_count: row.get(3)?
+            duration: row.get(3)?,
+            segment_count: row.get(4)?
         })
     })?;
 
@@ -173,23 +172,19 @@ pub fn query_app_titles(
     let conn = connect_db_file();
     
     let mut stmt = conn.prepare("SELECT
-        window_exe,
-        MIN(window_name) AS window_name
-    FROM window_segments
-    WHERE window_name LIKE '%' || ?1 || '%'
-    GROUP BY window_exe
-    ORDER BY COUNT(*) DESC
+        app_id,
+        exe_name,
+        display_name
+    FROM applications
+    WHERE display_name LIKE '%' || ?1 || '%'
+    ORDER BY display_name COLLATE NOCASE ASC
     LIMIT 6;")?;
 
     let apps_iter = stmt.query_map(params![query], |row| {
-        let window_exe: String = row.get(0)?;
-        let window_name: String = row.get(1)?;
-
-        let display_name = parse_window_title_name(&window_name, &window_exe);
-
         Ok(AppInfoDTO {
-            app_exe: window_exe,
-            display_name: display_name
+            app_id: row.get(0)?,
+            app_exe: row.get(1)?,
+            display_name: row.get(2)?
         })
     })?;
 
@@ -199,4 +194,19 @@ pub fn query_app_titles(
     }
 
     Ok(apps)
+}
+
+pub fn check_for_application(app_id: &str) -> rusqlite::Result<bool> {
+    let conn = connect_db_file();
+
+    let mut stmt = conn.prepare("SELECT 1 FROM applications
+    WHERE app_id = ?1 LIMIT 1")?;
+
+    let exists = stmt.query_row(params![app_id], |_| {
+        Ok(())
+    })
+    .optional()?
+    .is_some();
+
+   Ok(exists)
 }
