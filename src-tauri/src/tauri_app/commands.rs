@@ -12,9 +12,21 @@ use crate::{
         AppInfoDTO, AppUsageDTO, DailyUsageDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
     }
 };
+use tauri::{Runtime, ipc::Invoke};
+
+pub fn handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync + 'static {
+    tauri::generate_handler![
+        get_top_usage, 
+        get_usage_summary,
+        get_usage_fragmentation,
+        get_weeks_daily_usage,
+        get_applications,
+        search_applications
+    ]
+}
 
 #[tauri::command]
-pub fn get_top_usage(start_time: i64, end_time: i64, app_count: usize) -> TopUsageDTO {
+fn get_top_usage(start_time: i64, end_time: i64, app_count: usize) -> TopUsageDTO {
     let sort_value = ApplicationSortValue::Duration;
     let sort_direction = SortDirection::Descending;
 
@@ -42,7 +54,28 @@ pub fn get_top_usage(start_time: i64, end_time: i64, app_count: usize) -> TopUsa
 }
 
 #[tauri::command]
-pub fn get_applications(
+fn get_usage_summary(start_time: i64, end_time: i64) -> UsageSummaryDTO {
+    let usage_summary = query_usage_summary(start_time, end_time).expect("Failed to read from DB");
+
+    usage_summary
+}
+
+#[tauri::command]
+pub fn get_usage_fragmentation(start_time: i64, end_time: i64) -> Vec<UsageFragmentationDTO> {
+    let usage_fragmentation = query_usage_fragmentation(start_time, end_time).expect("Failed to read from DB");
+
+    usage_fragmentation
+}
+
+#[tauri::command]
+fn get_weeks_daily_usage(start_time: i64, end_time: i64) -> Vec<DailyUsageDTO> {
+    let weeks_daily_usage = query_weeks_daily_usage(start_time, end_time).expect("Failed to read from DB");
+
+    weeks_daily_usage
+}
+
+#[tauri::command]
+fn get_applications(
     start_time: i64, 
     end_time: i64, 
     sort_value: Option<String>, 
@@ -69,29 +102,8 @@ pub fn get_applications(
 }
 
 #[tauri::command]
-pub fn get_usage_summary(start_time: i64, end_time: i64) -> UsageSummaryDTO {
-    let usage_summary = query_usage_summary(start_time, end_time).expect("Failed to read from DB");
-
-    usage_summary
-}
-
-#[tauri::command]
-pub fn search_applications(query: String) -> Vec<AppInfoDTO> {
+fn search_applications(query: String) -> Vec<AppInfoDTO> {
     let app_titles = query_app_titles(query).expect("Failed to read from DB");
 
     app_titles
-}
-
-#[tauri::command]
-pub fn get_usage_fragmentation(start_time: i64, end_time: i64) -> Vec<UsageFragmentationDTO> {
-    let usage_fragmentation = query_usage_fragmentation(start_time, end_time).expect("Failed to read from DB");
-
-    usage_fragmentation
-}
-
-#[tauri::command]
-pub fn get_weeks_daily_usage(start_time: i64, end_time: i64) -> Vec<DailyUsageDTO> {
-    let weeks_daily_usage = query_weeks_daily_usage(start_time, end_time).expect("Failed to read from DB");
-
-    weeks_daily_usage
 }

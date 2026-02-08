@@ -8,24 +8,15 @@ use std::sync::mpsc::Sender;
 use tauri::RunEvent;
 
 use crate::ControlMsg;
-use crate::tauri_app::protocols::handle_icon_request;
-use crate::tauri_app::setup::setup_menu;
 
 pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>>, mut sampler_handle: Option<JoinHandle<()>>) {
     tauri::Builder::default()
         .register_uri_scheme_protocol("icons", |_app, request| { 
-            handle_icon_request(request)
+            protocols::handle_icon_request(request)
         })
-        .invoke_handler(tauri::generate_handler![
-            commands::get_top_usage, 
-            commands::get_usage_summary,
-            commands::get_usage_fragmentation,
-            commands::get_weeks_daily_usage,
-            commands::get_applications,
-            commands::search_applications
-        ])
+        .invoke_handler(commands::handler())
         .setup(|app| {
-            setup_menu(app, tx_control)
+            setup::setup_menu(app, tx_control)
         })
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
