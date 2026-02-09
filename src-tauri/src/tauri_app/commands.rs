@@ -25,6 +25,7 @@ pub fn handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync + 'stat
     ]
 }
 
+//TODO split into domains
 #[tauri::command]
 fn get_top_usage(start_time: i64, end_time: i64, app_count: usize) -> TopUsageDTO {
     let sort_value = ApplicationSortValue::Duration;
