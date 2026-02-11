@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
 	Bar,
 	BarChart,
@@ -36,6 +36,10 @@ const WeeklyUsageChart = ({
 		epochEndOfWeekMs,
 	);
 	const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+	useEffect(() => {
+		setSelectedIndex(null);
+	}, [epochStartOfWeekMs]);
 
 	const lastWeekScaffold: LastWeekScaffold[] = useMemo(() => {
 		const scaffold: LastWeekScaffold[] = [];
