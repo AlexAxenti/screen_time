@@ -2,7 +2,6 @@ import { Box } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import PageHeader from "../../components/UI/PageHeader";
-import { formatDateToYYYYMMDD, parseLocalDateString } from "../../lib/durationFormatHelpers";
 import { getEndOfDayMs, getStartOfDayMs, getWeekStartMs } from "../../lib/epochDayHelpers";
 import useGetApplications from "../../hooks/queries/useGetApplications";
 import ApplicationsFilters from "./-components/ApplicationsFilters";
@@ -19,11 +18,11 @@ function Index() {
 
 	const [dateRangeOption, setDateRangeOption] =
 		useState<DateRangeOption>("last7days");
-	const [customStartDate, setCustomStartDate] = useState<string>(
-		formatDateToYYYYMMDD(new Date(getWeekStartMs(today))),
+	const [customStartMs, setCustomStartMs] = useState<number>(
+		getWeekStartMs(today),
 	);
-	const [customEndDate, setCustomEndDate] = useState<string>(
-		formatDateToYYYYMMDD(today),
+	const [customEndMs, setCustomEndMs] = useState<number>(
+		getEndOfDayMs(today),
 	);
 
 	const { startTime, endTime } = useMemo(() => {
@@ -43,8 +42,8 @@ function Index() {
 			}
 			case "custom":
 				return {
-					startTime: getStartOfDayMs(parseLocalDateString(customStartDate)),
-					endTime: getEndOfDayMs(parseLocalDateString(customEndDate)),
+					startTime: getStartOfDayMs(new Date(customStartMs)),
+					endTime: getEndOfDayMs(new Date(customEndMs)),
 				};
 			default:
 				return {
@@ -52,7 +51,7 @@ function Index() {
 					endTime: todayEndMs,
 				};
 		}
-	}, [dateRangeOption, customStartDate, customEndDate, today]);
+	}, [dateRangeOption, customStartMs, customEndMs, today]);
 
 	const [sortOption, setSortOption] = useState<SortOption>("duration-desc");
 	const [searchQuery, setSearchQuery] = useState<string>("");
@@ -82,10 +81,10 @@ function Index() {
 			<ApplicationsFilters
 				dateRangeOption={dateRangeOption}
 				onDateRangeOptionChange={setDateRangeOption}
-				customStartDate={customStartDate}
-				customEndDate={customEndDate}
-				onCustomStartChange={setCustomStartDate}
-				onCustomEndChange={setCustomEndDate}
+				customStartMs={customStartMs}
+				customEndMs={customEndMs}
+				onCustomStartChange={setCustomStartMs}
+				onCustomEndChange={setCustomEndMs}
 				searchQuery={searchQuery}
 				onSearchChange={setSearchQuery}
 				sortOption={sortOption}

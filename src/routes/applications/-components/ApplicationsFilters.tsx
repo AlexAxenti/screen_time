@@ -6,10 +6,10 @@ import SortSelector, { type SortOption } from "./SortSelector";
 interface ApplicationsFiltersProps {
 	dateRangeOption: DateRangeOption;
 	onDateRangeOptionChange: (option: DateRangeOption) => void;
-	customStartDate: string;
-	customEndDate: string;
-	onCustomStartChange: (date: string) => void;
-	onCustomEndChange: (date: string) => void;
+	customStartMs: number;
+	customEndMs: number;
+	onCustomStartChange: (ms: number) => void;
+	onCustomEndChange: (ms: number) => void;
 	searchQuery: string;
 	onSearchChange: (query: string) => void;
 	sortOption: SortOption;
@@ -19,8 +19,8 @@ interface ApplicationsFiltersProps {
 const ApplicationsFilters = ({
 	dateRangeOption,
 	onDateRangeOptionChange,
-	customStartDate,
-	customEndDate,
+	customStartMs,
+	customEndMs,
 	onCustomStartChange,
 	onCustomEndChange,
 	searchQuery,
@@ -48,8 +48,8 @@ const ApplicationsFilters = ({
 				<DateRangeSelector
 					selectedOption={dateRangeOption}
 					onOptionChange={onDateRangeOptionChange}
-					customStartDate={customStartDate}
-					customEndDate={customEndDate}
+					customStartMs={customStartMs}
+					customEndMs={customEndMs}
 					onCustomStartChange={onCustomStartChange}
 					onCustomEndChange={onCustomEndChange}
 				/>
