@@ -38,15 +38,10 @@ const utcMidnightToLocalMidnight = (utcMidnightMs: number): number => {
 	return new Date(year, month, day, 0, 0, 0, 0).getTime();
 };
 
-const parseLocalDateString = (dateString: string): Date => {
-	return new Date(dateString + "T00:00:00");
-};
-
 export {
 	getWeekStartMs,
 	getWeekEndFromStartMs,
 	getStartOfDayMs,
 	getEndOfDayMs,
 	utcMidnightToLocalMidnight,
-	parseLocalDateString,
 };
