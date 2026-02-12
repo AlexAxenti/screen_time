@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
 	Bar,
 	BarChart,
@@ -17,6 +17,7 @@ import useGetWeeksDailyUsage from "../../hooks/queries/useGetWeeksDailyUsage";
 interface LastWeekScaffold {
 	startOfDayMs: number;
 	dayLabel: string;
+	fullDate: string;
 	order: number;
 }
 
@@ -54,9 +55,17 @@ const WeeklyUsageChart = ({
 				weekday: "short",
 			});
 
+			const fullDate = startOfWeekDate.toLocaleDateString("en-US", {
+				weekday: "short",
+				month: "short",
+				day: "numeric",
+				year: "numeric",
+			});
+
 			scaffold.push({
 				startOfDayMs: getStartOfDayMs(startOfWeekDate),
 				dayLabel,
+				fullDate,
 				order: i + 1,
 			});
 		}
@@ -135,6 +144,10 @@ const WeeklyUsageChart = ({
 						contentStyle={{ background: "#111", border: "1px solid #333" }}
 						labelStyle={{ color: "#fff" }}
 						itemStyle={{ color: "#fff" }}
+						labelFormatter={(_, payload) => {
+							const data = payload?.[0]?.payload;
+							return data?.fullDate ?? _;
+						}}
 						formatter={(value) => [
 							`${formatMsToHoursOrMinutes(Number(value))}`,
 							"Duration",

@@ -1,10 +1,12 @@
-import { Box, Popover, Typography } from "@mui/material";
+import { Box, Button, Popover, Typography } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { type Dayjs } from "dayjs";
 import { useMemo, useState } from "react";
+import { getWeekStartMs } from "../../lib/epochDayHelpers";
 
 interface DashboardHeaderProps {
 	rangeStartMs: number;
@@ -38,6 +40,14 @@ const DashboardHeader = ({
 			handleClose();
 		}
 	};
+
+	const handleResetToThisWeek = () => {
+		const currentWeekStart = getWeekStartMs(new Date());
+		onWeekChange(new Date(currentWeekStart));
+		handleClose();
+	};
+
+	const isCurrentWeek = weekStartMs === getWeekStartMs(new Date());
 
 	const timeframeLabel = useMemo(() => {
 		const startDate = new Date(rangeStartMs);
@@ -167,6 +177,19 @@ const DashboardHeader = ({
 						sx={{ height: "300px" }}
 					/>
 				</LocalizationProvider>
+				<Box sx={{ px: 2, pb: 2 }}>
+					<Button
+						variant="outlined"
+						size="small"
+						fullWidth
+						startIcon={<RefreshIcon />}
+						onClick={handleResetToThisWeek}
+						disabled={isCurrentWeek}
+						sx={{ textTransform: "none" }}
+					>
+						Reset to This Week
+					</Button>
+				</Box>
 			</Popover>
 		</Box>
 	);
