@@ -31,7 +31,15 @@ fn get_top_usage(start_time: i64, end_time: i64, app_count: usize) -> TopUsageDT
     let sort_value = ApplicationSortValue::Duration;
     let sort_direction = SortDirection::Descending;
 
-    let mut window_segments = query_app_usage(start_time, end_time, sort_value, sort_direction).expect("Failed to read from DB");
+    let mut window_segments = query_app_usage(
+        start_time, 
+        end_time, 
+        sort_value, 
+        sort_direction,
+                None,
+        None,
+        None,
+    ).expect("Failed to read from DB");
 
     let total_time: i64 = window_segments.iter()
         .map(|segment| segment.duration)
@@ -79,6 +87,9 @@ fn get_weeks_daily_usage(start_time: i64, end_time: i64) -> Vec<DailyUsageDTO> {
 fn get_applications(
     start_time: i64, 
     end_time: i64, 
+    page_count: i64,
+    page_size: i64,
+    search_value: Option<String>,
     sort_value: Option<String>, 
     sort_direction: Option<String>
 ) -> Vec<AppUsageDTO> {
@@ -97,7 +108,15 @@ fn get_applications(
         SortDirection::Descending
     };
     
-    let window_segments = query_app_usage(start_time, end_time, sort_value, sort_direction).expect("Failed to read from DB");
+    let window_segments = query_app_usage(
+        start_time, 
+        end_time, 
+        sort_value, 
+        sort_direction,
+        Some(page_count),
+        Some(page_size),
+        search_value,
+    ).expect("Failed to read from DB");
     
     window_segments
 }
