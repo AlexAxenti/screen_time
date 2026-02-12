@@ -5,11 +5,14 @@ import type { ApplicationUsage } from "../../types/dto";
 const useGetApplications = (
 	startTime: number,
 	endTime: number,
+	pageCount: number,
+	pageSize: number,
 	sortValue?: "window_exe" | "duration",
 	sortDirection?: "ASC" | "DESC",
+	searchValue?: string,
 ) => {
 	return useQuery({
-		queryKey: ["applications", startTime, endTime, sortValue, sortDirection],
+		queryKey: ["applications", startTime, endTime, pageCount, pageSize, sortValue, sortDirection, searchValue],
 		queryFn: async () => {
 			try {
 				const applications: ApplicationUsage[] = await invoke(
@@ -17,8 +20,11 @@ const useGetApplications = (
 					{
 						startTime,
 						endTime,
+						pageCount,
+						pageSize,
 						sortValue,
 						sortDirection,
+						searchValue
 					},
 				);
 				return applications;
