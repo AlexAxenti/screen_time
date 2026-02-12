@@ -164,7 +164,7 @@ const DashboardHeader = ({
 						value={dayjs(weekStartMs)}
 						onChange={handleDateChange}
 						maxDate={dayjs()}
-						sx={{ height: "275px" }}
+						sx={{ height: "300px" }}
 					/>
 				</LocalizationProvider>
 			</Popover>

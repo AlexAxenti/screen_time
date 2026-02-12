@@ -36,10 +36,12 @@ const WeeklyUsageChart = ({
 		epochEndOfWeekMs,
 	);
 	const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+	const [prevStartTime, setPrevStartTime] = useState<number>(epochStartOfWeekMs);
 
-	useEffect(() => {
+	if(epochStartOfWeekMs !== prevStartTime) {
+		setPrevStartTime(epochStartOfWeekMs);
 		setSelectedIndex(null);
-	}, [epochStartOfWeekMs]);
+	}
 
 	const lastWeekScaffold: LastWeekScaffold[] = useMemo(() => {
 		const scaffold: LastWeekScaffold[] = [];
