@@ -8,16 +8,6 @@ const getWeekStartMs = (todayInput: Date): number => {
 	return weekStart.getTime();
 };
 
-const getWeekEndMs = (todayInput: Date): number => {
-	const today: Date = new Date(todayInput);
-	today.setHours(0, 0, 0, 0);
-
-	const weekEnd: Date = new Date(today);
-	weekEnd.setDate(today.getDate() + 1);
-
-	return weekEnd.getTime();
-};
-
 const getStartOfDayMs = (todayInput: Date): number => {
 	const today: Date = new Date(todayInput);
 	today.setHours(0, 0, 0, 0);
@@ -48,11 +38,15 @@ const utcMidnightToLocalMidnight = (utcMidnightMs: number): number => {
 	return new Date(year, month, day, 0, 0, 0, 0).getTime();
 };
 
+const parseLocalDateString = (dateString: string): Date => {
+	return new Date(dateString + "T00:00:00");
+};
+
 export {
 	getWeekStartMs,
-	getWeekEndMs,
 	getWeekEndFromStartMs,
 	getStartOfDayMs,
 	getEndOfDayMs,
 	utcMidnightToLocalMidnight,
+	parseLocalDateString,
 };

@@ -2,8 +2,8 @@ import { Box } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import PageHeader from "../../components/UI/PageHeader";
-import { formatDateToYYYYMMDD } from "../../lib/durationFormatHelpers";
-import { getEndOfDayMs, getStartOfDayMs } from "../../lib/epochDayHelpers";
+import { formatDateToYYYYMMDD, parseLocalDateString } from "../../lib/durationFormatHelpers";
+import { getEndOfDayMs, getStartOfDayMs, getWeekStartMs } from "../../lib/epochDayHelpers";
 import useGetApplications from "../../hooks/queries/useGetApplications";
 import ApplicationsFilters from "./-components/ApplicationsFilters";
 import ApplicationsList from "./-components/ApplicationsList";
@@ -20,37 +20,36 @@ function Index() {
 	const [dateRangeOption, setDateRangeOption] =
 		useState<DateRangeOption>("last7days");
 	const [customStartDate, setCustomStartDate] = useState<string>(
-		formatDateToYYYYMMDD(new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)),
+		formatDateToYYYYMMDD(new Date(getWeekStartMs(today))),
 	);
 	const [customEndDate, setCustomEndDate] = useState<string>(
 		formatDateToYYYYMMDD(today),
 	);
 
 	const { startTime, endTime } = useMemo(() => {
-		const nowMs = Date.now();
 		const todayStartMs = getStartOfDayMs(today);
-		const tomorrowMs = todayStartMs + 24 * 60 * 60 * 1000;
+		const todayEndMs = getEndOfDayMs(today);
 
 		switch (dateRangeOption) {
 			case "today":
-				return { startTime: todayStartMs, endTime: tomorrowMs };
+				return { startTime: todayStartMs, endTime: todayEndMs };
 			case "last7days": {
 				const sevenDaysAgoMs = todayStartMs - 6 * 24 * 60 * 60 * 1000;
-				return { startTime: sevenDaysAgoMs, endTime: tomorrowMs };
+				return { startTime: sevenDaysAgoMs, endTime: todayEndMs };
 			}
 			case "last30days": {
 				const thirtyDaysAgoMs = todayStartMs - 29 * 24 * 60 * 60 * 1000;
-				return { startTime: thirtyDaysAgoMs, endTime: tomorrowMs };
+				return { startTime: thirtyDaysAgoMs, endTime: todayEndMs };
 			}
 			case "custom":
 				return {
-					startTime: getStartOfDayMs(new Date(customStartDate)),
-					endTime: getEndOfDayMs(new Date(customEndDate)),
+					startTime: getStartOfDayMs(parseLocalDateString(customStartDate)),
+					endTime: getEndOfDayMs(parseLocalDateString(customEndDate)),
 				};
 			default:
 				return {
-					startTime: nowMs - 6 * 24 * 60 * 60 * 1000,
-					endTime: tomorrowMs,
+					startTime: todayStartMs - 6 * 24 * 60 * 60 * 1000,
+					endTime: todayEndMs,
 				};
 		}
 	}, [dateRangeOption, customStartDate, customEndDate, today]);
