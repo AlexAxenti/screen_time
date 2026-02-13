@@ -1,9 +1,3 @@
-const formatMsToHoursAndMinutes = (ms: number) => {
-	const hours = Math.floor(ms / 3600000);
-	const minutes = Math.floor((ms % 3600000) / 60000);
-	return `${hours}h ${minutes}m`;
-};
-
 const formatMsToHoursOrMinutes = (ms: number) => {
 	const seconds = Math.floor((ms % 60000) / 1000);
 	const minutes = Math.floor((ms % 3600000) / 60000);
@@ -30,7 +24,6 @@ const parseLocalDateString = (dateString: string): Date => {
 };
 
 export {
-	formatMsToHoursAndMinutes,
 	formatMsToHoursOrMinutes,
 	formatDateToYYYYMMDD,
 	parseLocalDateString,

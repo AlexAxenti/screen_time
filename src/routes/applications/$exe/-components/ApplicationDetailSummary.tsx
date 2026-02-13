@@ -1,8 +1,27 @@
 import { Box } from "@mui/material";
 import SimpleDataCard from "../../../../components/UI/SimpleDataCard";
 import TitledCard from "../../../../components/UI/TitledCard";
+import useGetAppUsageSummary from "../../../../hooks/queries/useGetAppUsageSummary";
+import { formatMsToHoursOrMinutes } from "../../../../lib/durationFormatHelpers";
 
-function ApplicationDetailSummary() {
+interface ApplicationDetailSummaryProps {
+	startOfRangeMs: number;
+	endOfRangeMs: number;
+  appId: string;
+}
+
+function ApplicationDetailSummary({ 
+  startOfRangeMs, 
+  endOfRangeMs, 
+  appId 
+}: ApplicationDetailSummaryProps) {
+  const { data: usageSummary } = useGetAppUsageSummary(
+		startOfRangeMs,
+		endOfRangeMs,
+		appId,
+	);
+	if (!usageSummary) return null;
+
 	return (
 		<TitledCard>
 			<Box
@@ -15,19 +34,20 @@ function ApplicationDetailSummary() {
 				}}
 			>
 				<SimpleDataCard
-					dataValue="4h 32m"
+					dataValue={formatMsToHoursOrMinutes(usageSummary.total_duration)}
 					dataLabel="Total Focus Time"
 				/>
 
 				<SimpleDataCard
-					dataValue={42}
-					dataLabel="Focus Switches"
-					tooltip="Counts how often the active foreground application changed during tracked time."
+					dataValue={usageSummary.segments_count === 0 ? usageSummary.segments_count : usageSummary.segments_count - 1}
+					dataLabel="Session Counts"
+					tooltip="Counts how many times this application became the active foreground application focus."
 				/>
 
 				<SimpleDataCard
-					dataValue={1}
-					dataLabel="Unique Apps"
+					dataValue={formatMsToHoursOrMinutes(usageSummary.avg_segment_duration)}
+					dataLabel="Average Session Duration"
+          tooltip="Displays how long you remain focused on this application without switching to another app."
 				/>
 			</Box>
 		</TitledCard>

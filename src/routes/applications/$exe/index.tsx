@@ -125,7 +125,11 @@ function RouteComponent() {
 						appId={exe}
 					/>
 				</TitledCard>
-				<ApplicationDetailSummary />
+				<ApplicationDetailSummary 
+					startOfRangeMs={rangeStartMs}
+					endOfRangeMs={rangeEndMs}
+					appId={exe}
+				/>
 			</Box>
 
 			{/* Bottom Row: Two charts (1/2 each) */}
