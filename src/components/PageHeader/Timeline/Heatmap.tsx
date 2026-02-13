@@ -2,7 +2,7 @@ import { Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { PickersDay, type PickersDayProps } from "@mui/x-date-pickers/PickersDay";
 import type { Dayjs } from "dayjs";
-import { formatMsToHoursOrMinutes } from "../../lib/durationFormatHelpers";
+import { formatMsToHoursOrMinutes } from "../../../lib/durationFormatHelpers";
 
 export interface UsageThresholds {
 	p25: number;

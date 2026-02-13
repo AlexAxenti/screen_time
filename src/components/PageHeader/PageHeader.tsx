@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
-import Timeline from "../Timeline/Timeline";
+import Timeline from "./Timeline/Timeline";
 
 interface PageHeaderProps {
 	leftSlot: ReactNode;
@@ -9,6 +9,7 @@ interface PageHeaderProps {
 	weekStartMs: number;
 	weekEndMs: number;
 	onWeekChange: (startDate: Date) => void;
+  appId?: string;
 }
 
 const PageHeader = ({
@@ -18,6 +19,7 @@ const PageHeader = ({
 	weekStartMs,
 	weekEndMs,
 	onWeekChange,
+  appId,
 }: PageHeaderProps) => {
 	return (
 		<Box
@@ -38,6 +40,7 @@ const PageHeader = ({
 				weekStartMs={weekStartMs}
 				weekEndMs={weekEndMs}
 				onWeekChange={onWeekChange}
+        appId={appId}
 			/>
 		</Box>
 	);

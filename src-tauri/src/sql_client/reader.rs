@@ -106,9 +106,7 @@ pub fn query_usage_fragmentation(start_time: i64, end_time: i64, app_id: Option<
 
     let app_id = app_id.unwrap_or_default();
 
-    let app_query = if app_id.len() > 0 { format!("AND app_id = '{}'", app_id) } else { "".to_string() };
-
-    let stmt_str = format!("SELECT
+    let mut stmt = conn.prepare("SELECT
     CASE
         WHEN duration_ms < 60000   THEN 'lt_1m'
         WHEN duration_ms < 120000  THEN '1_2m'
@@ -129,13 +127,11 @@ pub fn query_usage_fragmentation(start_time: i64, end_time: i64, app_id: Option<
     FROM window_segments
     WHERE start_time >= ?1 
         AND start_time < ?2
-        {}
+        AND (?3 = '' OR app_id = ?3)
     GROUP BY duration_bucket, bucket_order
-    ORDER BY bucket_order;", app_query);
+    ORDER BY bucket_order;")?;
 
-    let mut stmt = conn.prepare(&stmt_str)?;
-
-    let fragmentation_iter = stmt.query_map(params![start_time, end_time], |row| {
+    let fragmentation_iter = stmt.query_map(params![start_time, end_time, app_id], |row| {
         Ok(UsageFragmentationDTO {
             duration_bucket: row.get(0)?,
             count: row.get(2)?
@@ -155,9 +151,7 @@ pub fn query_weeks_daily_usage(start_time: i64, end_time: i64, app_id: Option<St
 
     let app_id = app_id.unwrap_or_default();
 
-    let app_query = if app_id.len() > 0 { format!("AND app_id = '{}'", app_id) } else { "".to_string() };
-
-    let stmt_str = format!("SELECT
+    let mut stmt = conn.prepare("SELECT
         date(start_time / 1000, 'unixepoch', 'localtime') AS day,
         CAST(strftime('%s', date(start_time / 1000, 'unixepoch', 'localtime')) AS INTEGER) * 1000
             AS day_start_ms,
@@ -169,13 +163,11 @@ pub fn query_weeks_daily_usage(start_time: i64, end_time: i64, app_id: Option<St
         AND start_time <  ?2
         AND duration_ms IS NOT NULL
         AND duration_ms > 0
-        {}
+        AND (?3 = '' OR app_id = ?3)
     GROUP BY day
-    ORDER BY day;", app_query);
+    ORDER BY day;")?;
 
-    let mut stmt = conn.prepare(&stmt_str)?;
-
-    let usage_iter = stmt.query_map(params![start_time, end_time], |row| {
+    let usage_iter = stmt.query_map(params![start_time, end_time, app_id], |row| {
         Ok(DailyUsageDTO {
             day_start_ms: row.get(1)?,
             total_duration_ms: row.get(2)?,
@@ -237,8 +229,10 @@ pub fn check_for_application(app_id: &str) -> rusqlite::Result<bool> {
    Ok(exists)
 }
 
-pub fn query_heat_map_values(start_time: i64, end_time: i64) -> rusqlite::Result<Vec<DailyUsageHeatmapDTO>> {
+pub fn query_heat_map_values(start_time: i64, end_time: i64, app_id: Option<String>) -> rusqlite::Result<Vec<DailyUsageHeatmapDTO>> {
     let conn = connect_db_file();
+
+    let app_id = app_id.unwrap_or_default();
 
     let mut stmt = conn.prepare("SELECT
     CAST(strftime('%s', date(ws.start_time / 1000, 'unixepoch', 'localtime')) AS INTEGER) * 1000
@@ -246,12 +240,13 @@ pub fn query_heat_map_values(start_time: i64, end_time: i64) -> rusqlite::Result
     SUM(ws.duration_ms) AS total_duration_ms
     FROM window_segments ws
     WHERE ws.start_time >= ?1
-    AND ws.start_time <  ?2
-    AND ws.duration_ms > 0
+        AND ws.start_time <  ?2
+        AND ws.duration_ms > 0
+        AND (?3 = '' OR ws.app_id = ?3)
     GROUP BY day_start_ms
     ORDER BY day_start_ms ASC;")?;
 
-    let usage_iter = stmt.query_map(params![start_time, end_time], |row| {
+    let usage_iter = stmt.query_map(params![start_time, end_time, app_id], |row| {
         Ok(DailyUsageHeatmapDTO {
             day_start_ms: row.get(0)?,
             total_duration_ms: row.get(1)?,

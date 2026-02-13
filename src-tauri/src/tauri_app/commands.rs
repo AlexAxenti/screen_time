@@ -124,8 +124,8 @@ fn search_applications(query: String) -> Vec<AppInfoDTO> {
 }
 
 #[tauri::command]
-fn get_usage_heat_map(start_time: i64, end_time: i64) -> Vec<DailyUsageHeatmapDTO> {
-    let daily_usage = query_heat_map_values(start_time, end_time).expect("Failed to read from DB");
+fn get_usage_heat_map(start_time: i64, end_time: i64, app_id: Option<String>) -> Vec<DailyUsageHeatmapDTO> {
+    let daily_usage = query_heat_map_values(start_time, end_time, app_id).expect("Failed to read from DB");
 
     daily_usage
 }

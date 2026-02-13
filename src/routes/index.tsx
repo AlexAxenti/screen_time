@@ -2,13 +2,13 @@ import { Box, useTheme } from "@mui/material";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import "./index.css";
 import { useState } from "react";
+import UsageFragmentationChart from "../components/Charts/UsageFragmentationChart";
+import WeeklyUsageChart from "../components/Charts/WeeklyUsageChart";
 import TitledCard from "../components/UI/TitledCard";
 import { getStartOfDayMs, getWeekEndFromStartMs, getWeekStartMs } from "../lib/epochDayHelpers";
 import DashboardHeader from "./-components/DashboardHeader/DashboardHeader";
 import DashboardSummary from "./-components/DashboardSummary";
 import TopExesChart from "./-components/TopExesChart/TopExesChart";
-import UsageFragmentationChart from "./-components/UsageFragmentationChart";
-import WeeklyUsageChart from "./-components/WeeklyUsageChart";
 
 export const Route = createFileRoute("/")({
 	component: Index,

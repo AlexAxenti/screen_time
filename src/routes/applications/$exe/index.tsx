@@ -1,6 +1,8 @@
 import { Box, Typography } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import UsageFragmentationChart from "../../../components/Charts/UsageFragmentationChart";
+import WeeklyUsageChart from "../../../components/Charts/WeeklyUsageChart";
 import PageHeader from "../../../components/PageHeader/PageHeader";
 import TitledCard from "../../../components/UI/TitledCard";
 import { getStartOfDayMs, getWeekEndFromStartMs, getWeekStartMs } from "../../../lib/epochDayHelpers";
@@ -56,6 +58,7 @@ function RouteComponent() {
 				weekStartMs={weekStartMs}
 				weekEndMs={weekEndMs}
 				onWeekChange={handleWeekChange}
+				appId={exe}
 			/>
 
 			{/* Top Row: Weekly Chart (2/3) + Summary Cards (1/3) */}
@@ -68,9 +71,12 @@ function RouteComponent() {
 				}}
 			>
 				<TitledCard title="Weekly Overview">
-					<Box sx={{ height: 300, display: "flex", alignItems: "center", justifyContent: "center", color: "text.secondary" }}>
-						Weekly Usage Chart Placeholder
-					</Box>
+					<WeeklyUsageChart
+						epochStartOfWeekMs={weekStartMs}
+						epochEndOfWeekMs={weekEndMs}
+						handleSetRange={handleSetRange}
+						appId={exe}
+					/>
 				</TitledCard>
 				<ApplicationDetailSummary />
 			</Box>
@@ -89,9 +95,11 @@ function RouteComponent() {
 					</Box>
 				</TitledCard>
 				<TitledCard title="Focus Time Blocks">
-					<Box sx={{ height: 250, display: "flex", alignItems: "center", justifyContent: "center", color: "text.secondary" }}>
-						Focus Time Blocks Chart Placeholder
-					</Box>
+					<UsageFragmentationChart
+						startOfRangeMs={rangeStartMs}
+						endOfRangeMs={rangeEndMs}
+						appId={exe}
+					/>
 				</TitledCard>
 			</Box>
 		</Box>

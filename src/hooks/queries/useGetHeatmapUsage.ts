@@ -3,14 +3,14 @@ import { invoke } from "@tauri-apps/api/core";
 import { utcMidnightToLocalMidnight } from "../../lib/epochDayHelpers";
 import type { WeeksDailyUsage } from "../../types/dto";
 
-const useGetHeatmapUsage = (startTime: number, endTime: number) => {
+const useGetHeatmapUsage = (startTime: number, endTime: number, appId?: string) => {
 	return useQuery({
-		queryKey: ["heatmap_usage", startTime, endTime],
+		queryKey: ["heatmap_usage", startTime, endTime, appId],
 		queryFn: async () => {
 			try {
 				let heatmapUsage: WeeksDailyUsage[] = await invoke(
 					"get_usage_heat_map",
-					{ startTime, endTime },
+					{ startTime, endTime, appId },
 				);
 				heatmapUsage = heatmapUsage.map((usage) => ({
 					...usage,

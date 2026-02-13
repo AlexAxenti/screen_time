@@ -3,14 +3,14 @@ import { invoke } from "@tauri-apps/api/core";
 import { utcMidnightToLocalMidnight } from "../../lib/epochDayHelpers";
 import type { WeeksDailyUsage } from "../../types/dto";
 
-const useGetWeeksDailyUsage = (startTime: number, endTime: number, app_id?: string) => {
+const useGetWeeksDailyUsage = (startTime: number, endTime: number, appId?: string) => {
 	return useQuery({
-		queryKey: ["weeks_daily_usage", startTime, endTime, app_id],
+		queryKey: ["weeks_daily_usage", startTime, endTime, appId],
 		queryFn: async () => {
 			try {
 				let weeksDailyUsage: WeeksDailyUsage[] = await invoke(
 					"get_weeks_daily_usage",
-					{ startTime, endTime, app_id },
+					{ startTime, endTime, appId },
 				);
 				weeksDailyUsage = weeksDailyUsage.map((usage) => ({
 					...usage,
