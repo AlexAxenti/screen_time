@@ -9,6 +9,7 @@ import { getStartOfDayMs, getWeekEndFromStartMs, getWeekStartMs } from "../../..
 import { getIconSrc } from "../../../lib/iconPaths";
 import ApplicationDetailSummary from "./-components/ApplicationDetailSummary";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 interface SearchParams {
 	displayName?: string;
@@ -89,15 +90,33 @@ function RouteComponent() {
 								}}
 							/>
 						</Box>
-						<Typography
-							variant="h4"
-							sx={{
-								fontWeight: 600,
-								color: "text.primary",
-							}}
-						>
-							{displayName || exe}
-						</Typography>
+						<Box sx={{ position: "relative" }}>
+							<Typography
+								variant="h4"
+								sx={{
+									fontWeight: 600,
+									color: "text.primary",
+								}}
+							>
+								{displayName || exe}
+							</Typography>
+							<IconButton
+								onClick={() => console.log("Settings clicked")}
+								size="small"
+								sx={{
+									position: "absolute",
+									top: -4,
+									right: -28,
+									color: "text.secondary",
+									padding: 0.5,
+									"&:hover": {
+										backgroundColor: "action.hover",
+									},
+								}}
+							>
+								<SettingsIcon sx={{ fontSize: 16 }} />
+							</IconButton>
+						</Box>
 					</Box>
 				}
 				rangeStartMs={rangeStartMs}
