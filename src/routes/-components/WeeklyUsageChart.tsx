@@ -17,6 +17,7 @@ import useGetWeeksDailyUsage from "../../hooks/queries/useGetWeeksDailyUsage";
 interface LastWeekScaffold {
 	startOfDayMs: number;
 	dayLabel: string;
+	fullDate: string;
 	order: number;
 }
 
@@ -36,6 +37,12 @@ const WeeklyUsageChart = ({
 		epochEndOfWeekMs,
 	);
 	const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+	const [prevStartTime, setPrevStartTime] = useState<number>(epochStartOfWeekMs);
+
+	if(epochStartOfWeekMs !== prevStartTime) {
+		setPrevStartTime(epochStartOfWeekMs);
+		setSelectedIndex(null);
+	}
 
 	const lastWeekScaffold: LastWeekScaffold[] = useMemo(() => {
 		const scaffold: LastWeekScaffold[] = [];
@@ -48,9 +55,17 @@ const WeeklyUsageChart = ({
 				weekday: "short",
 			});
 
+			const fullDate = startOfWeekDate.toLocaleDateString("en-US", {
+				weekday: "short",
+				month: "short",
+				day: "numeric",
+				year: "numeric",
+			});
+
 			scaffold.push({
 				startOfDayMs: getStartOfDayMs(startOfWeekDate),
 				dayLabel,
+				fullDate,
 				order: i + 1,
 			});
 		}
@@ -86,12 +101,15 @@ const WeeklyUsageChart = ({
 						const idx = e?.activeTooltipIndex;
 						if (idx === null || idx === undefined) return;
 
-						const d = mergedWeeksDailyUsage[Number(idx)];
-						if (!d) return;
+						const data = mergedWeeksDailyUsage[Number(idx)];
+						console.log("clicked data", data);
+						if (!data) return;
+
+						console.log("index", idx);
 
 						handleSetRange(
-							d.startOfDayMs ?? 0,
-							(d.startOfDayMs ?? 0) + 24 * 60 * 60 * 1000,
+							data.startOfDayMs ?? 0,
+							(data.startOfDayMs ?? 0) + 24 * 60 * 60 * 1000,
 						);
 						setSelectedIndex(
 							Number(idx) === selectedIndex ? null : Number(idx),
@@ -129,6 +147,10 @@ const WeeklyUsageChart = ({
 						contentStyle={{ background: "#111", border: "1px solid #333" }}
 						labelStyle={{ color: "#fff" }}
 						itemStyle={{ color: "#fff" }}
+						labelFormatter={(_, payload) => {
+							const data = payload?.[0]?.payload;
+							return data?.fullDate ?? _;
+						}}
 						formatter={(value) => [
 							`${formatMsToHoursOrMinutes(Number(value))}`,
 							"Duration",

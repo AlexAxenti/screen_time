@@ -1,7 +1,7 @@
 use rusqlite::{OptionalExtension, params};
 use crate::{
     sql_client::init::connect_db_file, 
-    types::dtos::{AppInfoDTO, AppUsageDTO, DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO}
+    types::dtos::{AppInfoDTO, AppUsageDTO, DailyUsageDTO, DailyUsageHeatmapDTO, UsageFragmentationDTO, UsageSummaryDTO}
 };
 
 //TODO split up reader into domain based query modules
@@ -38,9 +38,12 @@ pub fn query_usage_summary(start_time: i64, end_time: i64) -> rusqlite::Result<U
 
 pub fn query_app_usage(
     start_time: i64, 
-    end_time: i64, 
+    end_time: i64,
     sort_value: ApplicationSortValue, 
-    sort_direction: SortDirection
+    sort_direction: SortDirection,
+    page_count: Option<i64>,
+    page_size: Option<i64>,
+    search_value: Option<String>,
 ) -> rusqlite::Result<Vec<AppUsageDTO>> {
     let conn = connect_db_file();
     
@@ -50,27 +53,35 @@ pub fn query_app_usage(
     };
     
     let order_by_clause = match sort_value {
-        ApplicationSortValue::Duration => format!("ORDER BY duration {}, window_exe COLLATE NOCASE {}", sort_direction, sort_direction),
+        ApplicationSortValue::Duration => format!("ORDER BY duration {}, display_name COLLATE NOCASE {}", sort_direction, sort_direction),
         _ => format!("ORDER BY display_name COLLATE NOCASE {}, duration {}", sort_direction, sort_direction)
     };
     
-    let init_stmt = "SELECT 
+    let search_param = search_value.unwrap_or_default();
+    
+    let pagination_clause = match (page_count, page_size) {
+        (Some(page), Some(size)) => format!("LIMIT {} OFFSET {}", size, page * size),
+        _ => String::new()
+    };
+    
+    let stmt_str = format!("SELECT 
         ws.app_id,
         ws.window_exe, 
-        COALESCE(a.display_name, MIN(ws.window_exe))    AS display_name,
+        COALESCE(a.display_name, MIN(ws.window_exe)) AS display_name,
         SUM(ws.duration_ms) AS duration,
         COUNT(*) AS segment_count
     FROM window_segments ws
     LEFT JOIN applications a
         ON a.app_id = ws.app_id
     WHERE start_time >= ?1 AND start_time < ?2
-    GROUP BY ws.app_id";
-    
-    let stmt_str = format!("{} {}", init_stmt, order_by_clause);
+    GROUP BY ws.app_id
+    HAVING (?3 = '' OR display_name LIKE '%' || ?3 || '%')
+    {}
+    {}", order_by_clause, pagination_clause);
     
     let mut stmt = conn.prepare(&stmt_str)?;
 
-    let segment_iter = stmt.query_map(params![start_time, end_time], |row| {
+    let segment_iter = stmt.query_map(params![start_time, end_time, search_param], |row| {
         Ok(AppUsageDTO {
             app_info: AppInfoDTO {
                 app_id: row.get(0)?,
@@ -209,4 +220,33 @@ pub fn check_for_application(app_id: &str) -> rusqlite::Result<bool> {
     .is_some();
 
    Ok(exists)
+}
+
+pub fn query_heat_map_values(start_time: i64, end_time: i64) -> rusqlite::Result<Vec<DailyUsageHeatmapDTO>> {
+    let conn = connect_db_file();
+
+    let mut stmt = conn.prepare("SELECT
+    CAST(strftime('%s', date(ws.start_time / 1000, 'unixepoch', 'localtime')) AS INTEGER) * 1000
+        AS day_start_ms,
+    SUM(ws.duration_ms) AS total_duration_ms
+    FROM window_segments ws
+    WHERE ws.start_time >= ?1
+    AND ws.start_time <  ?2
+    AND ws.duration_ms > 0
+    GROUP BY day_start_ms
+    ORDER BY day_start_ms ASC;")?;
+
+    let usage_iter = stmt.query_map(params![start_time, end_time], |row| {
+        Ok(DailyUsageHeatmapDTO {
+            day_start_ms: row.get(0)?,
+            total_duration_ms: row.get(1)?,
+        })
+    })?;
+
+    let mut daily_usage = Vec::new();
+    for day in usage_iter {
+        daily_usage.push(day?);
+    }
+
+    Ok(daily_usage)
 }

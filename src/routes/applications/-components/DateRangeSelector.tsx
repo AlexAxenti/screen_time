@@ -1,30 +1,40 @@
-import {
-	Box,
-	FormControlLabel,
-	Radio,
-	RadioGroup,
-	TextField,
-} from "@mui/material";
+import { Box, FormControlLabel, Radio, RadioGroup } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs, { type Dayjs } from "dayjs";
 
 type DateRangeOption = "today" | "last7days" | "last30days" | "custom";
 
 interface DateRangeSelectorProps {
 	selectedOption: DateRangeOption;
 	onOptionChange: (option: DateRangeOption) => void;
-	customStartDate: string;
-	customEndDate: string;
-	onCustomStartChange: (date: string) => void;
-	onCustomEndChange: (date: string) => void;
+	customStartMs: number;
+	customEndMs: number;
+	onCustomStartChange: (ms: number) => void;
+	onCustomEndChange: (ms: number) => void;
 }
 
 const DateRangeSelector = ({
 	selectedOption,
 	onOptionChange,
-	customStartDate,
-	customEndDate,
+	customStartMs,
+	customEndMs,
 	onCustomStartChange,
 	onCustomEndChange,
 }: DateRangeSelectorProps) => {
+	const handleStartChange = (value: Dayjs | null) => {
+		if (value) {
+			onCustomStartChange(value.valueOf());
+		}
+	};
+
+	const handleEndChange = (value: Dayjs | null) => {
+		if (value) {
+			onCustomEndChange(value.valueOf());
+		}
+	};
+
 	return (
 		<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
 			<RadioGroup
@@ -76,26 +86,30 @@ const DateRangeSelector = ({
 			</RadioGroup>
 
 			{selectedOption === "custom" && (
-				<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-					<TextField
-						type="date"
-						label="Start Date"
-						value={customStartDate}
-						onChange={(e) => onCustomStartChange(e.target.value)}
-						size="small"
-						InputLabelProps={{ shrink: true }}
-						sx={{ minWidth: 150 }}
-					/>
-					<TextField
-						type="date"
-						label="End Date"
-						value={customEndDate}
-						onChange={(e) => onCustomEndChange(e.target.value)}
-						size="small"
-						InputLabelProps={{ shrink: true }}
-						sx={{ minWidth: 150 }}
-					/>
-				</Box>
+				<LocalizationProvider dateAdapter={AdapterDayjs}>
+					<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+						<DatePicker
+							label="Start Date"
+							value={dayjs(customStartMs)}
+							onChange={handleStartChange}
+							slotProps={{
+								textField: { size: "small", sx: { minWidth: 150 } },
+								actionBar: { actions: [] },
+								layout: { sx: { height: 300 } },
+							}}
+						/>
+						<DatePicker
+							label="End Date"
+							value={dayjs(customEndMs)}
+							onChange={handleEndChange}
+							slotProps={{
+								textField: { size: "small", sx: { minWidth: 150 } },
+								actionBar: { actions: [] },
+								layout: { sx: { height: 300 } },
+							}}
+						/>
+					</Box>
+				</LocalizationProvider>
 			)}
 		</Box>
 	);

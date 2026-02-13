@@ -1,15 +1,9 @@
 use crate::{
     sql_client::reader::{
-        ApplicationSortValue, 
-        SortDirection, 
-        query_app_titles, 
-        query_app_usage, 
-        query_usage_fragmentation, 
-        query_usage_summary, 
-        query_weeks_daily_usage
+        ApplicationSortValue, SortDirection, query_app_titles, query_app_usage, query_heat_map_values, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
     }, 
     types::dtos::{
-        AppInfoDTO, AppUsageDTO, DailyUsageDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
+        AppInfoDTO, AppUsageDTO, DailyUsageDTO, DailyUsageHeatmapDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
     }
 };
 use tauri::{Runtime, ipc::Invoke};
@@ -21,7 +15,8 @@ pub fn handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync + 'stat
         get_usage_fragmentation,
         get_weeks_daily_usage,
         get_applications,
-        search_applications
+        search_applications,
+        get_usage_heat_map
     ]
 }
 
@@ -31,7 +26,15 @@ fn get_top_usage(start_time: i64, end_time: i64, app_count: usize) -> TopUsageDT
     let sort_value = ApplicationSortValue::Duration;
     let sort_direction = SortDirection::Descending;
 
-    let mut window_segments = query_app_usage(start_time, end_time, sort_value, sort_direction).expect("Failed to read from DB");
+    let mut window_segments = query_app_usage(
+        start_time, 
+        end_time, 
+        sort_value, 
+        sort_direction,
+                None,
+        None,
+        None,
+    ).expect("Failed to read from DB");
 
     let total_time: i64 = window_segments.iter()
         .map(|segment| segment.duration)
@@ -79,6 +82,9 @@ fn get_weeks_daily_usage(start_time: i64, end_time: i64) -> Vec<DailyUsageDTO> {
 fn get_applications(
     start_time: i64, 
     end_time: i64, 
+    page_count: i64,
+    page_size: i64,
+    search_value: Option<String>,
     sort_value: Option<String>, 
     sort_direction: Option<String>
 ) -> Vec<AppUsageDTO> {
@@ -97,7 +103,15 @@ fn get_applications(
         SortDirection::Descending
     };
     
-    let window_segments = query_app_usage(start_time, end_time, sort_value, sort_direction).expect("Failed to read from DB");
+    let window_segments = query_app_usage(
+        start_time, 
+        end_time, 
+        sort_value, 
+        sort_direction,
+        Some(page_count),
+        Some(page_size),
+        search_value,
+    ).expect("Failed to read from DB");
     
     window_segments
 }
@@ -107,4 +121,11 @@ fn search_applications(query: String) -> Vec<AppInfoDTO> {
     let app_titles = query_app_titles(query).expect("Failed to read from DB");
 
     app_titles
+}
+
+#[tauri::command]
+fn get_usage_heat_map(start_time: i64, end_time: i64) -> Vec<DailyUsageHeatmapDTO> {
+    let daily_usage = query_heat_map_values(start_time, end_time).expect("Failed to read from DB");
+
+    daily_usage
 }

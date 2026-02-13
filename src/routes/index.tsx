@@ -3,8 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import "./index.css";
 import { useState } from "react";
 import TitledCard from "../components/UI/TitledCard";
-import { getWeekEndMs, getWeekStartMs } from "../lib/epochDayHelpers";
-import DashboardHeader from "./-components/DashboardHeader";
+import { getStartOfDayMs, getWeekEndFromStartMs, getWeekStartMs } from "../lib/epochDayHelpers";
+import DashboardHeader from "./-components/DashboardHeader/DashboardHeader";
 import DashboardSummary from "./-components/DashboardSummary";
 import TopExesChart from "./-components/TopExesChart/TopExesChart";
 import UsageFragmentationChart from "./-components/UsageFragmentationChart";
@@ -15,23 +15,30 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-	const today: Date = new Date();
 	const theme = useTheme();
 
-	const weekStartMs = getWeekStartMs(today);
-	const weekEndMs = getWeekEndMs(today);
+	const [weekStartMs, setWeekStartMs] = useState<number>(() => getWeekStartMs(new Date()));
+	const weekEndMs = getWeekEndFromStartMs(weekStartMs);
 
 	const [rangeStartMs, setRangeStartMs] = useState<number>(weekStartMs);
 	const [rangeEndMs, setRangeEndMs] = useState<number>(weekEndMs);
 
 	const handleSetRange = (startMs: number, endMs: number) => {
-		if (startMs === rangeStartMs) {
+		if (startMs === rangeStartMs && endMs === rangeEndMs) {
 			setRangeStartMs(weekStartMs);
 			setRangeEndMs(weekEndMs);
 		} else {
 			setRangeStartMs(startMs);
 			setRangeEndMs(endMs);
 		}
+	};
+
+	const handleWeekChange = (newStartDate: Date) => {
+		const newStartMs = getStartOfDayMs(newStartDate);
+		const newEndMs = getWeekEndFromStartMs(newStartMs);
+		setWeekStartMs(newStartMs);
+		setRangeStartMs(newStartMs);
+		setRangeEndMs(newEndMs);
 	};
 
 	return (
@@ -41,6 +48,7 @@ function Index() {
 				rangeEndMs={rangeEndMs}
 				weekStartMs={weekStartMs}
 				weekEndMs={weekEndMs}
+				onWeekChange={handleWeekChange}
 			/>
 
 			{/* Top Row: Weekly Chart (2/3) + Summary Cards (1/3) */}

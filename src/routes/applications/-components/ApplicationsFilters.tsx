@@ -6,11 +6,10 @@ import SortSelector, { type SortOption } from "./SortSelector";
 interface ApplicationsFiltersProps {
 	dateRangeOption: DateRangeOption;
 	onDateRangeOptionChange: (option: DateRangeOption) => void;
-	customStartDate: string;
-	customEndDate: string;
-	onCustomStartChange: (date: string) => void;
-	onCustomEndChange: (date: string) => void;
-	searchQuery: string;
+	customStartMs: number;
+	customEndMs: number;
+	onCustomStartChange: (ms: number) => void;
+	onCustomEndChange: (ms: number) => void;
 	onSearchChange: (query: string) => void;
 	sortOption: SortOption;
 	onSortChange: (option: SortOption) => void;
@@ -19,11 +18,10 @@ interface ApplicationsFiltersProps {
 const ApplicationsFilters = ({
 	dateRangeOption,
 	onDateRangeOptionChange,
-	customStartDate,
-	customEndDate,
+	customStartMs,
+	customEndMs,
 	onCustomStartChange,
 	onCustomEndChange,
-	searchQuery,
 	onSearchChange,
 	sortOption,
 	onSortChange,
@@ -48,8 +46,8 @@ const ApplicationsFilters = ({
 				<DateRangeSelector
 					selectedOption={dateRangeOption}
 					onOptionChange={onDateRangeOptionChange}
-					customStartDate={customStartDate}
-					customEndDate={customEndDate}
+					customStartMs={customStartMs}
+					customEndMs={customEndMs}
 					onCustomStartChange={onCustomStartChange}
 					onCustomEndChange={onCustomEndChange}
 				/>
@@ -60,7 +58,7 @@ const ApplicationsFilters = ({
 						gap: 2,
 					}}
 				>
-					<ApplicationsSearch value={searchQuery} onChange={onSearchChange} />
+					<ApplicationsSearch onChange={onSearchChange} />
 					<SortSelector value={sortOption} onChange={onSortChange} />
 				</Box>
 			</Box>
