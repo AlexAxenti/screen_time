@@ -4,7 +4,7 @@ import "./index.css";
 import { useState } from "react";
 import TitledCard from "../components/UI/TitledCard";
 import { getStartOfDayMs, getWeekEndFromStartMs, getWeekStartMs } from "../lib/epochDayHelpers";
-import DashboardHeader from "./-components/DashboardHeader";
+import DashboardHeader from "./-components/DashboardHeader/DashboardHeader";
 import DashboardSummary from "./-components/DashboardSummary";
 import TopExesChart from "./-components/TopExesChart/TopExesChart";
 import UsageFragmentationChart from "./-components/UsageFragmentationChart";
@@ -24,7 +24,7 @@ function Index() {
 	const [rangeEndMs, setRangeEndMs] = useState<number>(weekEndMs);
 
 	const handleSetRange = (startMs: number, endMs: number) => {
-		if (startMs === rangeStartMs) {
+		if (startMs === rangeStartMs && endMs === rangeEndMs) {
 			setRangeStartMs(weekStartMs);
 			setRangeEndMs(weekEndMs);
 		} else {

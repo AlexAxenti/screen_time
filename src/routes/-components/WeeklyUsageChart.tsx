@@ -101,12 +101,15 @@ const WeeklyUsageChart = ({
 						const idx = e?.activeTooltipIndex;
 						if (idx === null || idx === undefined) return;
 
-						const d = mergedWeeksDailyUsage[Number(idx)];
-						if (!d) return;
+						const data = mergedWeeksDailyUsage[Number(idx)];
+						console.log("clicked data", data);
+						if (!data) return;
+
+						console.log("index", idx);
 
 						handleSetRange(
-							d.startOfDayMs ?? 0,
-							(d.startOfDayMs ?? 0) + 24 * 60 * 60 * 1000,
+							data.startOfDayMs ?? 0,
+							(data.startOfDayMs ?? 0) + 24 * 60 * 60 * 1000,
 						);
 						setSelectedIndex(
 							Number(idx) === selectedIndex ? null : Number(idx),

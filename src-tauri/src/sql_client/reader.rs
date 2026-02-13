@@ -1,7 +1,7 @@
 use rusqlite::{OptionalExtension, params};
 use crate::{
     sql_client::init::connect_db_file, 
-    types::dtos::{AppInfoDTO, AppUsageDTO, DailyUsageDTO, UsageFragmentationDTO, UsageSummaryDTO}
+    types::dtos::{AppInfoDTO, AppUsageDTO, DailyUsageDTO, DailyUsageHeatmapDTO, UsageFragmentationDTO, UsageSummaryDTO}
 };
 
 //TODO split up reader into domain based query modules
@@ -220,4 +220,33 @@ pub fn check_for_application(app_id: &str) -> rusqlite::Result<bool> {
     .is_some();
 
    Ok(exists)
+}
+
+pub fn query_heat_map_values(start_time: i64, end_time: i64) -> rusqlite::Result<Vec<DailyUsageHeatmapDTO>> {
+    let conn = connect_db_file();
+
+    let mut stmt = conn.prepare("SELECT
+    CAST(strftime('%s', date(ws.start_time / 1000, 'unixepoch', 'localtime')) AS INTEGER) * 1000
+        AS day_start_ms,
+    SUM(ws.duration_ms) AS total_duration_ms
+    FROM window_segments ws
+    WHERE ws.start_time >= ?1
+    AND ws.start_time <  ?2
+    AND ws.duration_ms > 0
+    GROUP BY day_start_ms
+    ORDER BY day_start_ms ASC;")?;
+
+    let usage_iter = stmt.query_map(params![start_time, end_time], |row| {
+        Ok(DailyUsageHeatmapDTO {
+            day_start_ms: row.get(0)?,
+            total_duration_ms: row.get(1)?,
+        })
+    })?;
+
+    let mut daily_usage = Vec::new();
+    for day in usage_iter {
+        daily_usage.push(day?);
+    }
+
+    Ok(daily_usage)
 }

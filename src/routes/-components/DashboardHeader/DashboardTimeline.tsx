@@ -2,13 +2,25 @@ import { Box, Button, Popover, Typography } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { type PickersDayProps } from "@mui/x-date-pickers/PickersDay";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { type Dayjs } from "dayjs";
 import { useMemo, useState } from "react";
-import { getWeekStartMs } from "../../lib/epochDayHelpers";
+import { HeatmapDay, type HeatmapDayProps, calculatePercentileThresholds } from "./DashboardHeatmap";
+import { getWeekStartMs } from "../../../lib/epochDayHelpers";
+import useGetHeatmapUsage from "../../../hooks/queries/useGetHeatmapUsage";
 
-interface DashboardHeaderProps {
+const computeHeatmapRange = (month: Dayjs) => {
+	const prevMonthStart = month.subtract(1, "month").startOf("month");
+	const nextNextMonthStart = month.add(2, "month").startOf("month");
+	return {
+		startMs: prevMonthStart.valueOf(),
+		endMs: nextNextMonthStart.valueOf(),
+	};
+};
+
+interface DashboardTimelineProps {
 	rangeStartMs: number;
 	rangeEndMs: number;
 	weekStartMs: number;
@@ -16,17 +28,41 @@ interface DashboardHeaderProps {
 	onWeekChange: (startDate: Date) => void;
 }
 
-const DashboardHeader = ({
+const DashboardTimeline = ({
 	rangeStartMs,
 	rangeEndMs,
 	weekStartMs,
 	weekEndMs,
 	onWeekChange,
-}: DashboardHeaderProps) => {
+}: DashboardTimelineProps) => {
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const open = Boolean(anchorEl);
 
+	const [visibleMonth, setVisibleMonth] = useState<Dayjs>(dayjs(new Date()).startOf("month"));
+	const [pickerValue, setPickerValue] = useState<Dayjs | null>(dayjs(weekStartMs));
+
+	const { startMs, endMs } = computeHeatmapRange(visibleMonth);
+
+	const { data: heatmapUsage } = useGetHeatmapUsage(startMs, endMs);
+
+	const usageData = useMemo(() => {
+		if (!heatmapUsage) return {};
+		return heatmapUsage.reduce<Record<string, number>>((acc, usage) => {
+			const dateKey = dayjs(usage.day_start_ms).format("YYYY-MM-DD");
+			// acc[dateKey] = Math.round(usage.total_duration_ms / 60000);
+			acc[dateKey] = Math.round(usage.total_duration_ms);
+			return acc;
+		}, {});
+	}, [heatmapUsage]);
+
+	const thresholds = useMemo(() => calculatePercentileThresholds(usageData), [usageData]);
+
+	const handleMonthChange = (month: Dayjs) => {
+		setVisibleMonth(month.startOf("month"));
+	};
+
 	const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+		setPickerValue(dayjs(weekStartMs));
 		setAnchorEl(event.currentTarget);
 	};
 
@@ -36,6 +72,7 @@ const DashboardHeader = ({
 
 	const handleDateChange = (value: Dayjs | null) => {
 		if (value) {
+			setPickerValue(value);
 			onWeekChange(value.toDate());
 			handleClose();
 		}
@@ -44,6 +81,7 @@ const DashboardHeader = ({
 	const handleResetToThisWeek = () => {
 		const currentWeekStart = getWeekStartMs(new Date());
 		onWeekChange(new Date(currentWeekStart));
+		setPickerValue(dayjs(currentWeekStart));
 		handleClose();
 	};
 
@@ -53,6 +91,10 @@ const DashboardHeader = ({
 		const startDate = new Date(rangeStartMs);
 
 		const isSingleDay = rangeEndMs - rangeStartMs === 24 * 60 * 60 * 1000;
+
+		console.log("rangeStartMs", rangeStartMs);
+		console.log("rangeEndMs", rangeEndMs);
+		console.log("isSingleDay", isSingleDay);
 
 		if (isSingleDay) {
 			return startDate.toLocaleDateString("en-US", {
@@ -74,26 +116,7 @@ const DashboardHeader = ({
 	}, [rangeStartMs, rangeEndMs, weekStartMs, weekEndMs]);
 
 	return (
-		<Box
-			sx={{
-				display: "flex",
-				justifyContent: "space-between",
-				alignItems: "center",
-				marginBottom: 3,
-				paddingBottom: 2,
-				borderBottom: "1px solid",
-				borderColor: "divider",
-			}}
-		>
-			<Typography
-				variant="h4"
-				sx={{
-					fontWeight: 600,
-					color: "text.primary",
-				}}
-			>
-				Dashboard
-			</Typography>
+		<>
 			<Box
 				onClick={handleClick}
 				sx={{
@@ -171,10 +194,21 @@ const DashboardHeader = ({
 			>
 				<LocalizationProvider dateAdapter={AdapterDayjs}>
 					<DateCalendar
-						value={dayjs(weekStartMs)}
+						value={pickerValue}
 						onChange={handleDateChange}
+						onMonthChange={handleMonthChange}
+						referenceDate={visibleMonth}
 						maxDate={dayjs()}
 						sx={{ height: "300px" }}
+						slots={{
+							day: HeatmapDay as React.ComponentType<PickersDayProps>,
+						}}
+						slotProps={{
+							day: {
+								usageData,
+								thresholds,
+							} as HeatmapDayProps,
+						}}
 					/>
 				</LocalizationProvider>
 				<Box sx={{ px: 2, pb: 2 }}>
@@ -191,8 +225,8 @@ const DashboardHeader = ({
 					</Button>
 				</Box>
 			</Popover>
-		</Box>
+		</>
 	);
 };
 
-export default DashboardHeader;
+export default DashboardTimeline;

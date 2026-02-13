@@ -41,3 +41,10 @@ pub struct DailyUsageDTO {
     pub segment_count: i64,
     pub exe_count: i64
 }
+
+//TODO combine with above?
+#[derive(Serialize)]
+pub struct DailyUsageHeatmapDTO {
+    pub day_start_ms: i64,
+    pub total_duration_ms: i64,
+}
