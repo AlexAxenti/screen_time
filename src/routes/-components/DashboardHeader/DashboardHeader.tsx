@@ -1,5 +1,5 @@
-import { Box, Typography } from "@mui/material";
-import DashboardTimeline from "./DashboardTimeline";
+import { Typography } from "@mui/material";
+import PageHeader from "../../../components/PageHeader/PageHeader";
 
 interface DashboardHeaderProps {
 	rangeStartMs: number;
@@ -9,6 +9,7 @@ interface DashboardHeaderProps {
 	onWeekChange: (startDate: Date) => void;
 }
 
+//TODO remove and move to index
 const DashboardHeader = ({
 	rangeStartMs,
 	rangeEndMs,
@@ -17,34 +18,24 @@ const DashboardHeader = ({
 	onWeekChange,
 }: DashboardHeaderProps) => {
 	return (
-		<Box
-			sx={{
-				display: "flex",
-				justifyContent: "space-between",
-				alignItems: "center",
-				marginBottom: 3,
-				paddingBottom: 2,
-				borderBottom: "1px solid",
-				borderColor: "divider",
-			}}
-		>
-			<Typography
-				variant="h4"
-				sx={{
-					fontWeight: 600,
-					color: "text.primary",
-				}}
-			>
-				Dashboard
-			</Typography>
-			<DashboardTimeline
-				rangeStartMs={rangeStartMs}
-				rangeEndMs={rangeEndMs}
-				weekStartMs={weekStartMs}
-				weekEndMs={weekEndMs}
-				onWeekChange={onWeekChange}
-			/>
-		</Box>
+		<PageHeader
+			leftSlot={
+				<Typography
+					variant="h4"
+					sx={{
+						fontWeight: 600,
+						color: "text.primary",
+					}}
+				>
+					Dashboard
+				</Typography>
+			}
+			rangeStartMs={rangeStartMs}
+			rangeEndMs={rangeEndMs}
+			weekStartMs={weekStartMs}
+			weekEndMs={weekEndMs}
+			onWeekChange={onWeekChange}
+		/>
 	);
 };
 
