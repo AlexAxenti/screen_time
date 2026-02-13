@@ -101,10 +101,14 @@ pub fn query_app_usage(
     Ok(segments)
 }
 
-pub fn query_usage_fragmentation(start_time: i64, end_time: i64) -> rusqlite::Result<Vec<UsageFragmentationDTO>> {
+pub fn query_usage_fragmentation(start_time: i64, end_time: i64, app_id: Option<String>) -> rusqlite::Result<Vec<UsageFragmentationDTO>> {
     let conn = connect_db_file();
 
-    let mut stmt = conn.prepare("SELECT
+    let app_id = app_id.unwrap_or_default();
+
+    let app_query = if app_id.len() > 0 { format!("AND app_id = '{}'", app_id) } else { "".to_string() };
+
+    let stmt_str = format!("SELECT
     CASE
         WHEN duration_ms < 60000   THEN 'lt_1m'
         WHEN duration_ms < 120000  THEN '1_2m'
@@ -123,9 +127,13 @@ pub fn query_usage_fragmentation(start_time: i64, end_time: i64) -> rusqlite::Re
     END AS bucket_order,
     COUNT(*) AS count
     FROM window_segments
-    WHERE start_time >= ?1 AND start_time < ?2
+    WHERE start_time >= ?1 
+        AND start_time < ?2
+        {}
     GROUP BY duration_bucket, bucket_order
-    ORDER BY bucket_order;")?;
+    ORDER BY bucket_order;", app_query);
+
+    let mut stmt = conn.prepare(&stmt_str)?;
 
     let fragmentation_iter = stmt.query_map(params![start_time, end_time], |row| {
         Ok(UsageFragmentationDTO {
@@ -142,10 +150,14 @@ pub fn query_usage_fragmentation(start_time: i64, end_time: i64) -> rusqlite::Re
     Ok(buckets)
 }
 
-pub fn query_weeks_daily_usage(start_time: i64, end_time: i64) -> rusqlite::Result<Vec<DailyUsageDTO>> {
+pub fn query_weeks_daily_usage(start_time: i64, end_time: i64, app_id: Option<String>) -> rusqlite::Result<Vec<DailyUsageDTO>> {
     let conn = connect_db_file();
 
-    let mut stmt = conn.prepare("SELECT
+    let app_id = app_id.unwrap_or_default();
+
+    let app_query = if app_id.len() > 0 { format!("AND app_id = '{}'", app_id) } else { "".to_string() };
+
+    let stmt_str = format!("SELECT
         date(start_time / 1000, 'unixepoch', 'localtime') AS day,
         CAST(strftime('%s', date(start_time / 1000, 'unixepoch', 'localtime')) AS INTEGER) * 1000
             AS day_start_ms,
@@ -157,8 +169,11 @@ pub fn query_weeks_daily_usage(start_time: i64, end_time: i64) -> rusqlite::Resu
         AND start_time <  ?2
         AND duration_ms IS NOT NULL
         AND duration_ms > 0
+        {}
     GROUP BY day
-    ORDER BY day;")?;
+    ORDER BY day;", app_query);
+
+    let mut stmt = conn.prepare(&stmt_str)?;
 
     let usage_iter = stmt.query_map(params![start_time, end_time], |row| {
         Ok(DailyUsageDTO {

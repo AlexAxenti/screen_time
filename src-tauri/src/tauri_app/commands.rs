@@ -65,15 +65,15 @@ fn get_usage_summary(start_time: i64, end_time: i64) -> UsageSummaryDTO {
 }
 
 #[tauri::command]
-pub fn get_usage_fragmentation(start_time: i64, end_time: i64) -> Vec<UsageFragmentationDTO> {
-    let usage_fragmentation = query_usage_fragmentation(start_time, end_time).expect("Failed to read from DB");
+pub fn get_usage_fragmentation(start_time: i64, end_time: i64, app_id: Option<String>) -> Vec<UsageFragmentationDTO> {
+    let usage_fragmentation = query_usage_fragmentation(start_time, end_time, app_id).expect("Failed to read from DB");
 
     usage_fragmentation
 }
 
 #[tauri::command]
-fn get_weeks_daily_usage(start_time: i64, end_time: i64) -> Vec<DailyUsageDTO> {
-    let weeks_daily_usage = query_weeks_daily_usage(start_time, end_time).expect("Failed to read from DB");
+fn get_weeks_daily_usage(start_time: i64, end_time: i64, app_id: Option<String>) -> Vec<DailyUsageDTO> {
+    let weeks_daily_usage = query_weeks_daily_usage(start_time, end_time, app_id).expect("Failed to read from DB");
 
     weeks_daily_usage
 }

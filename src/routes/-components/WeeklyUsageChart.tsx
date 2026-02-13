@@ -102,10 +102,7 @@ const WeeklyUsageChart = ({
 						if (idx === null || idx === undefined) return;
 
 						const data = mergedWeeksDailyUsage[Number(idx)];
-						console.log("clicked data", data);
 						if (!data) return;
-
-						console.log("index", idx);
 
 						handleSetRange(
 							data.startOfDayMs ?? 0,
