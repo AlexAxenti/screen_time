@@ -11,6 +11,7 @@ import InfoTooltip from "../../components/UI/InfoTooltip";
 import useGetUsageFragmentation from "../../hooks/queries/useGetUsageFragmentation";
 import type { UsageFragmentation } from "../../types/dto";
 
+//TODO REMOVE FILE
 const BUCKETS = [
 	{ bucket: "lt_1m", order: 1 },
 	{ bucket: "1_2m", order: 2 },

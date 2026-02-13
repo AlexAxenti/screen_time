@@ -11,6 +11,7 @@ import { HeatmapDay, type HeatmapDayProps, calculatePercentileThresholds } from 
 import { getWeekStartMs } from "../../../lib/epochDayHelpers";
 import useGetHeatmapUsage from "../../../hooks/queries/useGetHeatmapUsage";
 
+//TODO REMOVE FILE
 const computeHeatmapRange = (month: Dayjs) => {
 	const prevMonthStart = month.subtract(1, "month").startOf("month");
 	const nextNextMonthStart = month.add(2, "month").startOf("month");
