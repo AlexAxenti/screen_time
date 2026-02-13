@@ -10,7 +10,6 @@ interface ApplicationsFiltersProps {
 	customEndMs: number;
 	onCustomStartChange: (ms: number) => void;
 	onCustomEndChange: (ms: number) => void;
-	searchQuery: string;
 	onSearchChange: (query: string) => void;
 	sortOption: SortOption;
 	onSortChange: (option: SortOption) => void;
@@ -23,7 +22,6 @@ const ApplicationsFilters = ({
 	customEndMs,
 	onCustomStartChange,
 	onCustomEndChange,
-	searchQuery,
 	onSearchChange,
 	sortOption,
 	onSortChange,
@@ -60,7 +58,7 @@ const ApplicationsFilters = ({
 						gap: 2,
 					}}
 				>
-					<ApplicationsSearch value={searchQuery} onChange={onSearchChange} />
+					<ApplicationsSearch onChange={onSearchChange} />
 					<SortSelector value={sortOption} onChange={onSortChange} />
 				</Box>
 			</Box>

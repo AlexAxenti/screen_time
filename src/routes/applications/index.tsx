@@ -109,7 +109,6 @@ function Index() {
 				customEndMs={customEndMs}
 				onCustomStartChange={setCustomStartMs}
 				onCustomEndChange={setCustomEndMs}
-				searchQuery={searchQuery}
 				onSearchChange={setSearchQuery}
 				sortOption={sortOption}
 				onSortChange={setSortOption}
