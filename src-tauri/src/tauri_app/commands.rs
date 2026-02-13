@@ -1,9 +1,9 @@
 use crate::{
     sql_client::reader::{
-        ApplicationSortValue, SortDirection, query_app_titles, query_app_usage, query_heat_map_values, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
+        ApplicationSortValue, SortDirection, query_app_titles, query_app_usage, query_app_usage_summary, query_heat_map_values, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
     }, 
     types::dtos::{
-        AppInfoDTO, AppUsageDTO, DailyUsageDTO, DailyUsageHeatmapDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
+        AppInfoDTO, AppUsageDTO, AppUsageSummaryDTO, DailyUsageDTO, DailyUsageHeatmapDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
     }
 };
 use tauri::{Runtime, ipc::Invoke};
@@ -12,6 +12,7 @@ pub fn handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync + 'stat
     tauri::generate_handler![
         get_top_usage, 
         get_usage_summary,
+        get_app_usage_summary,
         get_usage_fragmentation,
         get_weeks_daily_usage,
         get_applications,
@@ -65,15 +66,22 @@ fn get_usage_summary(start_time: i64, end_time: i64) -> UsageSummaryDTO {
 }
 
 #[tauri::command]
-pub fn get_usage_fragmentation(start_time: i64, end_time: i64) -> Vec<UsageFragmentationDTO> {
-    let usage_fragmentation = query_usage_fragmentation(start_time, end_time).expect("Failed to read from DB");
+fn get_app_usage_summary(start_time: i64, end_time: i64, app_id: String) -> AppUsageSummaryDTO {
+    let app_usage_summary = query_app_usage_summary(start_time, end_time, app_id).expect("Failed to read from DB");
+
+    app_usage_summary
+}
+
+#[tauri::command]
+pub fn get_usage_fragmentation(start_time: i64, end_time: i64, app_id: Option<String>) -> Vec<UsageFragmentationDTO> {
+    let usage_fragmentation = query_usage_fragmentation(start_time, end_time, app_id).expect("Failed to read from DB");
 
     usage_fragmentation
 }
 
 #[tauri::command]
-fn get_weeks_daily_usage(start_time: i64, end_time: i64) -> Vec<DailyUsageDTO> {
-    let weeks_daily_usage = query_weeks_daily_usage(start_time, end_time).expect("Failed to read from DB");
+fn get_weeks_daily_usage(start_time: i64, end_time: i64, app_id: Option<String>) -> Vec<DailyUsageDTO> {
+    let weeks_daily_usage = query_weeks_daily_usage(start_time, end_time, app_id).expect("Failed to read from DB");
 
     weeks_daily_usage
 }
@@ -124,8 +132,8 @@ fn search_applications(query: String) -> Vec<AppInfoDTO> {
 }
 
 #[tauri::command]
-fn get_usage_heat_map(start_time: i64, end_time: i64) -> Vec<DailyUsageHeatmapDTO> {
-    let daily_usage = query_heat_map_values(start_time, end_time).expect("Failed to read from DB");
+fn get_usage_heat_map(start_time: i64, end_time: i64, app_id: Option<String>) -> Vec<DailyUsageHeatmapDTO> {
+    let daily_usage = query_heat_map_values(start_time, end_time, app_id).expect("Failed to read from DB");
 
     daily_usage
 }

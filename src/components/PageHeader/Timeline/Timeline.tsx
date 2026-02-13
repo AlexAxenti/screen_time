@@ -7,11 +7,10 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { type Dayjs } from "dayjs";
 import { useMemo, useState } from "react";
-import { HeatmapDay, type HeatmapDayProps, calculatePercentileThresholds } from "./DashboardHeatmap";
+import { HeatmapDay, type HeatmapDayProps, calculatePercentileThresholds } from "./Heatmap";
 import { getWeekStartMs } from "../../../lib/epochDayHelpers";
 import useGetHeatmapUsage from "../../../hooks/queries/useGetHeatmapUsage";
 
-//TODO REMOVE FILE
 const computeHeatmapRange = (month: Dayjs) => {
 	const prevMonthStart = month.subtract(1, "month").startOf("month");
 	const nextNextMonthStart = month.add(2, "month").startOf("month");
@@ -21,21 +20,23 @@ const computeHeatmapRange = (month: Dayjs) => {
 	};
 };
 
-interface DashboardTimelineProps {
+interface TimelineProps {
 	rangeStartMs: number;
 	rangeEndMs: number;
 	weekStartMs: number;
 	weekEndMs: number;
 	onWeekChange: (startDate: Date) => void;
+  appId?: string;
 }
 
-const DashboardTimeline = ({
+const Timeline = ({
 	rangeStartMs,
 	rangeEndMs,
 	weekStartMs,
 	weekEndMs,
 	onWeekChange,
-}: DashboardTimelineProps) => {
+  appId,
+}: TimelineProps) => {
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const open = Boolean(anchorEl);
 
@@ -44,7 +45,7 @@ const DashboardTimeline = ({
 
 	const { startMs, endMs } = computeHeatmapRange(visibleMonth);
 
-	const { data: heatmapUsage } = useGetHeatmapUsage(startMs, endMs);
+	const { data: heatmapUsage } = useGetHeatmapUsage(startMs, endMs, appId);
 
 	const usageData = useMemo(() => {
 		if (!heatmapUsage) return {};
@@ -230,4 +231,4 @@ const DashboardTimeline = ({
 	);
 };
 
-export default DashboardTimeline;
+export default Timeline;

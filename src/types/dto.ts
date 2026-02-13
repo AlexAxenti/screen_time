@@ -23,6 +23,12 @@ export interface UsageSummary {
 	exe_count: number;
 }
 
+export interface AppUsageSummary {
+	total_duration: number;
+	segments_count: number;
+	avg_segment_duration: number;
+}
+
 export interface UsageFragmentation {
 	duration_bucket: string;
 	count: number;

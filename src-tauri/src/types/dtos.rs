@@ -29,6 +29,13 @@ pub struct UsageSummaryDTO {
 }
 
 #[derive(Serialize)]
+pub struct AppUsageSummaryDTO {
+    pub total_duration: i64,
+    pub segments_count: i64,
+    pub avg_segment_duration: i64,
+}
+
+#[derive(Serialize)]
 pub struct UsageFragmentationDTO {
     pub duration_bucket: String,
     pub count: i64,

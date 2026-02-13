@@ -28,11 +28,12 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
 		TOP_APP_COUNT,
 	);
 
-	const handleBarClick = (app_id: string) => {
+	const handleBarClick = (app_id: string, displayName: string) => {
 		if (app_id) {
 			navigate({
 				to: "/applications/$exe",
 				params: { exe: app_id },
+				search: { displayName },
 			});
 		}
 	};
@@ -58,7 +59,7 @@ const TopExesChart = ({ startOfRangeMs, endOfRangeMs }: TopExesChartProps) => {
 
 						if (!selectedApp) return;
 
-						handleBarClick(selectedApp.app_info.app_id);
+						handleBarClick(selectedApp.app_info.app_id, selectedApp.app_info.display_name);
 					}}
 				>
 					<XAxis

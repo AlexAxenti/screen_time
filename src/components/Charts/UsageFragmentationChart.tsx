@@ -7,11 +7,10 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import InfoTooltip from "../../components/UI/InfoTooltip";
+import InfoTooltip from "../UI/InfoTooltip";
 import useGetUsageFragmentation from "../../hooks/queries/useGetUsageFragmentation";
 import type { UsageFragmentation } from "../../types/dto";
 
-//TODO REMOVE FILE
 const BUCKETS = [
 	{ bucket: "lt_1m", order: 1 },
 	{ bucket: "1_2m", order: 2 },
@@ -33,15 +32,18 @@ const BUCKET_LABELS: Record<string, string> = {
 interface UsageFragmentationChartProps {
 	startOfRangeMs: number;
 	endOfRangeMs: number;
+	appId?: string;
 }
 
 const UsageFragmentationChart = ({
 	startOfRangeMs,
 	endOfRangeMs,
+	appId,
 }: UsageFragmentationChartProps) => {
 	const { data: usageFragmentation } = useGetUsageFragmentation(
 		startOfRangeMs,
 		endOfRangeMs,
+		appId,
 	);
 
 	const normalizeBuckets = (rows: UsageFragmentation[]) => {

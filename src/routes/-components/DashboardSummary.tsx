@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import SimpleDataCard from "../../components/UI/SimpleDataCard";
 import TitledCard from "../../components/UI/TitledCard";
-import { formatMsToHoursAndMinutes } from "../../lib/durationFormatHelpers";
+import { formatMsToHoursOrMinutes } from "../../lib/durationFormatHelpers";
 import useGetUsageSummary from "../../hooks/queries/useGetUsageSummary";
 
 interface DashboardSummaryProps {
@@ -31,7 +31,7 @@ function DashboardSummary({
 				}}
 			>
 				<SimpleDataCard
-					dataValue={formatMsToHoursAndMinutes(usageSummary.total_duration)}
+					dataValue={formatMsToHoursOrMinutes(usageSummary.total_duration)}
 					dataLabel="Total Focus Time"
 				/>
 

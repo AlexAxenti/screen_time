@@ -24,6 +24,7 @@ const ApplicationCard = ({
 		<Link
 			to="/applications/$exe"
 			params={{ exe: app_id }}
+			search={{ displayName }}
 			style={{
 				textDecoration: "none",
 			}}

@@ -14,7 +14,6 @@ import { formatMsToHoursOrMinutes } from "../../lib/durationFormatHelpers";
 import { getStartOfDayMs } from "../../lib/epochDayHelpers";
 import useGetWeeksDailyUsage from "../../hooks/queries/useGetWeeksDailyUsage";
 
-//TODO REMOVE FILE
 interface LastWeekScaffold {
 	startOfDayMs: number;
 	dayLabel: string;
@@ -22,25 +21,28 @@ interface LastWeekScaffold {
 	order: number;
 }
 
-interface UsageFragmentationChartProps {
+interface WeeklyUsageChartProps {
 	epochStartOfWeekMs: number;
 	epochEndOfWeekMs: number;
 	handleSetRange: (startMs: number, endMs: number) => void;
+	appId?: string;
 }
 
 const WeeklyUsageChart = ({
 	epochStartOfWeekMs,
 	epochEndOfWeekMs,
 	handleSetRange,
-}: UsageFragmentationChartProps) => {
+	appId,
+}: WeeklyUsageChartProps) => {
 	const { data: weeksDailyUsage } = useGetWeeksDailyUsage(
 		epochStartOfWeekMs,
 		epochEndOfWeekMs,
+		appId,
 	);
 	const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 	const [prevStartTime, setPrevStartTime] = useState<number>(epochStartOfWeekMs);
 
-	if(epochStartOfWeekMs !== prevStartTime) {
+	if (epochStartOfWeekMs !== prevStartTime) {
 		setPrevStartTime(epochStartOfWeekMs);
 		setSelectedIndex(null);
 	}
