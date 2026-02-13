@@ -1,19 +1,32 @@
-import { Box, Typography } from "@mui/material";
-import { createFileRoute } from "@tanstack/react-router";
+import { Box, IconButton, Typography } from "@mui/material";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import UsageFragmentationChart from "../../../components/Charts/UsageFragmentationChart";
 import WeeklyUsageChart from "../../../components/Charts/WeeklyUsageChart";
 import PageHeader from "../../../components/PageHeader/PageHeader";
 import TitledCard from "../../../components/UI/TitledCard";
 import { getStartOfDayMs, getWeekEndFromStartMs, getWeekStartMs } from "../../../lib/epochDayHelpers";
+import { getIconSrc } from "../../../lib/iconPaths";
 import ApplicationDetailSummary from "./-components/ApplicationDetailSummary";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
+interface SearchParams {
+	displayName?: string;
+}
 
 export const Route = createFileRoute("/applications/$exe/")({
 	component: RouteComponent,
+	validateSearch: (search: Record<string, unknown>): SearchParams => {
+		return {
+			displayName: typeof search.displayName === "string" ? search.displayName : undefined,
+		};
+	},
 });
 
 function RouteComponent() {
 	const { exe } = Route.useParams();
+	const { displayName } = Route.useSearch();
+	const router = useRouter();
 
 	const [weekStartMs, setWeekStartMs] = useState<number>(() => getWeekStartMs(new Date()));
 	const weekEndMs = getWeekEndFromStartMs(weekStartMs);
@@ -43,15 +56,49 @@ function RouteComponent() {
 		<Box>
 			<PageHeader
 				leftSlot={
-					<Typography
-						variant="h4"
-						sx={{
-							fontWeight: 600,
-							color: "text.primary",
-						}}
-					>
-						{exe}
-					</Typography>
+					<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+						<IconButton
+							onClick={() => router.history.back()}
+							sx={{
+								color: "text.secondary",
+								"&:hover": {
+									backgroundColor: "action.hover",
+								},
+							}}
+						>
+							<ArrowBackIcon />
+						</IconButton>
+						<Box
+							sx={{
+								width: 32,
+								height: 32,
+								flexShrink: 0,
+								overflow: "hidden",
+							}}
+						>
+							<img
+								src={getIconSrc(exe)}
+								alt={displayName || exe}
+								onError={(e) => {
+									e.currentTarget.src = "/app_placeholder.png";
+								}}
+								style={{
+									width: "100%",
+									height: "100%",
+									objectFit: "cover",
+								}}
+							/>
+						</Box>
+						<Typography
+							variant="h4"
+							sx={{
+								fontWeight: 600,
+								color: "text.primary",
+							}}
+						>
+							{displayName || exe}
+						</Typography>
+					</Box>
 				}
 				rangeStartMs={rangeStartMs}
 				rangeEndMs={rangeEndMs}
