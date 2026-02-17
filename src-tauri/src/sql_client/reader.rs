@@ -1,7 +1,7 @@
 use rusqlite::{OptionalExtension, params};
 use crate::{
     sql_client::init::connect_db_file, 
-    types::dtos::{AppInfoDTO, AppUsageDTO, AppUsageSummaryDTO, DailyUsageDTO, DailyUsageHeatmapDTO, UsageFragmentationDTO, UsageSummaryDTO}
+    types::dtos::{AppInfoDTO, AppUsageDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, UsageFragmentationDTO, UsageSummaryDTO}
 };
 
 //TODO split up reader into domain based query modules
@@ -286,4 +286,109 @@ pub fn query_heat_map_values(start_time: i64, end_time: i64, app_id: Option<Stri
     }
 
     Ok(daily_usage)
+}
+
+pub fn query_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: String) -> rusqlite::Result<Vec<AvgTimeOfDayUsage>> {
+    let conn = connect_db_file();
+
+    let mut stmt = conn.prepare("WITH RECURSIVE
+
+    params(app_id, range_start, range_end) AS (
+    VALUES (?1, ?2, ?3)
+    ),
+
+    -- 1️. Filter segments by start_time in range
+    filtered AS (
+    SELECT
+        id,
+        start_time,
+        end_time
+    FROM window_segments
+    WHERE app_id = (SELECT app_id FROM params)
+        AND start_time >= (SELECT range_start FROM params)
+        AND start_time <  (SELECT range_end FROM params)
+    ),
+
+    -- 2️. Split segments at hour boundaries
+    expanded AS (
+    -- first chunk
+    SELECT
+        id,
+        start_time AS chunk_start,
+        MIN(
+        end_time,
+        ((start_time / 3600000) + 1) * 3600000
+        ) AS chunk_end
+    FROM filtered
+
+    UNION ALL
+
+    -- additional chunks
+    SELECT
+        e.id,
+        e.chunk_end AS chunk_start,
+        MIN(
+        f.end_time,
+        ((e.chunk_end / 3600000) + 1) * 3600000
+        ) AS chunk_end
+    FROM expanded e
+    JOIN filtered f USING (id)
+    WHERE e.chunk_end < f.end_time
+    ),
+
+    -- 3️. Group by hour-of-day
+    hourly AS (
+    SELECT
+        CAST(
+        strftime('%H',
+            datetime(chunk_start / 1000, 'unixepoch', 'localtime')
+        ) AS INTEGER
+        ) AS hour,
+        SUM(chunk_end - chunk_start) as total_ms
+    FROM expanded
+    GROUP BY hour
+    ),
+
+    -- 4️. Generate 0..23 hours
+    hours AS (
+    SELECT 0 AS hour
+    UNION ALL
+    SELECT hour + 1 FROM hours WHERE hour < 23
+    ),
+
+    -- 5️. Count calendar days in selected range
+    day_count AS (
+    SELECT
+        CAST(
+        (julianday(date(datetime(((SELECT range_end FROM params) - 1) / 1000, 'unixepoch', 'localtime')))
+        - julianday(date(datetime((SELECT range_start FROM params) / 1000,     'unixepoch', 'localtime')))
+        + 1)
+        AS INTEGER
+    ) AS days
+    )
+
+    -- 6. Get avg values per hourly bucket
+    SELECT
+    h.hour,
+    COALESCE(hr.total_ms, 0) AS total_ms,
+    COALESCE(hr.total_ms, 0) / dc.days AS avg_ms_per_hour_of_day
+    FROM hours h
+    LEFT JOIN hourly hr USING (hour)
+    CROSS JOIN day_count dc
+    ORDER BY h.hour;")?;
+
+    let usage_iter = stmt.query_map(params![app_id, start_time, end_time], |row| {
+        Ok(AvgTimeOfDayUsage {
+            hour: row.get(0)?,
+            total_duration_ms: row.get(1)?,
+            avg_ms_per_hour_of_day: row.get(2)?
+        })
+    })?;
+
+    let mut avg_usage = Vec::new();
+    for hour in usage_iter {
+        avg_usage.push(hour?);
+    }
+
+    Ok(avg_usage)
 }

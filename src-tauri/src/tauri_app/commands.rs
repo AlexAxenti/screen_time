@@ -1,9 +1,9 @@
 use crate::{
     sql_client::reader::{
-        ApplicationSortValue, SortDirection, query_app_titles, query_app_usage, query_app_usage_summary, query_heat_map_values, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
+        ApplicationSortValue, SortDirection, query_app_avg_time_of_day_usage, query_app_titles, query_app_usage, query_app_usage_summary, query_heat_map_values, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
     }, 
     types::dtos::{
-        AppInfoDTO, AppUsageDTO, AppUsageSummaryDTO, DailyUsageDTO, DailyUsageHeatmapDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
+        AppInfoDTO, AppUsageDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
     }
 };
 use tauri::{Runtime, ipc::Invoke};
@@ -17,7 +17,8 @@ pub fn handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync + 'stat
         get_weeks_daily_usage,
         get_applications,
         search_applications,
-        get_usage_heat_map
+        get_usage_heat_map,
+        get_app_avg_time_of_day_usage
     ]
 }
 
@@ -136,4 +137,11 @@ fn get_usage_heat_map(start_time: i64, end_time: i64, app_id: Option<String>) ->
     let daily_usage = query_heat_map_values(start_time, end_time, app_id).expect("Failed to read from DB");
 
     daily_usage
+}
+
+#[tauri::command]
+fn get_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: String) -> Vec<AvgTimeOfDayUsage> {
+    let avg_usage = query_app_avg_time_of_day_usage(start_time, end_time, app_id).expect("Failed to read from DB");
+
+    avg_usage
 }
