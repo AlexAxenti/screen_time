@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import useGetAvgTimeOfDayUsage from "../../../../hooks/queries/useGetWeeksDailyUsage copy";
+import useGetAvgTimeOfDayUsage from "../../../../hooks/queries/useGetAvgTimeOfDayUsage";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 interface UsageFragmentationChartProps {
