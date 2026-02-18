@@ -10,6 +10,7 @@ import { getIconSrc } from "../../../lib/iconPaths";
 import ApplicationDetailSummary from "./-components/ApplicationDetailSummary";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SettingsIcon from "@mui/icons-material/Settings";
+import AvgTimeOfDayUsageChart from "./-components/AvgTimeOfDayUsageChart";
 
 interface SearchParams {
 	displayName?: string;
@@ -160,9 +161,11 @@ function RouteComponent() {
 				}}
 			>
 				<TitledCard title="Usage Distribution">
-					<Box sx={{ height: 250, display: "flex", alignItems: "center", justifyContent: "center", color: "text.secondary" }}>
-						Usage Distribution Chart Placeholder
-					</Box>
+					<AvgTimeOfDayUsageChart 
+						startOfRangeMs={rangeStartMs}
+						endOfRangeMs={rangeEndMs}
+						appId={exe}
+					/>
 				</TitledCard>
 				<TitledCard title="Focus Time Blocks">
 					<UsageFragmentationChart

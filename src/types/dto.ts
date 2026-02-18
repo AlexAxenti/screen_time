@@ -40,3 +40,9 @@ export interface WeeksDailyUsage {
 	segment_count: number;
 	exe_count: number;
 }
+
+export interface AvgTimeOfDayUsage {
+	hour: number;
+	total_duration_ms: number;
+	avg_ms_per_hour_of_day: number;
+}

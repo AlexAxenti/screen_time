@@ -55,3 +55,10 @@ pub struct DailyUsageHeatmapDTO {
     pub day_start_ms: i64,
     pub total_duration_ms: i64,
 }
+
+#[derive(Serialize)]
+pub struct AvgTimeOfDayUsage {
+    pub hour: i64,
+    pub total_duration_ms: i64,
+    pub avg_ms_per_hour_of_day: i64
+}
