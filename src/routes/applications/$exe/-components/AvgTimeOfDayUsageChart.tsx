@@ -34,6 +34,7 @@ const AvgTimeOfDayUsageChart = ({
   const { data: avgUsage } = useGetAvgTimeOfDayUsage(startOfRangeMs, endOfRangeMs, appId);
 
   //TODO decide if i want this or entire day
+  //TODO fix x axis so it doesnt show less than 1 hour increments.
   const domain = useMemo(() => {
     if (!avgUsage || avgUsage.length === 0) return [0, 23];
 
