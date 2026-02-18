@@ -90,6 +90,7 @@ const UsageFragmentationChart = ({
 							value: "Segment Counts",
 							angle: -90,
 							position: "insideLeft",
+							style: { textAnchor: "middle" },
 						}}
 					/>
 					<Tooltip

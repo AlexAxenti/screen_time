@@ -140,6 +140,7 @@ const WeeklyUsageChart = ({
 							angle: -90,
 							position: "left",
 							offset: 20,
+							style: { textAnchor: "middle" },
 						}}
 						tickFormatter={(v) => formatMsToHoursOrMinutes(Number(v))}
 					/>
