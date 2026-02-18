@@ -2,7 +2,6 @@ import { Box, IconButton, Typography } from "@mui/material";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import UsageFragmentationChart from "../../../components/Charts/UsageFragmentationChart";
-import WeeklyUsageChart from "../../../components/Charts/WeeklyUsageChart";
 import PageHeader from "../../../components/PageHeader/PageHeader";
 import TitledCard from "../../../components/UI/TitledCard";
 import { getStartOfDayMs, getWeekEndFromStartMs, getWeekStartMs } from "../../../lib/epochDayHelpers";
@@ -11,6 +10,7 @@ import ApplicationDetailSummary from "./-components/ApplicationDetailSummary";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AvgTimeOfDayUsageChart from "./-components/AvgTimeOfDayUsageChart";
+import YearlyHeatmap from "./-components/YearlyHeatmap";
 
 interface SearchParams {
 	displayName?: string;
@@ -137,13 +137,8 @@ function RouteComponent() {
 					marginBottom: 3,
 				}}
 			>
-				<TitledCard title="Weekly Overview">
-					<WeeklyUsageChart
-						epochStartOfWeekMs={weekStartMs}
-						epochEndOfWeekMs={weekEndMs}
-						handleSetRange={handleSetRange}
-						appId={exe}
-					/>
+				<TitledCard title="Yearly Overview">
+					<YearlyHeatmap appId={exe} />
 				</TitledCard>
 				<ApplicationDetailSummary 
 					startOfRangeMs={rangeStartMs}
