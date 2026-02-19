@@ -27,7 +27,6 @@ const SearchBar = () => {
 	const debouncedSearch = useDebouncedValue(searchValue, 250);
 	const { data: applications } = useSearchApplications(debouncedSearch);
 
-	// Reset highlighted index when applications change
 	useEffect(() => {
 		setHighlightedIndex(-1);
 	}, [applications]);
@@ -93,7 +92,6 @@ const SearchBar = () => {
 		}
 	};
 
-	// Scroll highlighted item into view
 	useEffect(() => {
 		if (highlightedIndex >= 0 && menuItemRefs.current[highlightedIndex]) {
 			menuItemRefs.current[highlightedIndex]?.scrollIntoView({
