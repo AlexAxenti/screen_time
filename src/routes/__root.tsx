@@ -13,7 +13,7 @@ export const Route = createRootRoute({
 					flex: 1,
 					width: "100%",
 					px: { xs: 2, sm: 3 },
-					py: 3,
+					py: '20px',
 				}}
 			>
 				<Outlet />

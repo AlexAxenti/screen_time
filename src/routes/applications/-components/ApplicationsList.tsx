@@ -67,7 +67,7 @@ const ApplicationsList = ({
 	}
 
 	return (
-		<Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, height: "calc(100vh - 300px)", minHeight: 300 }}>
+		<Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, height: "calc(100vh - 350px)", minHeight: 300 }}>
 			<ApplicationsListHeader />
 			<Box sx={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.5 }}>
 				{applications.map((app) => {
