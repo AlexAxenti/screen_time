@@ -6,9 +6,10 @@ import UsageFragmentationChart from "../components/Charts/UsageFragmentationChar
 import WeeklyUsageChart from "../components/Charts/WeeklyUsageChart";
 import TitledCard from "../components/UI/TitledCard";
 import { getStartOfDayMs, getWeekEndFromStartMs, getWeekStartMs } from "../lib/epochDayHelpers";
-import DashboardHeader from "./-components/DashboardHeader/DashboardHeader";
 import DashboardSummary from "./-components/DashboardSummary";
 import TopExesChart from "./-components/TopExesChart/TopExesChart";
+import Timeline from "../components/Timeline/Timeline";
+import PageHeader from "../components/UI/PageHeader";
 
 export const Route = createFileRoute("/")({
 	component: Index,
@@ -43,12 +44,17 @@ function Index() {
 
 	return (
 		<Box>
-			<DashboardHeader
-				rangeStartMs={rangeStartMs}
-				rangeEndMs={rangeEndMs}
-				weekStartMs={weekStartMs}
-				weekEndMs={weekEndMs}
-				onWeekChange={handleWeekChange}
+			<PageHeader 
+				title="Dashboard"
+				rightContent={
+					<Timeline
+						rangeStartMs={rangeStartMs}
+						rangeEndMs={rangeEndMs}
+						weekStartMs={weekStartMs}
+						weekEndMs={weekEndMs}
+						onWeekChange={handleWeekChange}
+					/>
+				}
 			/>
 
 			{/* Top Row: Weekly Chart (2/3) + Summary Cards (1/3) */}

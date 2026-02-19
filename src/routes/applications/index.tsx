@@ -1,7 +1,6 @@
 import { Box, FormControl, IconButton, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-//TODO use proper PageHeader component
 import PageHeader from "../../components/UI/PageHeader";
 import { getEndOfDayMs, getStartOfDayMs, getWeekStartMs } from "../../lib/epochDayHelpers";
 import useGetApplications from "../../hooks/queries/useGetApplications";
