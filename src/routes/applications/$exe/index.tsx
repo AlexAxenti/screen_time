@@ -1,18 +1,14 @@
-import { Box, IconButton } from "@mui/material";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { Box } from "@mui/material";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import UsageFragmentationChart from "../../../components/Charts/UsageFragmentationChart";
 import WeeklyUsageChart from "../../../components/Charts/WeeklyUsageChart";
-import PageHeader from "../../../components/UI/PageHeader";
-import Timeline from "../../../components/Timeline/Timeline";
-import PageHeaderTitle from "../../../components/UI/PageHeaderTitle";
 import TitledCard from "../../../components/UI/TitledCard";
 import { getStartOfDayMs, getWeekEndFromStartMs, getWeekStartMs } from "../../../lib/epochDayHelpers";
-import { getIconSrc } from "../../../lib/iconPaths";
 import ApplicationDetailSummary from "./-components/ApplicationDetailSummary";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import SettingsIcon from "@mui/icons-material/Settings";
 import AvgTimeOfDayUsageChart from "./-components/AvgTimeOfDayUsageChart";
+import ApplicationDetailsPageHeader from "./-components/ApplicationDetailsPageHeader";
+import useGetApplicationMetadata from "../../../hooks/queries/useGetApplicationMetadata";
 
 interface SearchParams {
 	displayName?: string;
@@ -30,7 +26,8 @@ export const Route = createFileRoute("/applications/$exe/")({
 function RouteComponent() {
 	const { exe } = Route.useParams();
 	const { displayName } = Route.useSearch();
-	const router = useRouter();
+
+	const { data: applicationMetadata } = useGetApplicationMetadata(exe);
 
 	const [weekStartMs, setWeekStartMs] = useState<number>(() => getWeekStartMs(new Date()));
 	const weekEndMs = getWeekEndFromStartMs(weekStartMs);
@@ -58,72 +55,14 @@ function RouteComponent() {
 
 	return (
 		<Box>
-			<PageHeader 
-				leftContent={
-					<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-						<IconButton
-							onClick={() => router.history.back()}
-							sx={{
-								color: "text.secondary",
-								"&:hover": {
-									backgroundColor: "action.hover",
-								},
-							}}
-						>
-							<ArrowBackIcon />
-						</IconButton>
-						<Box
-							sx={{
-								width: 32,
-								height: 32,
-								flexShrink: 0,
-								overflow: "hidden",
-							}}
-						>
-							<img
-								src={getIconSrc(exe)}
-								alt={displayName || exe}
-								onError={(e) => {
-									e.currentTarget.src = "/app_placeholder.png";
-								}}
-								style={{
-									width: "100%",
-									height: "100%",
-									objectFit: "cover",
-								}}
-							/>
-						</Box>
-						<Box sx={{ position: "relative" }}>
-							<PageHeaderTitle title={displayName || exe} />
-							<IconButton
-								onClick={() => console.log("Settings clicked")}
-								size="small"
-								sx={{
-									position: "absolute",
-									top: -4,
-									right: -28,
-									color: "text.secondary",
-									padding: 0.5,
-									"&:hover": {
-										backgroundColor: "action.hover",
-									},
-								}}
-							>
-								<SettingsIcon sx={{ fontSize: 16 }} />
-							</IconButton>
-						</Box>
-					</Box>
-				}
-				rightContent={
-					<Timeline 
-						rangeStartMs={rangeStartMs}
-						rangeEndMs={rangeEndMs}
-						weekStartMs={weekStartMs}
-						weekEndMs={weekEndMs}
-						onWeekChange={handleWeekChange}
-						appId={exe}
-					/>
-				}
+			<ApplicationDetailsPageHeader
+				exe={exe}
+				displayName={applicationMetadata?.app_info.display_name || displayName}
+				rangeStartMs={rangeStartMs}
+				rangeEndMs={rangeEndMs}
+				weekStartMs={weekStartMs}
+				weekEndMs={weekEndMs}
+				onWeekChange={handleWeekChange}
 			/>
 
 			{/* Top Row: Weekly Chart (2/3) + Summary Cards (1/3) */}

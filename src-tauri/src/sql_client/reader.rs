@@ -1,7 +1,7 @@
 use rusqlite::{OptionalExtension, params};
 use crate::{
     sql_client::init::connect_db_file, 
-    types::dtos::{AppInfoDTO, AppUsageDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, UsageFragmentationDTO, UsageSummaryDTO}
+    types::dtos::{AppInfoDTO, AppMetadataDTO, AppUsageDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, UsageFragmentationDTO, UsageSummaryDTO}
 };
 
 //TODO split up reader into domain based query modules
@@ -311,6 +311,31 @@ pub fn check_for_application(app_id: &str) -> rusqlite::Result<bool> {
     .is_some();
 
    Ok(exists)
+}
+
+pub fn query_app_metadata(app_id: &str) -> rusqlite::Result<AppMetadataDTO> {
+    let conn = connect_db_file();
+
+     let mut stmt = conn.prepare("SELECT
+        app_id,
+        exe_name,
+        display_name,
+        is_tracked
+    FROM applications
+    WHERE app_id = ?1")?;
+
+    let app_metadata = stmt.query_row(params![app_id], |row| {
+        Ok(AppMetadataDTO {
+            app_info: AppInfoDTO { 
+                app_id: row.get(0)?, 
+                app_exe: row.get(1)?, 
+                display_name: row.get(2)? 
+            },
+            is_tracked: row.get(3)?
+        })
+    })?;
+
+   Ok(app_metadata)
 }
 
 pub fn query_heat_map_values(start_time: i64, end_time: i64, app_id: Option<String>) -> rusqlite::Result<Vec<DailyUsageHeatmapDTO>> {

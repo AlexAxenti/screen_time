@@ -4,6 +4,10 @@ export interface ApplicationInfo {
 	display_name: string;
 }
 
+export interface ApplicationMetadata {
+	app_info: ApplicationInfo;
+	is_tracked: boolean;
+}
 
 export interface ApplicationUsage {
 	app_info: ApplicationInfo;

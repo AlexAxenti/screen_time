@@ -1,8 +1,8 @@
 use crate::{
     ControlMsg, sql_client::{reader::{
-        ApplicationSortValue, SortDirection, query_app_avg_time_of_day_usage, query_app_titles, query_app_usage, query_app_usage_summary, query_heat_map_values, query_untracked_apps, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
+        ApplicationSortValue, SortDirection, query_app_avg_time_of_day_usage, query_app_metadata, query_app_titles, query_app_usage, query_app_usage_summary, query_heat_map_values, query_untracked_apps, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
     }, writer::update_application_tracked}, types::dtos::{
-        AppInfoDTO, AppUsageDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
+        AppInfoDTO, AppMetadataDTO, AppUsageDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
     }
 };
 use tauri::{Runtime, State, ipc::Invoke};
@@ -21,7 +21,8 @@ pub fn handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync + 'stat
         get_usage_heat_map,
         get_app_avg_time_of_day_usage,
         get_untracked_apps,
-        set_app_tracked
+        set_app_tracked,
+        get_application_metadata
     ]
 }
 
@@ -168,4 +169,11 @@ fn set_app_tracked(state: State<AppState>, app_id: String, is_tracked: bool) -> 
         .expect("Failed to send toggle app msg");
 
     true
+}
+
+#[tauri::command]
+fn get_application_metadata(app_id: String) -> AppMetadataDTO {
+    let app_metadata = query_app_metadata(&app_id).expect("Failed to read from DB");
+
+    app_metadata
 }

@@ -8,6 +8,12 @@ pub struct AppInfoDTO {
 }
 
 #[derive(Serialize)]
+pub struct AppMetadataDTO {
+    pub app_info: AppInfoDTO,
+    pub is_tracked: bool
+}
+
+#[derive(Serialize)]
 pub struct AppUsageDTO {
     pub app_info: AppInfoDTO,
     pub duration: i64,
