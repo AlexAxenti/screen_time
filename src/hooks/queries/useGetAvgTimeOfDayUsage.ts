@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import type { AvgTimeOfDayUsage } from "../../types/dto";
+import type { AvgTimeOfDayUsage } from "../../types/tauriDtos";
 
 const useGetAvgTimeOfDayUsage = (startTime: number, endTime: number, appId: string) => {
 	return useQuery({

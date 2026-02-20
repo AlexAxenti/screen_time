@@ -212,8 +212,67 @@ pub fn query_weeks_daily_usage(start_time: i64, end_time: i64, app_id: Option<St
 }
 
 pub fn query_app_titles(
-    query: String
+    query: String,
+    tracked: Option<bool>
 ) -> rusqlite::Result<Vec<AppInfoDTO>> {
+    let conn = connect_db_file();
+
+    let tracked_clause = match tracked {
+        Some(true) => "AND is_tracked = 1",
+        Some(false) => "AND is_tracked = 0",
+        None => "",
+    };
+    
+    let stmt_str = format!("SELECT
+        app_id,
+        exe_name,
+        display_name
+    FROM applications
+    WHERE display_name LIKE '%' || ?1 || '%'
+    {}
+    ORDER BY display_name COLLATE NOCASE ASC
+    LIMIT 6;", tracked_clause);
+
+    let mut stmt = conn.prepare(&stmt_str)?;
+
+    let apps_iter = stmt.query_map(params![query], |row| {
+        Ok(AppInfoDTO {
+            app_id: row.get(0)?,
+            app_exe: row.get(1)?,
+            display_name: row.get(2)?
+        })
+    })?;
+
+    let mut apps = Vec::new();
+    for app in apps_iter {
+        apps.push(app?);
+    }
+
+    Ok(apps)
+}
+
+//TODO clean up the two below fns
+pub fn query_untracked_app_ids() -> rusqlite::Result<Vec<String>> {
+    let conn = connect_db_file();
+    
+    let mut stmt = conn.prepare("SELECT
+        app_id
+    FROM applications
+    WHERE is_tracked = 0;")?;
+
+    let apps_iter = stmt.query_map(params![], |row| {
+       Ok(row.get(0)?)
+    })?;
+
+    let mut apps = Vec::new();
+    for app in apps_iter {
+        apps.push(app?);
+    }
+
+    Ok(apps)
+}
+
+pub fn query_untracked_apps() -> rusqlite::Result<Vec<AppInfoDTO>> {
     let conn = connect_db_file();
     
     let mut stmt = conn.prepare("SELECT
@@ -221,11 +280,9 @@ pub fn query_app_titles(
         exe_name,
         display_name
     FROM applications
-    WHERE display_name LIKE '%' || ?1 || '%'
-    ORDER BY display_name COLLATE NOCASE ASC
-    LIMIT 6;")?;
+    WHERE is_tracked = 0;")?;
 
-    let apps_iter = stmt.query_map(params![query], |row| {
+    let apps_iter = stmt.query_map(params![], |row| {
         Ok(AppInfoDTO {
             app_id: row.get(0)?,
             app_exe: row.get(1)?,

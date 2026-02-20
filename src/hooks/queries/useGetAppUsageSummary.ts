@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import type { AppUsageSummary } from "../../types/dto";
+import type { AppUsageSummary } from "../../types/tauriDtos";
 
 const useGetAppUsageSummary = (startTime: number, endTime: number, appId: string) => {
 	return useQuery({

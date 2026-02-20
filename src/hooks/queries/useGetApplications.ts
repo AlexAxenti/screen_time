@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import type { ApplicationUsage } from "../../types/dto";
+import type { ApplicationUsage } from "../../types/tauriDtos";
 
 const useGetApplications = (
 	startTime: number,
@@ -29,7 +29,7 @@ const useGetApplications = (
 				);
 				return applications;
 			} catch (e) {
-				console.error("get top usage failed");
+				console.error("get applications failed");
 				throw e;
 			}
 		},

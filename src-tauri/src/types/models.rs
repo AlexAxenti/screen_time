@@ -31,7 +31,8 @@ impl WindowSegment {
 pub enum ControlMsg {
     Pause,
     Resume,
-    Shutdown
+    Shutdown,
+    SetTracked { app_id: String, is_tracked: bool }
 }
 
 pub struct AppInfo {

@@ -13,10 +13,21 @@ use crate::{AppInfo, ControlMsg, WindowSegment, sampler::{windows_utils::{get_id
 
 const IDLE_DURATION: u64 = 120000;
 
-pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg>) {
+const DEFAULT_UNKNOWN_NAME: &str = "unknown.exe";
+
+pub fn start(
+    tx_segments: Sender<WindowSegment>, 
+    rx_control: Receiver<ControlMsg>,
+    untracked_app_ids: Vec<String>
+) {
     let mut main_segment: Option<WindowSegment> = None;
     let mut running= true;
     let mut applications_found: HashSet<String> = HashSet::new();
+
+    let mut untracked_app_ids_set: HashSet<String> = HashSet::new();
+    for app_id in untracked_app_ids {
+        untracked_app_ids_set.insert(app_id);
+    }
 
     let (tx_apps, rx_apps): 
         (Sender<AppInfo>, Receiver<AppInfo>) = mpsc::channel();
@@ -42,7 +53,15 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
                 ControlMsg::Shutdown => {
                     flush_segment(&mut main_segment, sample_start_time, &tx_segments);
                     break;
-                }
+                },
+                ControlMsg::SetTracked { app_id, is_tracked } => {
+                    if is_tracked {
+                        untracked_app_ids_set.remove(&app_id);
+                    } else {
+                        untracked_app_ids_set.insert(app_id);
+                    }
+                    println!("Untracked app_ids: {:?}", untracked_app_ids_set);
+                } 
             }
         }
 
@@ -60,7 +79,7 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
             continue;
         };
 
-        let window_exe = get_exe_name_from_path(&window_exe_path, "unknown.exe").to_lowercase();
+        let window_exe = get_exe_name_from_path(&window_exe_path, DEFAULT_UNKNOWN_NAME).to_lowercase();
 
         let app_id: String = hash_exe_path(&window_exe_path);
 
@@ -78,7 +97,7 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
             applications_found.insert(app_id.clone());
         }
 
-        let is_tracked = app_is_tracked(&window_exe);
+        let is_tracked = app_is_tracked(&window_exe, &app_id, &untracked_app_ids_set);
 
         let sampled_segment = WindowSegment::new(
             app_id,
@@ -139,15 +158,17 @@ fn flush_segment(
 }
 
 // TODO have a list from tauri in the future
-fn app_is_tracked(exe_path: &str) -> bool {
-    let default_unknown_name = "unknown.exe";
-
-    let mut exe_name = get_exe_name_from_path(exe_path, default_unknown_name);
-
-    exe_name = exe_name.to_lowercase();
-
+fn app_is_tracked(
+    exe_name: &str,
+    app_id: &str,
+    untracked_app_ids_set: &HashSet<String>
+) -> bool {
     //TODO remove screen time when more polished
-    exe_name == "explorer.exe" || exe_name == "screen_time.exe" || exe_name == default_unknown_name
+
+    exe_name == "explorer.exe" || 
+    exe_name == "screen_time.exe" || 
+    exe_name == DEFAULT_UNKNOWN_NAME || 
+    untracked_app_ids_set.contains(app_id)
 }
 
 fn get_exe_name_from_path(exe_path: &str, default_name: &str) -> String {
