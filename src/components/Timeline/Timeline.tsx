@@ -122,9 +122,12 @@ const Timeline = ({
 			<Box
 				onClick={handleClick}
 				sx={{
+					display: "flex",
+					gap: 3,
 					textAlign: "right",
 					cursor: "pointer",
 					padding: "6px 14px",
+					alignSelf: "flex-end",
 					borderRadius: 2,
 					transition: "background-color 0.2s",
 					"&:hover": {
@@ -132,7 +135,16 @@ const Timeline = ({
 					},
 				}}
 			>
-				<Box
+				<Typography
+					variant="caption"
+					sx={{
+						color: "text.secondary",
+						letterSpacing: "0.05em",
+					}}
+				>
+					Selected Timeframe:
+				</Typography>
+				<Box 
 					sx={{
 						display: "flex",
 						alignItems: "center",
@@ -142,14 +154,14 @@ const Timeline = ({
 					}}
 				>
 					<Typography
-						variant="caption"
-						sx={{
-							color: "text.secondary",
-							letterSpacing: "0.05em",
-						}}
-					>
-						Selected Timeframe
-					</Typography>
+					variant="body2"
+					sx={{
+						fontWeight: 500,
+						color: "text.secondary",
+					}}
+				>
+					{timeframeLabel}
+				</Typography>
 					<KeyboardArrowDownIcon
 						sx={{
 							fontSize: 16,
@@ -159,15 +171,6 @@ const Timeline = ({
 						}}
 					/>
 				</Box>
-				<Typography
-					variant="body2"
-					sx={{
-						fontWeight: 500,
-						color: "text.secondary",
-					}}
-				>
-					{timeframeLabel}
-				</Typography>
 			</Box>
 			<Popover
 				open={open}

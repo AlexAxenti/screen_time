@@ -19,6 +19,7 @@ const PageHeader = ({ title, leftContent, rightContent }: PageHeaderProps) => {
 				paddingBottom: 2,
 				borderBottom: "1px solid",
 				borderColor: "divider",
+				height: "58px"
 			}}
 		>
 			{leftContent ?? <PageHeaderTitle title={title ?? ""} />}
