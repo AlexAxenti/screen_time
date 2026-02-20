@@ -1,7 +1,7 @@
 use crate::{
-    ControlMsg, sql_client::reader::{
-        ApplicationSortValue, SortDirection, query_app_avg_time_of_day_usage, query_app_titles, query_app_usage, query_app_usage_summary, query_heat_map_values, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
-    }, types::dtos::{
+    ControlMsg, sql_client::{reader::{
+        ApplicationSortValue, SortDirection, query_app_avg_time_of_day_usage, query_app_titles, query_app_usage, query_app_usage_summary, query_heat_map_values, query_untracked_apps, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
+    }, writer::update_application_tracked}, types::dtos::{
         AppInfoDTO, AppUsageDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
     }
 };
@@ -20,6 +20,7 @@ pub fn handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync + 'stat
         search_applications,
         get_usage_heat_map,
         get_app_avg_time_of_day_usage,
+        get_untracked_apps,
         set_app_tracked
     ]
 }
@@ -128,6 +129,7 @@ fn get_applications(
     window_segments
 }
 
+// todo naming ambiguous
 #[tauri::command]
 fn search_applications(query: String) -> Vec<AppInfoDTO> {
     let app_titles = query_app_titles(query).expect("Failed to read from DB");
@@ -150,8 +152,20 @@ fn get_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: String)
 }
 
 #[tauri::command]
-fn set_app_tracked(state: State<AppState>, app_id: String, is_tracked: bool) -> Result<(), String> {
+fn get_untracked_apps() -> Vec<AppInfoDTO> {
+    let apps = query_untracked_apps().expect("Failed to read from DB");
+
+    apps
+}
+
+
+#[tauri::command]
+fn set_app_tracked(state: State<AppState>, app_id: String, is_tracked: bool) -> bool {
+    update_application_tracked(&app_id, is_tracked);
+
     state.tx_control
         .send(ControlMsg::SetTracked { app_id, is_tracked })
-        .map_err(|e| e.to_string())
+        .expect("Failed to send toggle app msg");
+
+    true
 }

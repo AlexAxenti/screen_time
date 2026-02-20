@@ -29,7 +29,7 @@ const useGetApplications = (
 				);
 				return applications;
 			} catch (e) {
-				console.error("get top usage failed");
+				console.error("get applications failed");
 				throw e;
 			}
 		},

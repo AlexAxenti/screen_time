@@ -44,6 +44,7 @@ fn save_segment_to_db(segment: WindowSegment, db_connection: &Connection) {
     ]).expect("Failed to write!");
 }
 
+//Todo sepearte 'write' functions from loop functions above
 pub fn save_application_to_db(app_id: &str, exe_path: &str, exe_name: &str, display_name: &str) {
     let created_at = system_time_to_millis(SystemTime::now());
 
@@ -67,3 +68,13 @@ pub fn save_application_to_db(app_id: &str, exe_path: &str, exe_name: &str, disp
         created_at,
     ]).expect("Failed to write!");
 } 
+
+pub fn update_application_tracked(app_id: &str, is_tracked: bool) {
+    let conn = connect_db_file();
+    let is_tracked_int = if is_tracked { 1 } else { 0 };
+
+    conn.execute(
+        "UPDATE applications SET is_tracked = ?1 WHERE app_id = ?2",
+        params![is_tracked_int, app_id]
+    ).expect("Failed to update is_tracked!");
+}

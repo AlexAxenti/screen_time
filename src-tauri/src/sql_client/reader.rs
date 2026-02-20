@@ -241,6 +241,53 @@ pub fn query_app_titles(
     Ok(apps)
 }
 
+//TODO clean up the two below fns
+pub fn query_untracked_app_ids() -> rusqlite::Result<Vec<String>> {
+    let conn = connect_db_file();
+    
+    let mut stmt = conn.prepare("SELECT
+        app_id
+    FROM applications
+    WHERE is_tracked = 0;")?;
+
+    let apps_iter = stmt.query_map(params![], |row| {
+       Ok(row.get(0)?)
+    })?;
+
+    let mut apps = Vec::new();
+    for app in apps_iter {
+        apps.push(app?);
+    }
+
+    Ok(apps)
+}
+
+pub fn query_untracked_apps() -> rusqlite::Result<Vec<AppInfoDTO>> {
+    let conn = connect_db_file();
+    
+    let mut stmt = conn.prepare("SELECT
+        app_id,
+        exe_name,
+        display_name
+    FROM applications
+    WHERE is_tracked = 0;")?;
+
+    let apps_iter = stmt.query_map(params![], |row| {
+        Ok(AppInfoDTO {
+            app_id: row.get(0)?,
+            app_exe: row.get(1)?,
+            display_name: row.get(2)?
+        })
+    })?;
+
+    let mut apps = Vec::new();
+    for app in apps_iter {
+        apps.push(app?);
+    }
+
+    Ok(apps)
+}
+
 pub fn check_for_application(app_id: &str) -> rusqlite::Result<bool> {
     let conn = connect_db_file();
 
