@@ -35,6 +35,7 @@ pub fn get_idle_duration() -> Duration {
     }            
 }
 
+//TODO use clear struct instead of random tuple
 pub fn sample_foreground() -> Option<(String, String)> {
     let foreground_window_hwnd = unsafe {
         GetForegroundWindow()
