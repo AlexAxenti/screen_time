@@ -1,15 +1,16 @@
 import { Box, IconButton } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import SettingsIcon from "@mui/icons-material/Settings";
 import { useRouter } from "@tanstack/react-router";
 import PageHeader from "../../../../components/UI/PageHeader";
 import { getIconSrc } from "../../../../lib/iconPaths";
 import PageHeaderTitle from "../../../../components/UI/PageHeaderTitle";
 import Timeline from "../../../../components/Timeline/Timeline";
+import TrackingDropdown from "./TrackingDropdown";
 
 interface ApplicationDetailsPageHeaderProps {
   exe: string;
   displayName?: string;
+  isTracked: boolean;
   rangeStartMs: number;
   rangeEndMs: number;
   weekStartMs: number;
@@ -20,6 +21,7 @@ interface ApplicationDetailsPageHeaderProps {
 const ApplicationDetailsPageHeader = ({
   exe,
   displayName,
+  isTracked,
   rangeStartMs,
   rangeEndMs,
   weekStartMs,
@@ -66,22 +68,7 @@ const ApplicationDetailsPageHeader = ({
           </Box>
           <Box sx={{ position: "relative" }}>
             <PageHeaderTitle title={displayName || exe} />
-            <IconButton
-              onClick={() => console.log("Settings clicked")}
-              size="small"
-              sx={{
-                position: "absolute",
-                top: -4,
-                right: -28,
-                color: "text.secondary",
-                padding: 0.5,
-                "&:hover": {
-                  backgroundColor: "action.hover",
-                },
-              }}
-            >
-              <SettingsIcon sx={{ fontSize: 16 }} />
-            </IconButton>
+            <TrackingDropdown exe={exe} isTracked={isTracked} />
           </Box>
         </Box>
       }

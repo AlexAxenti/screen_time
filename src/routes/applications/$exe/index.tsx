@@ -58,6 +58,7 @@ function RouteComponent() {
 			<ApplicationDetailsPageHeader
 				exe={exe}
 				displayName={applicationMetadata?.app_info.display_name || displayName}
+				isTracked={applicationMetadata?.is_tracked ?? true}
 				rangeStartMs={rangeStartMs}
 				rangeEndMs={rangeEndMs}
 				weekStartMs={weekStartMs}
