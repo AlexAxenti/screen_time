@@ -9,10 +9,20 @@ use tauri::RunEvent;
 
 use crate::ControlMsg;
 
+const HIDE_ON_CLOSE: bool = false;
+
 pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>>, mut sampler_handle: Option<JoinHandle<()>>) {
     tauri::Builder::default()
         .register_uri_scheme_protocol("icons", |_app, request| { 
             protocols::handle_icon_request(request)
+        })
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                if HIDE_ON_CLOSE {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
+            }
         })
         .invoke_handler(commands::handler())
         .setup(|app| {
