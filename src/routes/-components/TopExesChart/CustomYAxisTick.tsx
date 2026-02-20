@@ -1,5 +1,5 @@
 import { getIconSrc } from "../../../lib/iconPaths";
-import type { ApplicationUsage } from "../../../types/dto";
+import type { ApplicationUsage } from "../../../types/tauriDtos";
 
 export const createCustomYAxisTick = (chartData: ApplicationUsage[]) => {
 	return ({ x, y, payload }: any) => {

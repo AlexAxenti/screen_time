@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
-import type { ApplicationUsage } from "../../../types/dto";
+import type { ApplicationUsage } from "../../../types/tauriDtos";
 import ApplicationCard from "./ApplicationCard";
 import ApplicationsListHeader from "./ApplicationsListHeader";
 

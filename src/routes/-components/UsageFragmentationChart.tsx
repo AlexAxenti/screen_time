@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import InfoTooltip from "../../components/UI/InfoTooltip";
 import useGetUsageFragmentation from "../../hooks/queries/useGetUsageFragmentation";
-import type { UsageFragmentation } from "../../types/dto";
+import type { UsageFragmentation } from "../../types/tauriDtos";
 
 //TODO REMOVE FILE
 const BUCKETS = [

@@ -1,11 +1,11 @@
 use tauri::{App, menu::MenuBuilder, tray::TrayIconBuilder};
 
 use crate::ControlMsg;
-use std::sync::mpsc::Sender;
+use super::AppState;
 
 use tauri::{Manager, WebviewWindowBuilder};
 
-pub fn setup_menu(app: &mut App, tx_control: Sender<ControlMsg>) -> std::result::Result<(), Box<dyn std::error::Error>> {
+pub fn setup_menu(app: &mut App) -> std::result::Result<(), Box<dyn std::error::Error>> {
     let menu = MenuBuilder::new(app)
         .text("resume", "Resume")
         .text("pause", "Pause")
@@ -26,20 +26,22 @@ pub fn setup_menu(app: &mut App, tx_control: Sender<ControlMsg>) -> std::result:
     app.on_menu_event(move |app_handle: &tauri::AppHandle, event| {
         println!("Menu event: {:?}", event.id());
 
+        let state = app_handle.state::<AppState>();
+
         match event.id().0.as_str() {
             "quit" => {
                 println!("Shutting down");
-                tx_control.send(ControlMsg::Shutdown).ok();
+                state.tx_control.send(ControlMsg::Shutdown).ok();
 
                 app_handle.exit(0);
             }
             "resume" => {
                 println!("Resuming");
-                tx_control.send(ControlMsg::Resume).ok();
+                state.tx_control.send(ControlMsg::Resume).ok();
             }
             "pause" => {
                 println!("Pausing");
-                tx_control.send(ControlMsg::Pause).ok();
+                state.tx_control.send(ControlMsg::Pause).ok();
             }
             "dashboard" => {
                 if let Some(win) = app_handle.get_webview_window("main") {

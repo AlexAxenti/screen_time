@@ -42,6 +42,9 @@ pub fn start(tx_segments: Sender<WindowSegment>, rx_control: Receiver<ControlMsg
                 ControlMsg::Shutdown => {
                     flush_segment(&mut main_segment, sample_start_time, &tx_segments);
                     break;
+                },
+                ControlMsg::SetTracked { app_id, is_tracked } => {
+                    println!("Received {} {}", app_id, is_tracked);
                 }
             }
         }

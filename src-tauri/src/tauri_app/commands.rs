@@ -1,12 +1,13 @@
 use crate::{
-    sql_client::reader::{
+    ControlMsg, sql_client::reader::{
         ApplicationSortValue, SortDirection, query_app_avg_time_of_day_usage, query_app_titles, query_app_usage, query_app_usage_summary, query_heat_map_values, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
-    }, 
-    types::dtos::{
+    }, types::dtos::{
         AppInfoDTO, AppUsageDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
     }
 };
-use tauri::{Runtime, ipc::Invoke};
+use tauri::{Runtime, State, ipc::Invoke};
+
+use super::AppState;
 
 pub fn handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync + 'static {
     tauri::generate_handler![
@@ -18,7 +19,8 @@ pub fn handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync + 'stat
         get_applications,
         search_applications,
         get_usage_heat_map,
-        get_app_avg_time_of_day_usage
+        get_app_avg_time_of_day_usage,
+        set_app_tracked
     ]
 }
 
@@ -145,4 +147,11 @@ fn get_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: String)
     let avg_usage = query_app_avg_time_of_day_usage(start_time, end_time, app_id).expect("Failed to read from DB");
 
     avg_usage
+}
+
+#[tauri::command]
+fn set_app_tracked(state: State<AppState>, app_id: String, is_tracked: bool) -> Result<(), String> {
+    state.tx_control
+        .send(ControlMsg::SetTracked { app_id, is_tracked })
+        .map_err(|e| e.to_string())
 }

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import type { ApplicationInfo } from "../../types/dto";
+import type { ApplicationInfo } from "../../types/tauriDtos";
 
 const useSearchApplications = (query: string) => {
 	return useQuery({

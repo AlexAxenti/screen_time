@@ -11,8 +11,15 @@ use crate::ControlMsg;
 
 const HIDE_ON_CLOSE: bool = false;
 
+pub struct AppState {
+    pub tx_control: Sender<ControlMsg>,
+}
+
 pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>>, mut sampler_handle: Option<JoinHandle<()>>) {
+    let app_state = AppState { tx_control };
+
     tauri::Builder::default()
+        .manage(app_state)
         .register_uri_scheme_protocol("icons", |_app, request| { 
             protocols::handle_icon_request(request)
         })
@@ -26,7 +33,7 @@ pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>
         })
         .invoke_handler(commands::handler())
         .setup(|app| {
-            setup::setup_menu(app, tx_control)
+            setup::setup_menu(app)
         })
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

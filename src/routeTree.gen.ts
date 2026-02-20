@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as ApplicationsIndexRouteImport } from './routes/applications/index'
 import { Route as ApplicationsExeIndexRouteImport } from './routes/applications/$exe/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApplicationsIndexRoute = ApplicationsIndexRouteImport.update({
@@ -32,30 +38,34 @@ const ApplicationsExeIndexRoute = ApplicationsExeIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/applications/': typeof ApplicationsIndexRoute
+  '/settings/': typeof SettingsIndexRoute
   '/applications/$exe/': typeof ApplicationsExeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/applications': typeof ApplicationsIndexRoute
+  '/settings': typeof SettingsIndexRoute
   '/applications/$exe': typeof ApplicationsExeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/applications/': typeof ApplicationsIndexRoute
+  '/settings/': typeof SettingsIndexRoute
   '/applications/$exe/': typeof ApplicationsExeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/applications/' | '/applications/$exe/'
+  fullPaths: '/' | '/applications/' | '/settings/' | '/applications/$exe/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/applications' | '/applications/$exe'
-  id: '__root__' | '/' | '/applications/' | '/applications/$exe/'
+  to: '/' | '/applications' | '/settings' | '/applications/$exe'
+  id: '__root__' | '/' | '/applications/' | '/settings/' | '/applications/$exe/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApplicationsIndexRoute: typeof ApplicationsIndexRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
   ApplicationsExeIndexRoute: typeof ApplicationsExeIndexRoute
 }
 
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/': {
+      id: '/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/applications/': {
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApplicationsIndexRoute: ApplicationsIndexRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
   ApplicationsExeIndexRoute: ApplicationsExeIndexRoute,
 }
 export const routeTree = rootRouteImport

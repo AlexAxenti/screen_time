@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import InfoTooltip from "../UI/InfoTooltip";
 import useGetUsageFragmentation from "../../hooks/queries/useGetUsageFragmentation";
-import type { UsageFragmentation } from "../../types/dto";
+import type { UsageFragmentation } from "../../types/tauriDtos";
 
 const BUCKETS = [
 	{ bucket: "lt_1m", order: 1 },
