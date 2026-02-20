@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import type { ToggleTrackedInput } from "../../types/tauriInputs";
-import type { ApplicationInfo } from "../../types/tauriDtos";
+import type { ApplicationInfo, ApplicationMetadata } from "../../types/tauriDtos";
 
 const useToggleTrackedApp = () => {
   const queryClient = useQueryClient();
@@ -31,6 +31,14 @@ const useToggleTrackedApp = () => {
             queryClient.invalidateQueries({ queryKey: ["untracked_applications"] });
             return old;
           }
+        }
+      );
+
+      queryClient.setQueryData<ApplicationMetadata>(
+        ["application", appId],
+        (old) => {
+          if (!old) return old;
+          return { ...old, is_tracked: isTracked };
         }
       );
     },
