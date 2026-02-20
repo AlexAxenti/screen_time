@@ -212,18 +212,28 @@ pub fn query_weeks_daily_usage(start_time: i64, end_time: i64, app_id: Option<St
 }
 
 pub fn query_app_titles(
-    query: String
+    query: String,
+    tracked: Option<bool>
 ) -> rusqlite::Result<Vec<AppInfoDTO>> {
     let conn = connect_db_file();
+
+    let tracked_clause = match tracked {
+        Some(true) => "AND is_tracked = 1",
+        Some(false) => "AND is_tracked = 0",
+        None => "",
+    };
     
-    let mut stmt = conn.prepare("SELECT
+    let stmt_str = format!("SELECT
         app_id,
         exe_name,
         display_name
     FROM applications
     WHERE display_name LIKE '%' || ?1 || '%'
+    {}
     ORDER BY display_name COLLATE NOCASE ASC
-    LIMIT 6;")?;
+    LIMIT 6;", tracked_clause);
+
+    let mut stmt = conn.prepare(&stmt_str)?;
 
     let apps_iter = stmt.query_map(params![query], |row| {
         Ok(AppInfoDTO {

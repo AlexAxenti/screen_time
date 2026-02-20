@@ -1,26 +1,21 @@
 import { Box } from '@mui/material'
 import { createFileRoute } from '@tanstack/react-router'
-import useToggleTrackedApp from '../../hooks/mutations/useToogleTrackedApp';
-import useGetUntrackedApps from '../../hooks/queries/useGetUntrackedApps';
+import PageHeader from '../../components/UI/PageHeader';
+import GeneralSection from './-components/GeneralSection';
+import UntrackedAppsSection from './-components/UntrackedAppsSection';
 
 export const Route = createFileRoute('/settings/')({
   component: Index,
 })
 
 function Index() {
-  const { data: untrackedApps } = useGetUntrackedApps();
-  console.log("Untracked apps:", untrackedApps);
-
-  const toggleTracked = useToggleTrackedApp();
-
-  const handleToggle = () => {
-    toggleTracked.mutate({ appId: "d1af8a5a7298fdde40ca87f5a2f43b2d", isTracked: false });
-  }
-
   return (
     <Box>
-      <div>Hello "/settings/"!</div>
-      <button onClick={handleToggle}>Track</button>
+      <PageHeader title="Settings" />
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <GeneralSection />
+        <UntrackedAppsSection />
+      </Box>
     </Box>
   );
 }

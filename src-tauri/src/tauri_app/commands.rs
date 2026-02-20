@@ -131,8 +131,8 @@ fn get_applications(
 
 // todo naming ambiguous
 #[tauri::command]
-fn search_applications(query: String) -> Vec<AppInfoDTO> {
-    let app_titles = query_app_titles(query).expect("Failed to read from DB");
+fn search_applications(query: String, tracked: Option<bool>) -> Vec<AppInfoDTO> {
+    let app_titles = query_app_titles(query, tracked).expect("Failed to read from DB");
 
     app_titles
 }
