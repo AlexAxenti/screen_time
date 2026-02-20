@@ -1,12 +1,14 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import type { ReactNode } from "react";
+import PageHeaderTitle from "./PageHeaderTitle";
 
 interface PageHeaderProps {
-	title: string;
+	title?: string;
+	leftContent?: ReactNode;
 	rightContent?: ReactNode;
 }
 
-const PageHeader = ({ title, rightContent }: PageHeaderProps) => {
+const PageHeader = ({ title, leftContent, rightContent }: PageHeaderProps) => {
 	return (
 		<Box
 			sx={{
@@ -17,18 +19,11 @@ const PageHeader = ({ title, rightContent }: PageHeaderProps) => {
 				paddingBottom: 2,
 				borderBottom: "1px solid",
 				borderColor: "divider",
+				height: "58px"
 			}}
 		>
-			<Typography
-				variant="h4"
-				sx={{
-					fontWeight: 600,
-					color: "text.primary",
-				}}
-			>
-				{title}
-			</Typography>
-			{rightContent && <Box sx={{ textAlign: "right" }}>{rightContent}</Box>}
+			{leftContent ?? <PageHeaderTitle title={title ?? ""} />}
+			{rightContent}
 		</Box>
 	);
 };

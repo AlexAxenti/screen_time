@@ -67,24 +67,26 @@ const ApplicationsList = ({
 	}
 
 	return (
-		<Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+		<Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, height: "calc(100vh - 350px)", minHeight: 300 }}>
 			<ApplicationsListHeader />
-			{applications.map((app) => {
-				const durationPercent =
-					totalDuration > 0 ? (app.duration / totalDuration) * 100 : 0;
+			<Box sx={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.5 }}>
+				{applications.map((app) => {
+					const durationPercent =
+						totalDuration > 0 ? (app.duration / totalDuration) * 100 : 0;
 
-				return (
-					<ApplicationCard
-						key={app.app_info.app_id}
-						app_id={app.app_info.app_id}
-						exe={app.app_info.app_exe}
-						displayName={app.app_info.display_name}
-						segmentCount={app.segment_count}
-						duration={app.duration}
-						durationPercent={durationPercent}
-					/>
-				);
-			})}
+					return (
+						<ApplicationCard
+							key={app.app_info.app_id}
+							app_id={app.app_info.app_id}
+							exe={app.app_info.app_exe}
+							displayName={app.app_info.display_name}
+							segmentCount={app.segment_count}
+							duration={app.duration}
+							durationPercent={durationPercent}
+						/>
+					);
+				})}
+			</Box>
 		</Box>
 	);
 };

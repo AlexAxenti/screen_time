@@ -7,11 +7,10 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { type Dayjs } from "dayjs";
 import { useMemo, useState } from "react";
-import { HeatmapDay, type HeatmapDayProps, calculatePercentileThresholds } from "./DashboardHeatmap";
-import { getWeekStartMs } from "../../../lib/epochDayHelpers";
-import useGetHeatmapUsage from "../../../hooks/queries/useGetHeatmapUsage";
+import { HeatmapDay, type HeatmapDayProps, calculatePercentileThresholds } from "./Heatmap";
+import { getWeekStartMs } from "../../lib/epochDayHelpers";
+import useGetHeatmapUsage from "../../hooks/queries/useGetHeatmapUsage";
 
-//TODO REMOVE FILE
 const computeHeatmapRange = (month: Dayjs) => {
 	const prevMonthStart = month.subtract(1, "month").startOf("month");
 	const nextNextMonthStart = month.add(2, "month").startOf("month");
@@ -21,21 +20,23 @@ const computeHeatmapRange = (month: Dayjs) => {
 	};
 };
 
-interface DashboardTimelineProps {
+interface TimelineProps {
 	rangeStartMs: number;
 	rangeEndMs: number;
 	weekStartMs: number;
 	weekEndMs: number;
 	onWeekChange: (startDate: Date) => void;
+  appId?: string;
 }
 
-const DashboardTimeline = ({
+const Timeline = ({
 	rangeStartMs,
 	rangeEndMs,
 	weekStartMs,
 	weekEndMs,
 	onWeekChange,
-}: DashboardTimelineProps) => {
+  appId,
+}: TimelineProps) => {
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const open = Boolean(anchorEl);
 
@@ -44,7 +45,7 @@ const DashboardTimeline = ({
 
 	const { startMs, endMs } = computeHeatmapRange(visibleMonth);
 
-	const { data: heatmapUsage } = useGetHeatmapUsage(startMs, endMs);
+	const { data: heatmapUsage } = useGetHeatmapUsage(startMs, endMs, appId);
 
 	const usageData = useMemo(() => {
 		if (!heatmapUsage) return {};
@@ -121,9 +122,12 @@ const DashboardTimeline = ({
 			<Box
 				onClick={handleClick}
 				sx={{
+					display: "flex",
+					gap: 3,
 					textAlign: "right",
 					cursor: "pointer",
 					padding: "6px 14px",
+					alignSelf: "flex-end",
 					borderRadius: 2,
 					transition: "background-color 0.2s",
 					"&:hover": {
@@ -131,7 +135,16 @@ const DashboardTimeline = ({
 					},
 				}}
 			>
-				<Box
+				<Typography
+					variant="caption"
+					sx={{
+						color: "text.secondary",
+						letterSpacing: "0.05em",
+					}}
+				>
+					Selected Timeframe:
+				</Typography>
+				<Box 
 					sx={{
 						display: "flex",
 						alignItems: "center",
@@ -141,14 +154,14 @@ const DashboardTimeline = ({
 					}}
 				>
 					<Typography
-						variant="caption"
-						sx={{
-							color: "text.secondary",
-							letterSpacing: "0.05em",
-						}}
-					>
-						Selected Timeframe
-					</Typography>
+					variant="body2"
+					sx={{
+						fontWeight: 500,
+						color: "text.secondary",
+					}}
+				>
+					{timeframeLabel}
+				</Typography>
 					<KeyboardArrowDownIcon
 						sx={{
 							fontSize: 16,
@@ -158,15 +171,6 @@ const DashboardTimeline = ({
 						}}
 					/>
 				</Box>
-				<Typography
-					variant="body2"
-					sx={{
-						fontWeight: 500,
-						color: "text.secondary",
-					}}
-				>
-					{timeframeLabel}
-				</Typography>
 			</Box>
 			<Popover
 				open={open}
@@ -230,4 +234,4 @@ const DashboardTimeline = ({
 	);
 };
 
-export default DashboardTimeline;
+export default Timeline;

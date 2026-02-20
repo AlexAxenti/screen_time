@@ -87,6 +87,7 @@ fn get_weeks_daily_usage(start_time: i64, end_time: i64, app_id: Option<String>)
     weeks_daily_usage
 }
 
+//TODO naming abiguous
 #[tauri::command]
 fn get_applications(
     start_time: i64, 

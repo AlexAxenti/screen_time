@@ -1,9 +1,11 @@
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import UsageFragmentationChart from "../../../components/Charts/UsageFragmentationChart";
 import WeeklyUsageChart from "../../../components/Charts/WeeklyUsageChart";
-import PageHeader from "../../../components/PageHeader/PageHeader";
+import PageHeader from "../../../components/UI/PageHeader";
+import Timeline from "../../../components/Timeline/Timeline";
+import PageHeaderTitle from "../../../components/UI/PageHeaderTitle";
 import TitledCard from "../../../components/UI/TitledCard";
 import { getStartOfDayMs, getWeekEndFromStartMs, getWeekStartMs } from "../../../lib/epochDayHelpers";
 import { getIconSrc } from "../../../lib/iconPaths";
@@ -56,8 +58,8 @@ function RouteComponent() {
 
 	return (
 		<Box>
-			<PageHeader
-				leftSlot={
+			<PageHeader 
+				leftContent={
 					<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
 						<IconButton
 							onClick={() => router.history.back()}
@@ -92,15 +94,7 @@ function RouteComponent() {
 							/>
 						</Box>
 						<Box sx={{ position: "relative" }}>
-							<Typography
-								variant="h4"
-								sx={{
-									fontWeight: 600,
-									color: "text.primary",
-								}}
-							>
-								{displayName || exe}
-							</Typography>
+							<PageHeaderTitle title={displayName || exe} />
 							<IconButton
 								onClick={() => console.log("Settings clicked")}
 								size="small"
@@ -120,12 +114,16 @@ function RouteComponent() {
 						</Box>
 					</Box>
 				}
-				rangeStartMs={rangeStartMs}
-				rangeEndMs={rangeEndMs}
-				weekStartMs={weekStartMs}
-				weekEndMs={weekEndMs}
-				onWeekChange={handleWeekChange}
-				appId={exe}
+				rightContent={
+					<Timeline 
+						rangeStartMs={rangeStartMs}
+						rangeEndMs={rangeEndMs}
+						weekStartMs={weekStartMs}
+						weekEndMs={weekEndMs}
+						onWeekChange={handleWeekChange}
+						appId={exe}
+					/>
+				}
 			/>
 
 			{/* Top Row: Weekly Chart (2/3) + Summary Cards (1/3) */}

@@ -1,6 +1,6 @@
 import { AppBar, Toolbar, useMediaQuery, useTheme } from "@mui/material";
 import { useMatchRoute } from "@tanstack/react-router";
-import HeaderTitle from "./components/Headertitle";
+import HeaderTitle from "./components/HeaderTitle";
 import MobileDrawer from "./components/MobileDrawer";
 import NavLinks from "./components/NavLinks";
 import SearchBar from "./components/SearchBar";
