@@ -1,7 +1,7 @@
 use rusqlite::{OptionalExtension, params};
 use crate::{
     sql_client::init::connect_db_file, 
-    types::dtos::{AppInfoDTO, AppMetadataDTO, AppUsageDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, UsageFragmentationDTO, UsageSummaryDTO}
+    types::{dtos::{AppInfoDTO, AppMetadataDTO, AppUsageDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, UsageFragmentationDTO, UsageSummaryDTO}, models::{CloseBehavior, Settings}}
 };
 
 //TODO split up reader into domain based query modules
@@ -473,4 +473,32 @@ pub fn query_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: S
     }
 
     Ok(avg_usage)
+}
+
+pub fn query_settings() -> rusqlite::Result<Settings> {
+    let conn = connect_db_file();
+
+    let mut stmt = conn.prepare("SELECT 
+        start_on_startup,
+        close_behavior,
+        idle_duration_ms
+    FROM settings")?;
+
+    let settings = stmt.query_row(params![], |row| {
+        let close_behavior: String = row.get(1)?;
+
+        //TODO error handle incorrect values
+        let close_behavior = match close_behavior.as_str() {
+            "hide" => CloseBehavior::Hide,
+            _ => CloseBehavior::Destroy,
+        };
+
+        Ok(Settings {
+            start_on_startup: row.get(0)?,
+            close_behaviour: close_behavior,
+            idle_duration_ms: row.get(2)?
+        })
+    })?;
+
+   Ok(settings)
 }

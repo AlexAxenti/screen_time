@@ -8,14 +8,23 @@ use std::sync::mpsc::Sender;
 use tauri::RunEvent;
 
 use crate::ControlMsg;
-
-const HIDE_ON_CLOSE: bool = false;
+use crate::types::models::CloseBehavior;
 
 pub struct AppState {
     pub tx_control: Sender<ControlMsg>,
 }
 
-pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>>, mut sampler_handle: Option<JoinHandle<()>>) {
+pub fn run(
+    tx_control: Sender<ControlMsg>, 
+    mut sql_handle: Option<JoinHandle<()>>, 
+    mut sampler_handle: Option<JoinHandle<()>>,
+    close_behavior: &CloseBehavior
+) {
+    let hide_on_close = match close_behavior {
+        CloseBehavior::Hide => true,
+        CloseBehavior::Destroy => false
+    };
+
     let app_state = AppState { tx_control };
 
     tauri::Builder::default()
@@ -23,9 +32,9 @@ pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>
         .register_uri_scheme_protocol("icons", |_app, request| { 
             protocols::handle_icon_request(request)
         })
-        .on_window_event(|window, event| {
+        .on_window_event(move |window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                if HIDE_ON_CLOSE {
+                if hide_on_close {
                     api.prevent_close();
                     let _ = window.hide();
                 }
