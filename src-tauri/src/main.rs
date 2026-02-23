@@ -28,5 +28,5 @@ fn main() {
         sampler::start(tx_segments, rx_control, untracked_app_ids);
     }));
 
-    tauri_app::run(tx_control, sql_handle, sampler_handle, &settings.close_behaviour);
+    tauri_app::run(tx_control, sql_handle, sampler_handle, &settings.close_behavior);
 }

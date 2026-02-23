@@ -6,8 +6,13 @@ import {
 	Typography,
 } from "@mui/material";
 import SettingRow from "./SettingRow";
+import useGetApplicationSettings from "../../../hooks/queries/useGetApplicationSettings";
+import useToggleCloseBehavior from "../../../hooks/mutations/useToogleCloseBehavior";
 
 const GeneralSection = () => {
+	const { data: settings } = useGetApplicationSettings();
+	const { mutate: toggleCloseBehavior } = useToggleCloseBehavior();
+	
 	return (
 		<Card elevation={0} sx={{ p: 3, borderRadius: 3 }}>
 			<Typography variant="h5" fontWeight={500} sx={{ mb: 2 }}>
@@ -22,7 +27,17 @@ const GeneralSection = () => {
 					<Typography variant="body2" color="text.secondary">
 						Destroy
 					</Typography>
-					<Switch defaultChecked />
+					<Switch
+					checked={settings?.close_behavior === "hide"}
+					onChange={() =>
+						toggleCloseBehavior({
+							closeBehavior:
+								settings?.close_behavior === "hide"
+									? "destroy"
+									: "hide",
+						})
+					}
+				/>
 					<Typography variant="body2" color="text.secondary">
 						Hide
 					</Typography>

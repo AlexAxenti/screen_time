@@ -495,7 +495,7 @@ pub fn query_settings() -> rusqlite::Result<Settings> {
 
         Ok(Settings {
             start_on_startup: row.get(0)?,
-            close_behaviour: close_behavior,
+            close_behavior: close_behavior,
             idle_duration_ms: row.get(2)?
         })
     })?;

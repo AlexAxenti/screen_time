@@ -78,3 +78,12 @@ pub fn update_application_tracked(app_id: &str, is_tracked: bool) {
         params![is_tracked_int, app_id]
     ).expect("Failed to update is_tracked!");
 }
+
+pub fn update_close_behavior(close_behavior: &str) {
+    let conn = connect_db_file();
+
+    conn.execute(
+        "UPDATE settings SET close_behavior = ?1 WHERE id = 1",
+        params![close_behavior]
+    ).expect("Failed to update close_behavior!");
+}

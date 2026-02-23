@@ -65,7 +65,7 @@ pub fn initialize_db(conn: &Connection) {
     "CREATE TABLE IF NOT EXISTS settings (
         id INTEGER PRIMARY KEY CHECK (id = 1),
         start_on_startup INTEGER NOT NULL DEFAULT 0,
-        close_behavior TEXT NOT NULL DEFAULT 'hide',
+        close_behavior TEXT NOT NULL DEFAULT 'destroy',
         idle_duration_ms INTEGER NOT NULL DEFAULT 120000
     );",()).expect("Failed to initialize settings table");
 

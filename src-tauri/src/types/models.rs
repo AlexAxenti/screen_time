@@ -1,6 +1,6 @@
 use std::time::{Duration, SystemTime};
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 pub struct WindowSegment {
     pub app_id: String,
@@ -46,11 +46,11 @@ pub struct AppInfo {
 #[derive(Serialize)]
 pub struct Settings {
     pub start_on_startup: i64,
-    pub close_behaviour: CloseBehavior,
+    pub close_behavior: CloseBehavior,
     pub idle_duration_ms: i64
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CloseBehavior {
     Hide,
