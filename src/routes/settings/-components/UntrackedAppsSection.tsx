@@ -5,7 +5,7 @@ import {
 	Typography,
 } from "@mui/material";
 import useGetUntrackedApps from "../../../hooks/queries/useGetUntrackedApps";
-import useToggleTrackedApp from "../../../hooks/mutations/useToogleTrackedApp";
+import useToggleTrackedApp from "../../../hooks/mutations/useToggleTrackedApp";
 import type { ApplicationInfo } from "../../../types/tauriDtos";
 import AppSearchBar from "../../../components/UI/AppsSearchBar";
 import UntrackedAppRow from "./UntrackedAppRow";

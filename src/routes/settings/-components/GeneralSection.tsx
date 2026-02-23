@@ -7,11 +7,20 @@ import {
 } from "@mui/material";
 import SettingRow from "./SettingRow";
 import useGetApplicationSettings from "../../../hooks/queries/useGetApplicationSettings";
-import useToggleCloseBehavior from "../../../hooks/mutations/useToogleCloseBehavior";
+import useUpdateSettings from "../../../hooks/mutations/useUpdateSettings";
 
 const GeneralSection = () => {
 	const { data: settings } = useGetApplicationSettings();
-	const { mutate: toggleCloseBehavior } = useToggleCloseBehavior();
+	const { mutate: updateSettings } = useUpdateSettings();
+
+	const handleToggleCloseBehavior = () => {
+		if (!settings) return;
+		updateSettings({
+			...settings,
+			close_behavior:
+				settings.close_behavior === "hide" ? "destroy" : "hide",
+		});
+	};
 	
 	return (
 		<Card elevation={0} sx={{ p: 3, borderRadius: 3 }}>
@@ -28,16 +37,9 @@ const GeneralSection = () => {
 						Destroy
 					</Typography>
 					<Switch
-					checked={settings?.close_behavior === "hide"}
-					onChange={() =>
-						toggleCloseBehavior({
-							closeBehavior:
-								settings?.close_behavior === "hide"
-									? "destroy"
-									: "hide",
-						})
-					}
-				/>
+						checked={settings?.close_behavior === "hide"}
+						onChange={handleToggleCloseBehavior}
+					/>
 					<Typography variant="body2" color="text.secondary">
 						Hide
 					</Typography>

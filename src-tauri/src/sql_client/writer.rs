@@ -1,5 +1,5 @@
 use std::{sync::mpsc::Receiver, time::{SystemTime}};
-use crate::{WindowSegment, sql_client::init::connect_db_file, utils::time::system_time_to_millis};
+use crate::{WindowSegment, sql_client::init::connect_db_file, types::models::{CloseBehavior, Settings}, utils::time::system_time_to_millis};
 use rusqlite::{Connection, params};
 
 //TODO error handling
@@ -79,11 +79,16 @@ pub fn update_application_tracked(app_id: &str, is_tracked: bool) {
     ).expect("Failed to update is_tracked!");
 }
 
-pub fn update_close_behavior(close_behavior: &str) {
+pub fn update_settings(settings: &Settings) {
     let conn = connect_db_file();
 
+    let close_behavior = match settings.close_behavior {
+        CloseBehavior::Hide => "hide",
+        CloseBehavior::Destroy => "destroy",
+    };
+
     conn.execute(
-        "UPDATE settings SET close_behavior = ?1 WHERE id = 1",
-        params![close_behavior]
-    ).expect("Failed to update close_behavior!");
+        "UPDATE settings SET start_on_startup = ?1, close_behavior = ?2, idle_duration_ms = ?3 WHERE id = 1",
+        params![settings.start_on_startup, close_behavior, settings.idle_duration_ms]
+    ).expect("Failed to update settings!");
 }

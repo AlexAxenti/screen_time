@@ -1,6 +1,6 @@
 import { Avatar, Box, Button, Typography } from "@mui/material";
 import { getIconSrc } from "../../../lib/iconPaths";
-import useToggleTrackedApp from "../../../hooks/mutations/useToogleTrackedApp";
+import useToggleTrackedApp from "../../../hooks/mutations/useToggleTrackedApp";
 import type { ApplicationInfo } from "../../../types/tauriDtos";
 
 const UntrackedAppRow = ({ app }: { app: ApplicationInfo }) => {

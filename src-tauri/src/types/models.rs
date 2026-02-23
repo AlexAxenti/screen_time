@@ -43,7 +43,7 @@ pub struct AppInfo {
     pub app_exe_name: String
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Settings {
     pub start_on_startup: i64,
     pub close_behavior: CloseBehavior,
