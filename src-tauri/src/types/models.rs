@@ -50,6 +50,10 @@ pub struct Settings {
     pub idle_duration_ms: i64
 }
 
+pub struct TauriRuntimeSettings {
+    pub close_behavior: CloseBehavior,
+}
+
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CloseBehavior {

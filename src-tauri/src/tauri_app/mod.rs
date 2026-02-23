@@ -2,30 +2,30 @@ mod commands;
 mod protocols;
 mod setup;
 
+use std::sync::Mutex;
 use std::thread::JoinHandle;
 use std::sync::mpsc::Sender;
 
-use tauri::RunEvent;
+use tauri::{Manager, RunEvent};
 
 use crate::ControlMsg;
-use crate::types::models::CloseBehavior;
+use crate::types::models::{CloseBehavior, TauriRuntimeSettings};
 
 pub struct AppState {
     pub tx_control: Sender<ControlMsg>,
+    pub runtime_settings: Mutex<TauriRuntimeSettings>,
 }
 
 pub fn run(
     tx_control: Sender<ControlMsg>, 
     mut sql_handle: Option<JoinHandle<()>>, 
     mut sampler_handle: Option<JoinHandle<()>>,
-    close_behavior: &CloseBehavior
+    runtime_settings: TauriRuntimeSettings
 ) {
-    let hide_on_close = match close_behavior {
-        CloseBehavior::Hide => true,
-        CloseBehavior::Destroy => false
+    let app_state = AppState { 
+        tx_control, 
+        runtime_settings: Mutex::new(runtime_settings),
     };
-
-    let app_state = AppState { tx_control };
 
     tauri::Builder::default()
         .manage(app_state)
@@ -34,7 +34,14 @@ pub fn run(
         })
         .on_window_event(move |window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                if hide_on_close {
+                let state = window.state::<AppState>();
+
+                let settings = state
+                    .runtime_settings
+                    .lock()
+                    .expect("Failed to access runtime settings");
+
+                if matches!(settings.close_behavior, CloseBehavior::Hide) {
                     api.prevent_close();
                     let _ = window.hide();
                 }

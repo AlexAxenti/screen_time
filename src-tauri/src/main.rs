@@ -4,7 +4,7 @@ use std::{
 };
 
 use screen_time::{
-    ControlMsg, WindowSegment, sampler, sql_client::{self, reader::{query_settings, query_untracked_app_ids}}, tauri_app
+    ControlMsg, WindowSegment, sampler, sql_client::{self, reader::{query_settings, query_untracked_app_ids}}, tauri_app, types::models::TauriRuntimeSettings
 };
 
 fn main() {
@@ -28,5 +28,9 @@ fn main() {
         sampler::start(tx_segments, rx_control, untracked_app_ids);
     }));
 
-    tauri_app::run(tx_control, sql_handle, sampler_handle, &settings.close_behavior);
+    let tauri_runtime_settings = TauriRuntimeSettings {
+        close_behavior: settings.close_behavior
+    };
+
+    tauri_app::run(tx_control, sql_handle, sampler_handle, tauri_runtime_settings);
 }

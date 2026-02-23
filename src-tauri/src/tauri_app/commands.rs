@@ -188,8 +188,12 @@ fn get_application_settings() -> Settings {
 }
 
 #[tauri::command]
-fn update_settings(settings: Settings) -> bool {
+fn update_settings(state: State<AppState>, settings: Settings) -> bool {
     update_settings_db(&settings);
+
+    let mut runtime_settings = state.runtime_settings.lock().expect("Failed to edit runtim settings");
+
+    runtime_settings.close_behavior = settings.close_behavior;
 
     true
 }
