@@ -3,7 +3,7 @@ import { useMatchRoute } from "@tanstack/react-router";
 import HeaderTitle from "./components/HeaderTitle";
 import MobileDrawer from "./components/MobileDrawer";
 import NavLinks from "./components/NavLinks";
-import SearchBar from "./components/SearchBar";
+import HeaderSearchBar from "./components/HeaderSearchBar";
 
 const AppHeader = () => {
 	const theme = useTheme();
@@ -44,7 +44,7 @@ const AppHeader = () => {
 			>
 				<HeaderTitle />
 
-				{!isMobile && <SearchBar />}
+				{!isMobile && <HeaderSearchBar />}
 
 				{isMobile ? (
 					<MobileDrawer isActiveRoute={isActiveRoute} />

@@ -41,6 +41,16 @@ const useToggleTrackedApp = () => {
           return { ...old, is_tracked: isTracked };
         }
       );
+
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            key[0] === "search_applications" &&
+            key[2] === true
+          );
+        },
+      });
     },
   });
 };

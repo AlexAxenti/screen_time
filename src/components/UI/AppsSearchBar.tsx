@@ -1,22 +1,48 @@
 import {
+	Avatar,
 	ClickAwayListener,
 	InputAdornment,
 	MenuItem,
 	MenuList,
 	Paper,
 	Popper,
+	type PopperProps,
+	type SxProps,
 	TextField,
+	type Theme,
 	useTheme,
 } from "@mui/material";
-import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { FiSearch } from "react-icons/fi";
-import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
-import useSearchApplications from "../../../hooks/queries/useSearchApplications";
+import { useDebouncedValue } from "../../hooks/useDebouncedValue";
+import useSearchApplications from "../../hooks/queries/useSearchApplications";
+import { getIconSrc } from "../../lib/iconPaths";
+import type { ApplicationInfo } from "../../types/tauriDtos";
 
-const SearchBar = () => {
+interface AppSearchBarProps {
+	onSelect: (app: ApplicationInfo) => void;
+	tracked?: boolean;
+	placeholder?: string;
+	showIcons?: boolean;
+	sx?: SxProps<Theme>;
+	fullWidth?: boolean;
+	popperModifiers?: PopperProps["modifiers"];
+	popperSx?: SxProps<Theme>;
+	dropdownPaperSx?: SxProps<Theme>;
+}
+
+const AppSearchBar = ({
+	onSelect,
+	tracked,
+	placeholder = "Search applications...",
+	showIcons = false,
+	sx: sxOverride,
+	fullWidth = false,
+	popperModifiers,
+	popperSx,
+	dropdownPaperSx,
+}: AppSearchBarProps) => {
 	const theme = useTheme();
-	const navigate = useNavigate();
 	const [searchValue, setSearchValue] = useState("");
 	const [isOpen, setIsOpen] = useState(false);
 	const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -25,7 +51,10 @@ const SearchBar = () => {
 	const menuItemRefs = useRef<(HTMLLIElement | null)[]>([]);
 
 	const debouncedSearch = useDebouncedValue(searchValue, 250);
-	const { data: applications } = useSearchApplications(debouncedSearch);
+	const { data: applications } = useSearchApplications(
+		debouncedSearch,
+		tracked,
+	);
 
 	useEffect(() => {
 		setHighlightedIndex(-1);
@@ -37,15 +66,11 @@ const SearchBar = () => {
 		setHighlightedIndex(-1);
 	};
 
-	const handleSelect = (appId: string, displayName: string) => {
+	const handleSelect = (app: ApplicationInfo) => {
+		onSelect(app);
 		setIsOpen(false);
 		setSearchValue("");
 		setHighlightedIndex(-1);
-		navigate({
-			to: "/applications/$exe",
-			params: { exe: appId },
-			search: { displayName },
-		});
 	};
 
 	const handleClose = () => {
@@ -65,7 +90,9 @@ const SearchBar = () => {
 					setIsOpen(true);
 					setHighlightedIndex(0);
 				} else {
-					setHighlightedIndex((prev) => (prev < maxIndex ? prev + 1 : prev));
+					setHighlightedIndex((prev) =>
+						prev < maxIndex ? prev + 1 : prev,
+					);
 				}
 				break;
 			case "ArrowUp":
@@ -80,8 +107,7 @@ const SearchBar = () => {
 			case "Enter":
 				if (highlightedIndex >= 0 && applications[highlightedIndex]) {
 					e.preventDefault();
-					const app = applications[highlightedIndex];
-					handleSelect(app.app_id, app.display_name);
+					handleSelect(applications[highlightedIndex]);
 				}
 				break;
 			case "Escape":
@@ -110,16 +136,15 @@ const SearchBar = () => {
 		<ClickAwayListener onClickAway={handleClose}>
 			<div ref={anchorRef}>
 				<TextField
-					placeholder="Search applications..."
+					placeholder={placeholder}
 					size="small"
+					fullWidth={fullWidth}
 					value={searchValue}
 					onChange={handleInputChange}
 					onFocus={() => setIsOpen(true)}
 					onKeyDown={handleKeyDown}
 					inputRef={inputRef}
 					sx={{
-						width: { sm: 200, md: 280, lg: 320 },
-						mx: 3,
 						"& .MuiOutlinedInput-root": {
 							backgroundColor:
 								theme.palette.mode === "dark"
@@ -141,6 +166,7 @@ const SearchBar = () => {
 							fontSize: "0.875rem",
 							py: 1,
 						},
+						...((sxOverride ?? {}) as Record<string, unknown>),
 					}}
 					InputProps={{
 						startAdornment: (
@@ -159,15 +185,12 @@ const SearchBar = () => {
 					open={showDropdown ?? false}
 					anchorEl={anchorRef.current}
 					placement="bottom-start"
-					sx={{ zIndex: theme.zIndex.modal }}
-					modifiers={[
-						{
-							name: "offset",
-							options: {
-								offset: [24, 0],
-							},
-						},
-					]}
+					sx={{
+						zIndex: theme.zIndex.modal,
+						width: anchorRef.current?.offsetWidth,
+						...((popperSx ?? {}) as Record<string, unknown>),
+					}}
+					modifiers={popperModifiers}
 				>
 					<Paper
 						elevation={8}
@@ -175,11 +198,9 @@ const SearchBar = () => {
 							mt: 0.5,
 							borderRadius: 2,
 							overflow: "hidden",
-							minWidth: anchorRef.current
-								? anchorRef.current.offsetWidth - 48
-								: 280,
 							maxHeight: 300,
 							overflowY: "auto",
+							...((dropdownPaperSx ?? {}) as Record<string, unknown>),
 						}}
 					>
 						<MenuList dense>
@@ -189,13 +210,25 @@ const SearchBar = () => {
 									ref={(el) => {
 										menuItemRefs.current[index] = el;
 									}}
-									onClick={() => handleSelect(app.app_id, app.display_name)}
+									onClick={() => handleSelect(app)}
 									selected={index === highlightedIndex}
 									sx={{
 										fontSize: "0.875rem",
 										py: 1,
+										...(showIcons && {
+											display: "flex",
+											alignItems: "center",
+											gap: 1.5,
+										}),
 									}}
 								>
+									{showIcons && (
+										<Avatar
+											src={getIconSrc(app.app_id)}
+											variant="rounded"
+											sx={{ width: 22, height: 22 }}
+										/>
+									)}
 									{app.display_name}
 								</MenuItem>
 							))}
@@ -207,4 +240,4 @@ const SearchBar = () => {
 	);
 };
 
-export default SearchBar;
+export default AppSearchBar;

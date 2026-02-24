@@ -1,9 +1,9 @@
 use crate::{
     ControlMsg, sql_client::{reader::{
-        ApplicationSortValue, SortDirection, query_app_avg_time_of_day_usage, query_app_metadata, query_app_titles, query_app_usage, query_app_usage_summary, query_heat_map_values, query_untracked_apps, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
-    }, writer::update_application_tracked}, types::dtos::{
+        ApplicationSortValue, SortDirection, query_app_avg_time_of_day_usage, query_app_metadata, query_app_titles, query_app_usage, query_app_usage_summary, query_heat_map_values, query_settings, query_untracked_apps, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
+    }, writer::{update_application_tracked, update_settings as update_settings_db}}, types::{dtos::{
         AppInfoDTO, AppMetadataDTO, AppUsageDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
-    }
+    }, models::Settings}
 };
 use tauri::{Runtime, State, ipc::Invoke};
 
@@ -22,7 +22,9 @@ pub fn handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync + 'stat
         get_app_avg_time_of_day_usage,
         get_untracked_apps,
         set_app_tracked,
-        get_application_metadata
+        get_application_metadata,
+        get_application_settings,
+        update_settings
     ]
 }
 
@@ -176,4 +178,22 @@ fn get_application_metadata(app_id: String) -> AppMetadataDTO {
     let app_metadata = query_app_metadata(&app_id).expect("Failed to read from DB");
 
     app_metadata
+}
+
+#[tauri::command]
+fn get_application_settings() -> Settings {
+    let settings = query_settings().expect("Failed to read from DB");
+
+    settings
+}
+
+#[tauri::command]
+fn update_settings(state: State<AppState>, settings: Settings) -> bool {
+    update_settings_db(&settings);
+
+    let mut runtime_settings = state.runtime_settings.lock().expect("Failed to edit runtim settings");
+
+    runtime_settings.close_behavior = settings.close_behavior;
+
+    true
 }

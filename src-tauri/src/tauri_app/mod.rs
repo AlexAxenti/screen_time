@@ -2,30 +2,46 @@ mod commands;
 mod protocols;
 mod setup;
 
+use std::sync::Mutex;
 use std::thread::JoinHandle;
 use std::sync::mpsc::Sender;
 
-use tauri::RunEvent;
+use tauri::{Manager, RunEvent};
 
 use crate::ControlMsg;
-
-const HIDE_ON_CLOSE: bool = false;
+use crate::types::models::{CloseBehavior, TauriRuntimeSettings};
 
 pub struct AppState {
     pub tx_control: Sender<ControlMsg>,
+    pub runtime_settings: Mutex<TauriRuntimeSettings>,
 }
 
-pub fn run(tx_control: Sender<ControlMsg>, mut sql_handle: Option<JoinHandle<()>>, mut sampler_handle: Option<JoinHandle<()>>) {
-    let app_state = AppState { tx_control };
+pub fn run(
+    tx_control: Sender<ControlMsg>, 
+    mut sql_handle: Option<JoinHandle<()>>, 
+    mut sampler_handle: Option<JoinHandle<()>>,
+    runtime_settings: TauriRuntimeSettings
+) {
+    let app_state = AppState { 
+        tx_control, 
+        runtime_settings: Mutex::new(runtime_settings),
+    };
 
     tauri::Builder::default()
         .manage(app_state)
         .register_uri_scheme_protocol("icons", |_app, request| { 
             protocols::handle_icon_request(request)
         })
-        .on_window_event(|window, event| {
+        .on_window_event(move |window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                if HIDE_ON_CLOSE {
+                let state = window.state::<AppState>();
+
+                let settings = state
+                    .runtime_settings
+                    .lock()
+                    .expect("Failed to access runtime settings");
+
+                if matches!(settings.close_behavior, CloseBehavior::Hide) {
                     api.prevent_close();
                     let _ = window.hide();
                 }

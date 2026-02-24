@@ -2,7 +2,7 @@ import { Box, Button, Popover, Typography } from "@mui/material";
 import { useState } from "react";
 import SettingsIcon from "@mui/icons-material/Settings";
 import IconButton from "@mui/material/IconButton";
-import useToggleTrackedApp from "../../../../hooks/mutations/useToogleTrackedApp";
+import useToggleTrackedApp from "../../../../hooks/mutations/useToggleTrackedApp";
 
 interface TrackingDropdownProps {
   exe: string;

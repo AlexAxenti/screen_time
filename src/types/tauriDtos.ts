@@ -9,6 +9,14 @@ export interface ApplicationMetadata {
 	is_tracked: boolean;
 }
 
+export type CloseBehavior = "hide" | "destroy";
+
+export interface Settings {
+	start_on_startup: number;
+	close_behavior: CloseBehavior;
+	idle_duration_ms: number;
+}
+
 export interface ApplicationUsage {
 	app_info: ApplicationInfo;
 	duration: number;

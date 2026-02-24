@@ -1,5 +1,7 @@
 use std::time::{Duration, SystemTime};
 
+use serde::{Deserialize, Serialize};
+
 pub struct WindowSegment {
     pub app_id: String,
     pub window_name: String,
@@ -39,4 +41,28 @@ pub struct AppInfo {
     pub app_id: String,
     pub app_exe_path: String,
     pub app_exe_name: String
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Settings {
+    pub start_on_startup: i64,
+    pub close_behavior: CloseBehavior,
+    pub idle_duration_ms: i64
+}
+
+pub struct TauriRuntimeSettings {
+    pub close_behavior: CloseBehavior,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum CloseBehavior {
+    Hide,
+    Destroy
+}
+
+pub struct SchemaMigration {
+    pub migration_version: i64,
+    pub migration_name: &'static str,
+    pub migration_sql: &'static str,
 }

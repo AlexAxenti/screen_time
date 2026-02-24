@@ -5,39 +5,23 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-
-interface SettingRowProps {
-	label: string;
-	description: string;
-	children: React.ReactNode;
-}
-
-const SettingRow = ({ label, description, children }: SettingRowProps) => (
-	<Box
-		sx={{
-			display: "flex",
-			justifyContent: "space-between",
-			alignItems: "center",
-			py: 2,
-			"&:not(:last-child)": {
-				borderBottom: "1px solid",
-				borderColor: "divider",
-			},
-		}}
-	>
-		<Box sx={{ flex: 1, mr: 3 }}>
-			<Typography variant="body1" fontWeight={500}>
-				{label}
-			</Typography>
-			<Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-				{description}
-			</Typography>
-		</Box>
-		<Box sx={{ flexShrink: 0 }}>{children}</Box>
-	</Box>
-);
+import SettingRow from "./SettingRow";
+import useGetApplicationSettings from "../../../hooks/queries/useGetApplicationSettings";
+import useUpdateSettings from "../../../hooks/mutations/useUpdateSettings";
 
 const GeneralSection = () => {
+	const { data: settings } = useGetApplicationSettings();
+	const { mutate: updateSettings } = useUpdateSettings();
+
+	const handleToggleCloseBehavior = () => {
+		if (!settings) return;
+		updateSettings({
+			...settings,
+			close_behavior:
+				settings.close_behavior === "hide" ? "destroy" : "hide",
+		});
+	};
+	
 	return (
 		<Card elevation={0} sx={{ p: 3, borderRadius: 3 }}>
 			<Typography variant="h5" fontWeight={500} sx={{ mb: 2 }}>
@@ -52,7 +36,10 @@ const GeneralSection = () => {
 					<Typography variant="body2" color="text.secondary">
 						Destroy
 					</Typography>
-					<Switch defaultChecked />
+					<Switch
+						checked={settings?.close_behavior === "hide"}
+						onChange={handleToggleCloseBehavior}
+					/>
 					<Typography variant="body2" color="text.secondary">
 						Hide
 					</Typography>
