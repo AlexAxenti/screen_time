@@ -45,13 +45,14 @@ pub struct AppInfo {
 
 #[derive(Serialize, Deserialize)]
 pub struct Settings {
-    pub start_on_startup: i64,
+    pub start_on_startup: bool,
     pub close_behavior: CloseBehavior,
     pub idle_duration_ms: i64
 }
 
 pub struct TauriRuntimeSettings {
     pub close_behavior: CloseBehavior,
+    pub start_on_startup: bool
 }
 
 #[derive(Serialize, Deserialize)]

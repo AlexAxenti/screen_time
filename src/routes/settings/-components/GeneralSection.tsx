@@ -21,6 +21,14 @@ const GeneralSection = () => {
 				settings.close_behavior === "hide" ? "destroy" : "hide",
 		});
 	};
+
+	const handleToggleStartOnStartup = () => {
+		if (!settings) return;
+		updateSettings({
+			...settings,
+			start_on_startup: !settings.start_on_startup,
+		});
+	};
 	
 	return (
 		<Card elevation={0} sx={{ p: 3, borderRadius: 3 }}>
@@ -54,7 +62,10 @@ const GeneralSection = () => {
 					<Typography variant="body2" color="text.secondary">
 						No
 					</Typography>
-					<Switch defaultChecked={false} />
+					<Switch defaultChecked={false} 
+						checked={settings?.start_on_startup}
+						onChange={handleToggleStartOnStartup}
+					/>
 					<Typography variant="body2" color="text.secondary">
 						Yes
 					</Typography>

@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use std::{
     sync::mpsc::{self, Receiver, Sender},
     thread
@@ -28,7 +30,6 @@ fn main() {
         (Sender<WindowSegment>, Receiver<WindowSegment>) = mpsc::channel();
 
     let sql_handle = Some(thread::spawn(move || {
-        // sql_client::start_sql_client(rx_segments);
         run_writer_loop(rx_segments);
     }));
 
@@ -40,7 +41,8 @@ fn main() {
     }));
 
     let tauri_runtime_settings = TauriRuntimeSettings {
-        close_behavior: settings.close_behavior
+        close_behavior: settings.close_behavior,
+        start_on_startup: settings.start_on_startup
     };
 
     tauri_app::run(tx_control, sql_handle, sampler_handle, tauri_runtime_settings);

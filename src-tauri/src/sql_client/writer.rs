@@ -85,6 +85,8 @@ pub fn update_application_tracked(app_id: &str, is_tracked: bool) {
 pub fn update_settings(settings: &Settings) {
     let conn = connect_db_file();
 
+    let start_on_startup: i64 = if settings.start_on_startup { 1 } else { 0 };
+
     let close_behavior = match settings.close_behavior {
         CloseBehavior::Hide => "hide",
         CloseBehavior::Destroy => "destroy",
@@ -92,6 +94,6 @@ pub fn update_settings(settings: &Settings) {
 
     conn.execute(
         "UPDATE settings SET start_on_startup = ?1, close_behavior = ?2, idle_duration_ms = ?3 WHERE id = 1",
-        params![settings.start_on_startup, close_behavior, settings.idle_duration_ms]
+        params![start_on_startup, close_behavior, settings.idle_duration_ms]
     ).expect("Failed to update settings!");
 }
