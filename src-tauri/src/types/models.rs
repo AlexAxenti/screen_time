@@ -60,3 +60,9 @@ pub enum CloseBehavior {
     Hide,
     Destroy
 }
+
+pub struct SchemaMigration {
+    pub migration_version: i64,
+    pub migration_name: &'static str,
+    pub migration_sql: &'static str,
+}

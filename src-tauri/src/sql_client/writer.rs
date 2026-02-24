@@ -2,10 +2,13 @@ use std::{sync::mpsc::Receiver, time::{SystemTime}};
 use crate::{WindowSegment, sql_client::init::connect_db_file, types::models::{CloseBehavior, Settings}, utils::time::system_time_to_millis};
 use rusqlite::{Connection, params};
 
-//TODO error handling
-pub fn run_writer_loop(rx_segments: Receiver<WindowSegment>, db_connection: &Connection) {
+//TODO batching and error handling
+//TODO move to seperate mod?
+pub fn run_writer_loop(rx_segments: Receiver<WindowSegment>) {
+    let db_connection = connect_db_file();
+
     while let Ok(segment) = rx_segments.recv() {
-        save_segment_to_db(segment, db_connection);
+        save_segment_to_db(segment, &db_connection);
     }
 }
 

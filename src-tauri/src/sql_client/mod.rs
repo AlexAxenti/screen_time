@@ -1,16 +1,13 @@
 pub mod reader;
 pub mod writer;
 mod init;
+mod migrations;
 
-use std::sync::mpsc::Receiver;
-use crate::sql_client::{init::{connect_db_file, initialize_db}, writer::run_writer_loop};
-use crate::WindowSegment;
+use crate::{sql_client::init::{connect_db_file, init_migrations_table, run_migrations}};
 
-//TODO batching and error handling
-pub fn start_sql_client(rx_segments: Receiver<WindowSegment>) {
-    let conn = connect_db_file();
+pub fn init_db() {
+    let mut conn = connect_db_file();
 
-    initialize_db(&conn);
-
-    run_writer_loop(rx_segments, &conn);    
+    init_migrations_table(&conn);
+    run_migrations(&mut conn);
 }
