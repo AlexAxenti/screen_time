@@ -7,7 +7,7 @@ use std::sync::Mutex;
 use std::thread::JoinHandle;
 use std::sync::mpsc::Sender;
 
-use tauri::{Manager, RunEvent};
+use tauri::{Emitter, Manager, RunEvent};
 
 use crate::ControlMsg;
 use crate::types::models::{CloseBehavior, TauriRuntimeSettings};
@@ -47,6 +47,7 @@ pub fn run(
                 if matches!(settings.close_behavior, CloseBehavior::Hide) {
                     api.prevent_close();
                     let _ = window.hide();
+                    let _ = window.emit("app:reset-to-dashboard", ());
                 }
             }
         })
