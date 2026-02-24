@@ -23,6 +23,11 @@ export interface ApplicationUsage {
 	segment_count: number;
 }
 
+export interface PagedAppSearch {
+	apps_usage: ApplicationUsage[];
+	total: number;
+}
+
 export interface TopUsage {
 	window_segments: ApplicationUsage[];
 	total_duration: number;

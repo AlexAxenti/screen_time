@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import type { ApplicationUsage } from "../../types/tauriDtos";
+import type { PagedAppSearch } from "../../types/tauriDtos";
 
 const useGetApplications = (
 	startTime: number,
@@ -15,7 +15,7 @@ const useGetApplications = (
 		queryKey: ["applications", startTime, endTime, pageCount, pageSize, sortValue, sortDirection, searchValue],
 		queryFn: async () => {
 			try {
-				const applications: ApplicationUsage[] = await invoke(
+				const applications: PagedAppSearch = await invoke(
 					"get_applications",
 					{
 						startTime,

@@ -128,6 +128,36 @@ pub fn query_app_usage(
     Ok(segments)
 }
 
+
+pub fn query_app_usage_total(
+    start_time: i64,
+    end_time: i64,
+    search_value: Option<String>,
+) -> rusqlite::Result<i64> {
+    let conn = connect_db_file();
+    let search_param = search_value.unwrap_or_default();
+
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM (
+        SELECT
+            ws.app_id,
+            COALESCE(a.display_name, MIN(ws.window_exe)) AS display_name
+        FROM window_segments ws
+        LEFT JOIN applications a
+            ON a.app_id = ws.app_id
+        WHERE ws.start_time >= ?1 AND ws.start_time < ?2
+        GROUP BY ws.app_id
+        HAVING (?3 = '' OR display_name LIKE '%' || ?3 || '%')
+    )")?;
+
+    let total = stmt.query_row(params![start_time, end_time, search_param], |row|{
+        let count: i64 = row.get(0)?;
+
+        Ok(count)
+    })?;
+
+    Ok(total)
+}
+
 pub fn query_usage_fragmentation(start_time: i64, end_time: i64, app_id: Option<String>) -> rusqlite::Result<Vec<UsageFragmentationDTO>> {
     let conn = connect_db_file();
 
