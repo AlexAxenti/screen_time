@@ -15,6 +15,7 @@ use crate::types::models::{CloseBehavior, TauriRuntimeSettings};
 pub struct AppState {
     pub tx_control: Sender<ControlMsg>,
     pub runtime_settings: Mutex<TauriRuntimeSettings>,
+    pub is_paused: Mutex<bool>
 }
 
 pub fn run(
@@ -26,6 +27,7 @@ pub fn run(
     let app_state = AppState { 
         tx_control, 
         runtime_settings: Mutex::new(runtime_settings),
+        is_paused: Mutex::new(false)
     };
 
     tauri::Builder::default()

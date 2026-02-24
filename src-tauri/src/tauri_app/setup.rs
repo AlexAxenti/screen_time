@@ -1,4 +1,6 @@
-use tauri::{App, menu::MenuBuilder, tray::TrayIconBuilder};
+use std::sync::Arc;
+
+use tauri::{App, menu::{MenuBuilder, MenuItemBuilder}, tray::TrayIconBuilder};
 
 use crate::ControlMsg;
 use super::AppState;
@@ -6,9 +8,24 @@ use super::AppState;
 use tauri::{Manager, WebviewWindowBuilder};
 
 pub fn setup_menu(app: &mut App) -> std::result::Result<(), Box<dyn std::error::Error>> {
+    let state = app.state::<AppState>();
+    let is_paused = *state.is_paused.lock().expect("Failed to access is paused mutex");
+
+    let resume_item = Arc::new(
+        MenuItemBuilder::with_id("resume", "Resume")
+        .enabled(is_paused)           // only enabled if paused
+        .build(app)?
+    );
+
+    let pause_item = Arc::new(
+        MenuItemBuilder::with_id("pause", "Pause")
+        .enabled(!is_paused)          // only enabled if running
+        .build(app)?
+    );
+
     let menu = MenuBuilder::new(app)
-        .text("resume", "Resume")
-        .text("pause", "Pause")
+        .item(resume_item.as_ref())
+        .item(pause_item.as_ref())
         .separator()
         .text("dashboard", "Open Dashboard")
         .separator()
@@ -22,6 +39,9 @@ pub fn setup_menu(app: &mut App) -> std::result::Result<(), Box<dyn std::error::
         .tooltip("Screen Time Tracker")
         .build(app)
         .expect("failed to build tray icon");
+
+    let resume_item_cb = Arc::clone(&resume_item);
+    let pause_item_cb  = Arc::clone(&pause_item);
 
     app.on_menu_event(move |app_handle: &tauri::AppHandle, event| {
         println!("Menu event: {:?}", event.id());
@@ -37,11 +57,29 @@ pub fn setup_menu(app: &mut App) -> std::result::Result<(), Box<dyn std::error::
             }
             "resume" => {
                 println!("Resuming");
+                let mut paused = state.is_paused.lock().expect("Failed to access is paused mutex");
+                if !*paused {
+                    return;
+                }
+
+                *paused = false;
                 state.tx_control.send(ControlMsg::Resume).ok();
+
+                pause_item_cb.set_enabled(true).ok();
+                resume_item_cb.set_enabled(false).ok();
             }
             "pause" => {
                 println!("Pausing");
+                let mut paused = state.is_paused.lock().expect("Failed to access is paused mutex");
+                if *paused {
+                    return;
+                }
+
+                *paused = true;
                 state.tx_control.send(ControlMsg::Pause).ok();
+
+                pause_item_cb.set_enabled(false).ok();
+                resume_item_cb.set_enabled(true).ok();
             }
             "dashboard" => {
                 if let Some(win) = app_handle.get_webview_window("main") {
