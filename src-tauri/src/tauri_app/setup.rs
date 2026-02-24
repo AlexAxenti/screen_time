@@ -53,6 +53,7 @@ pub fn setup_menu(app: &mut App) -> std::result::Result<(), Box<dyn std::error::
                         "main", 
                         tauri::WebviewUrl::App("index.html".into()))
                     .title("Screen Time")
+                    .visible(false)
                     .inner_size(1200.0, 800.0)
                     .center()
                     .build();
