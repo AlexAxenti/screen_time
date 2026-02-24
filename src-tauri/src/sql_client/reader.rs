@@ -485,7 +485,10 @@ pub fn query_settings() -> rusqlite::Result<Settings> {
     FROM settings")?;
 
     let settings = stmt.query_row(params![], |row| {
+        let start_on_startup: i64 = row.get(0)?;
         let close_behavior: String = row.get(1)?;
+
+        let start_on_startup: bool = start_on_startup != 0;
 
         //TODO error handle incorrect values
         let close_behavior = match close_behavior.as_str() {
@@ -494,8 +497,8 @@ pub fn query_settings() -> rusqlite::Result<Settings> {
         };
 
         Ok(Settings {
-            start_on_startup: row.get(0)?,
-            close_behavior: close_behavior,
+            start_on_startup,
+            close_behavior,
             idle_duration_ms: row.get(2)?
         })
     })?;

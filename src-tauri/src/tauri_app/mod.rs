@@ -1,6 +1,7 @@
 mod commands;
 mod protocols;
 mod setup;
+mod startup;
 
 use std::sync::Mutex;
 use std::thread::JoinHandle;

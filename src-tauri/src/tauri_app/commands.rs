@@ -1,7 +1,7 @@
 use crate::{
     ControlMsg, sql_client::{reader::{
         ApplicationSortValue, SortDirection, query_app_avg_time_of_day_usage, query_app_metadata, query_app_titles, query_app_usage, query_app_usage_summary, query_heat_map_values, query_settings, query_untracked_apps, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
-    }, writer::{update_application_tracked, update_settings as update_settings_db}}, types::{dtos::{
+    }, writer::{update_application_tracked, update_settings as update_settings_db}}, tauri_app::startup::configure_start_on_startup, types::{dtos::{
         AppInfoDTO, AppMetadataDTO, AppUsageDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
     }, models::Settings}
 };
@@ -194,6 +194,12 @@ fn update_settings(state: State<AppState>, settings: Settings) -> bool {
     let mut runtime_settings = state.runtime_settings.lock().expect("Failed to edit runtim settings");
 
     runtime_settings.close_behavior = settings.close_behavior;
+
+    if runtime_settings.start_on_startup != settings.start_on_startup {
+        configure_start_on_startup(settings.start_on_startup).expect("Failed to set run on startup");
+
+        runtime_settings.start_on_startup = settings.start_on_startup;
+    }
 
     true
 }

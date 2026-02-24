@@ -12,7 +12,7 @@ export interface ApplicationMetadata {
 export type CloseBehavior = "hide" | "destroy";
 
 export interface Settings {
-	start_on_startup: number;
+	start_on_startup: boolean;
 	close_behavior: CloseBehavior;
 	idle_duration_ms: number;
 }
