@@ -80,6 +80,7 @@ function RouteComponent() {
 						epochStartOfWeekMs={weekStartMs}
 						epochEndOfWeekMs={weekEndMs}
 						handleSetRange={handleSetRange}
+						handleWeekChange={handleWeekChange}
 						appId={exe}
 					/>
 				</TitledCard>

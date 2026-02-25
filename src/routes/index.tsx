@@ -71,6 +71,7 @@ function Index() {
 						epochStartOfWeekMs={weekStartMs}
 						epochEndOfWeekMs={weekEndMs}
 						handleSetRange={handleSetRange}
+						handleWeekChange={handleWeekChange}
 					/>
 				</TitledCard>
 				<DashboardSummary

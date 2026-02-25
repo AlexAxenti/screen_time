@@ -38,10 +38,20 @@ const utcMidnightToLocalMidnight = (utcMidnightMs: number): number => {
 	return new Date(year, month, day, 0, 0, 0, 0).getTime();
 };
 
+const getMondayOfWeekMs = (date: Date): number => {
+	const d = new Date(date);
+	d.setHours(0, 0, 0, 0);
+	const day = d.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+	const diff = day === 0 ? -6 : 1 - day;
+	d.setDate(d.getDate() + diff);
+	return d.getTime();
+};
+
 export {
 	getWeekStartMs,
 	getWeekEndFromStartMs,
 	getStartOfDayMs,
 	getEndOfDayMs,
+	getMondayOfWeekMs,
 	utcMidnightToLocalMidnight,
 };
