@@ -42,7 +42,8 @@ fn main() {
 
     let tauri_runtime_settings = TauriRuntimeSettings {
         close_behavior: settings.close_behavior,
-        start_on_startup: settings.start_on_startup
+        start_on_startup: settings.start_on_startup,
+        is_onboarded: settings.is_onboarded
     };
 
     tauri_app::run(tx_control, sql_handle, sampler_handle, tauri_runtime_settings);

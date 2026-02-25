@@ -53,6 +53,15 @@ pub fn run(
         })
         .invoke_handler(commands::handler())
         .setup(|app| {
+            let state = app.state::<AppState>();
+            let settings = state.runtime_settings.lock().expect("Failed to acquire runtime settings lock");
+
+            if !settings.is_onboarded {
+                println!("Starting app {}", settings.is_onboarded);
+                setup::create_webview_window(app.handle());
+            };
+
+            drop(settings);
             setup::setup_menu(app)
         })
         .build(tauri::generate_context!())

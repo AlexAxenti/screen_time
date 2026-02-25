@@ -1,6 +1,6 @@
 use crate::types::models::SchemaMigration;
 
-pub const MIGRATIONS: [SchemaMigration; 1] = [
+pub const MIGRATIONS: [SchemaMigration; 2] = [
     SchemaMigration {
         migration_version: 1,
         migration_name: "Initial setup",
@@ -40,6 +40,14 @@ pub const MIGRATIONS: [SchemaMigration; 1] = [
         );
 
         INSERT OR IGNORE INTO settings (id) VALUES (1);
+        "#
+    },
+    SchemaMigration {
+        migration_version: 2,
+        migration_name: "Onboarding settings",
+        migration_sql: r#"
+        ALTER TABLE settings
+        ADD COLUMN is_onboarded INTEGER NOT NULL DEFAULT 0;
         "#
     }
 ];

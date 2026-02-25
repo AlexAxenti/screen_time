@@ -87,13 +87,15 @@ pub fn update_settings(settings: &Settings) {
 
     let start_on_startup: i64 = if settings.start_on_startup { 1 } else { 0 };
 
+    let is_onboarded: i64 = if settings.is_onboarded { 1 } else { 0 };
+
     let close_behavior = match settings.close_behavior {
         CloseBehavior::Hide => "hide",
         CloseBehavior::Destroy => "destroy",
     };
 
     conn.execute(
-        "UPDATE settings SET start_on_startup = ?1, close_behavior = ?2, idle_duration_ms = ?3 WHERE id = 1",
-        params![start_on_startup, close_behavior, settings.idle_duration_ms]
+        "UPDATE settings SET start_on_startup = ?1, close_behavior = ?2, idle_duration_ms = ?3, is_onboarded = ?4 WHERE id = 1",
+        params![start_on_startup, close_behavior, settings.idle_duration_ms, is_onboarded]
     ).expect("Failed to update settings!");
 }

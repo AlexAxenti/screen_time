@@ -15,6 +15,7 @@ export interface Settings {
 	start_on_startup: boolean;
 	close_behavior: CloseBehavior;
 	idle_duration_ms: number;
+	is_onboarded: boolean;
 }
 
 export interface ApplicationUsage {

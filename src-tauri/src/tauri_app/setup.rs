@@ -82,25 +82,27 @@ pub fn setup_menu(app: &mut App) -> std::result::Result<(), Box<dyn std::error::
                 resume_item_cb.set_enabled(true).ok();
             }
             "dashboard" => {
-                if let Some(win) = app_handle.get_webview_window("main") {
-                    let _ = win.show();
-                    let _ = win.set_focus();
-                } else {
-                    let win = WebviewWindowBuilder::new(
-                        app_handle, 
-                        "main", 
-                        tauri::WebviewUrl::App("index.html".into()))
-                    .title("Screen Time")
-                    .visible(false)
-                    .inner_size(1200.0, 800.0)
-                    .center()
-                    .build();
+                // if let Some(win) = app_handle.get_webview_window("main") {
+                //     let _ = win.show();
+                //     let _ = win.set_focus();
+                // } else {
+                //     let win = WebviewWindowBuilder::new(
+                //         app_handle, 
+                //         "main", 
+                //         tauri::WebviewUrl::App("index.html".into()))
+                //     .title("Screen Time")
+                //     .visible(false)
+                //     .inner_size(1200.0, 800.0)
+                //     .center()
+                //     .build();
 
-                    if let Ok(win) = win {
-                        let _ = win.show();
-                        let _ = win.set_focus();
-                    }
-                }
+                //     if let Ok(win) = win {
+                //         let _ = win.show();
+                //         let _ = win.set_focus();
+                //     }
+                // }
+
+                create_webview_window(app_handle);
             }
             _ => {
                 println!("Unhandled event");
@@ -109,4 +111,26 @@ pub fn setup_menu(app: &mut App) -> std::result::Result<(), Box<dyn std::error::
     });
 
     Ok(())
+}
+
+pub fn create_webview_window(app_handle: &tauri::AppHandle) {
+    if let Some(win) = app_handle.get_webview_window("main") {
+        let _ = win.show();
+        let _ = win.set_focus();
+    } else {
+        let win = WebviewWindowBuilder::new(
+            app_handle, 
+            "main", 
+            tauri::WebviewUrl::App("index.html".into()))
+        .title("Screen Time")
+        .visible(false)
+        .inner_size(1200.0, 800.0)
+        .center()
+        .build();
+
+        if let Ok(win) = win {
+            let _ = win.show();
+            let _ = win.set_focus();
+        }
+    }
 }

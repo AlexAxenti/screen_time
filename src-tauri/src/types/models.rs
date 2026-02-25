@@ -47,12 +47,14 @@ pub struct AppInfo {
 pub struct Settings {
     pub start_on_startup: bool,
     pub close_behavior: CloseBehavior,
-    pub idle_duration_ms: i64
+    pub idle_duration_ms: i64,
+    pub is_onboarded: bool,
 }
 
 pub struct TauriRuntimeSettings {
     pub close_behavior: CloseBehavior,
-    pub start_on_startup: bool
+    pub start_on_startup: bool,
+    pub is_onboarded: bool
 }
 
 #[derive(Serialize, Deserialize)]
