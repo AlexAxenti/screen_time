@@ -15,12 +15,11 @@ function ApplicationDetailSummary({
   endOfRangeMs, 
   appId 
 }: ApplicationDetailSummaryProps) {
-  const { data: usageSummary } = useGetAppUsageSummary(
+  const { data: usageSummary, isLoading } = useGetAppUsageSummary(
 		startOfRangeMs,
 		endOfRangeMs,
 		appId,
 	);
-	if (!usageSummary) return null;
 
 	return (
 		<TitledCard>
@@ -34,20 +33,27 @@ function ApplicationDetailSummary({
 				}}
 			>
 				<SimpleDataCard
-					dataValue={formatMsToHoursOrMinutes(usageSummary.total_duration)}
+					dataValue={formatMsToHoursOrMinutes(usageSummary?.total_duration || 0)}
 					dataLabel="Total Focus Time"
+					isLoading={isLoading}
 				/>
 
 				<SimpleDataCard
-					dataValue={usageSummary.segments_count === 0 ? usageSummary.segments_count : usageSummary.segments_count - 1}
+					dataValue={
+						usageSummary ? 
+						(usageSummary?.segments_count === 0 ? usageSummary?.segments_count : usageSummary?.segments_count - 1) 
+						: 0
+					}
 					dataLabel="Session Counts"
 					tooltip="Counts how many times this application became the active foreground application focus."
+					isLoading={isLoading}
 				/>
 
 				<SimpleDataCard
-					dataValue={formatMsToHoursOrMinutes(usageSummary.avg_segment_duration)}
+					dataValue={formatMsToHoursOrMinutes(usageSummary?.avg_segment_duration || 0)}
 					dataLabel="Average Session Duration"
           tooltip="Displays how long you remain focused on this application without switching to another app."
+					isLoading={isLoading}
 				/>
 			</Box>
 		</TitledCard>
