@@ -54,8 +54,8 @@ const SetupSlide = ({
 						color="text.secondary"
 						sx={{ mb: 1.5 }}
 					>
-						Hide keeps the window in memory for faster reopening.
-						Destroy frees memory but takes longer to reopen.
+            Destroy frees up RAM but takes longer to reopen.
+						Hide keeps the window in memory for faster reopening, but consumes more RAM.
 					</Typography>
 					<Box
 						sx={{
@@ -64,7 +64,7 @@ const SetupSlide = ({
 							gap: 1,
 						}}
 					>
-						<Typography variant="body2" color="text.secondary">
+						<Typography variant="body2" color="text.secondary" sx={{ minWidth: 52, textAlign: "right" }}>
 							Destroy
 						</Typography>
 						<Switch
@@ -103,7 +103,7 @@ const SetupSlide = ({
 							gap: 1,
 						}}
 					>
-						<Typography variant="body2" color="text.secondary">
+						<Typography variant="body2" color="text.secondary" sx={{ minWidth: 52, textAlign: "right" }}>
 							No
 						</Typography>
 						<Switch

@@ -8,7 +8,7 @@ import SetupSlide from "./components/SetupSlide";
 const OnboardingFlow = () => {
 	const [slide, setSlide] = useState(0);
 	const [closeBehavior, setCloseBehavior] = useState<CloseBehavior>("destroy");
-	const [startOnStartup, setStartOnStartup] = useState(false);
+	const [startOnStartup, setStartOnStartup] = useState(true);
 
 	const { mutate: updateSettings, isPending } = useUpdateSettings();
 
