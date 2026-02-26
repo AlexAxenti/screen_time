@@ -1,9 +1,7 @@
 use crate::{
     ControlMsg, 
     sql_client::{
-        reader::{
-            query_settings, query_untracked_apps
-        }, 
+        settings::{query_settings, query_untracked_apps}, 
         writer::{
             update_application_tracked, 
             update_settings as update_settings_db

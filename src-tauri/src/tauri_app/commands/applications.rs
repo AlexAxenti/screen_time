@@ -1,6 +1,11 @@
 use crate::{
-    sql_client::reader::{
-        ApplicationSortValue, SortDirection, query_app_metadata, query_app_titles, query_app_usage, query_app_usage_total
+    sql_client::application::{
+        ApplicationSortValue, 
+        SortDirection, 
+        query_app_metadata, 
+        query_app_titles, 
+        query_app_usage, 
+        query_app_usage_total
     }, 
     types::dtos::{AppInfoDTO, AppMetadataDTO, PagedAppSearchDTO}};
 

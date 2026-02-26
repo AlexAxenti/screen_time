@@ -11,7 +11,7 @@ use screen_time::{
     sampler, 
     sql_client::{
         init_db, 
-        reader::{query_settings, query_untracked_app_ids}, 
+        settings::{query_settings, query_untracked_app_ids}, 
         writer::run_writer_loop
     }, 
     tauri_app, 

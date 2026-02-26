@@ -1,4 +1,18 @@
-use crate::{sql_client::reader::{ApplicationSortValue, SortDirection, query_app_avg_time_of_day_usage, query_app_usage, query_app_usage_summary, query_heat_map_values, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage}, types::dtos::{AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO}};
+use crate::{
+    sql_client::{
+        application::{ApplicationSortValue, SortDirection, query_app_usage}, 
+        usage::{query_app_avg_time_of_day_usage, query_app_usage_summary, query_heat_map_values, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage}
+    }, 
+    types::dtos::{
+        AppUsageSummaryDTO, 
+        AvgTimeOfDayUsage, 
+        DailyUsageDTO, 
+        DailyUsageHeatmapDTO, 
+        TopUsageDTO, 
+        UsageFragmentationDTO, 
+        UsageSummaryDTO
+    }
+};
 
 //TODO split into domains
 #[tauri::command]

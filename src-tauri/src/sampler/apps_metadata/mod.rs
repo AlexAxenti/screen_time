@@ -5,7 +5,7 @@ use std::sync::mpsc::Receiver;
 use crate::{
     AppInfo, 
     sampler::apps_metadata::{display_name::get_exe_display_name_from_version_info, icons::ensure_icon_png_from_exe}, 
-    sql_client::{reader::check_for_application, writer::save_application_to_db}, 
+    sql_client::{application::check_for_application, writer::save_application_to_db}, 
     utils::paths::icons_dir
 };
 
