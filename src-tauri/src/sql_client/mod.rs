@@ -1,10 +1,9 @@
 // pub mod reader;
-pub mod writer;
 mod init;
 mod migrations;
 mod read;
-
 pub use read::*;
+pub mod writer;
 
 use crate::{sql_client::init::{connect_db_file, init_migrations_table, run_migrations}};
 
