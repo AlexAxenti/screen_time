@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import type { PagedAppSearch } from "../../types/tauriDtos";
 
-const useGetApplications = (
+const useGetApplicationsList = (
 	startTime: number,
 	endTime: number,
 	pageCount: number,
@@ -12,11 +12,11 @@ const useGetApplications = (
 	searchValue?: string,
 ) => {
 	return useQuery({
-		queryKey: ["applications", startTime, endTime, pageCount, pageSize, sortValue, sortDirection, searchValue],
+		queryKey: ["applications_list", startTime, endTime, pageCount, pageSize, sortValue, sortDirection, searchValue],
 		queryFn: async () => {
 			try {
 				const applications: PagedAppSearch = await invoke(
-					"get_applications",
+					"get_applications_list",
 					{
 						startTime,
 						endTime,
@@ -29,11 +29,11 @@ const useGetApplications = (
 				);
 				return applications;
 			} catch (e) {
-				console.error("get applications failed");
+				console.error("get applications list failed");
 				throw e;
 			}
 		},
 	});
 };
 
-export default useGetApplications;
+export default useGetApplicationsList;

@@ -21,7 +21,7 @@ pub struct AppUsageDTO {
 }
 
 #[derive(Serialize)]
-pub struct PagedAppSearch {
+pub struct PagedAppSearchDTO {
     pub apps_usage: Vec<AppUsageDTO>,
     pub total: i64
 }

@@ -15,7 +15,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
-import useSearchApplications from "../../hooks/queries/useSearchApplications";
+import useSearchApplicationTitles from "../../hooks/queries/useSearchApplicationTitles";
 import { getIconSrc } from "../../lib/iconPaths";
 import type { ApplicationInfo } from "../../types/tauriDtos";
 
@@ -51,7 +51,7 @@ const AppSearchBar = ({
 	const menuItemRefs = useRef<(HTMLLIElement | null)[]>([]);
 
 	const debouncedSearch = useDebouncedValue(searchValue, 250);
-	const { data: applications } = useSearchApplications(
+	const { data: applications } = useSearchApplicationTitles(
 		debouncedSearch,
 		tracked,
 	);

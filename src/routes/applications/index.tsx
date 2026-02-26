@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import PageHeader from "../../components/UI/PageHeader";
 import { getEndOfDayMs, getStartOfDayMs, getWeekStartMs } from "../../lib/epochDayHelpers";
-import useGetApplications from "../../hooks/queries/useGetApplications";
+import useGetApplicationsList from "../../hooks/queries/useGetApplicationsList";
 import ApplicationsFilters from "./-components/ApplicationsFilters";
 import ApplicationsList from "./-components/ApplicationsList";
 import type { DateRangeOption } from "./-components/DateRangeSelector";
@@ -68,7 +68,7 @@ function Index() {
 		data: results,
 		isLoading,
 		isError,
-	} = useGetApplications(
+	} = useGetApplicationsList(
 		startTime,
 		endTime,
 		pageCount,
