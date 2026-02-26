@@ -1,4 +1,6 @@
-import { Box } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useMemo, useState } from "react";
 import {
 	Bar,
@@ -11,7 +13,7 @@ import {
 	YAxis,
 } from "recharts";
 import { formatMsToHoursOrMinutes } from "../../lib/durationFormatHelpers";
-import { getStartOfDayMs } from "../../lib/epochDayHelpers";
+import { getMondayOfWeekMs, getStartOfDayMs } from "../../lib/epochDayHelpers";
 import useGetWeeksDailyUsage from "../../hooks/queries/useGetWeeksDailyUsage";
 
 interface LastWeekScaffold {
@@ -25,13 +27,17 @@ interface WeeklyUsageChartProps {
 	epochStartOfWeekMs: number;
 	epochEndOfWeekMs: number;
 	handleSetRange: (startMs: number, endMs: number) => void;
+	handleWeekChange: (newStartDate: Date) => void;
 	appId?: string;
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const WeeklyUsageChart = ({
 	epochStartOfWeekMs,
 	epochEndOfWeekMs,
 	handleSetRange,
+	handleWeekChange,
 	appId,
 }: WeeklyUsageChartProps) => {
 	const { data: weeksDailyUsage } = useGetWeeksDailyUsage(
@@ -95,8 +101,31 @@ const WeeklyUsageChart = ({
 			? mergedWeeksDailyUsage[selectedIndex]?.dayLabel
 			: null;
 
+	const currentMondayMs = getMondayOfWeekMs(new Date(epochStartOfWeekMs));
+	const prevMondayMs = currentMondayMs - 7 * DAY_MS;
+	const nextMondayMs = currentMondayMs + 7 * DAY_MS;
+	const todayMs = getStartOfDayMs(new Date());
+	const canGoRight = nextMondayMs < todayMs;
+
 	return (
-		<Box sx={{ width: "100%", height: "300px" }}>
+		<Box sx={{ width: "100%", height: "300px", position: "relative" }}>
+			
+			<Box sx={{ position: "absolute", top: -44, right: 0, display: "flex", alignItems: "center", gap: 0.5 }}>
+				<IconButton
+					size="small"
+					onClick={() => handleWeekChange(new Date(prevMondayMs))}
+				>
+					<ChevronLeftIcon fontSize="small" />
+				</IconButton>
+				<IconButton
+					size="small"
+					disabled={!canGoRight}
+					onClick={() => handleWeekChange(new Date(nextMondayMs))}
+				>
+					<ChevronRightIcon fontSize="small" />
+				</IconButton>
+			</Box>
+			
 			<ResponsiveContainer width="100%" height="100%">
 				<BarChart
 					data={mergedWeeksDailyUsage}

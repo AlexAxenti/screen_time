@@ -21,6 +21,12 @@ pub struct AppUsageDTO {
 }
 
 #[derive(Serialize)]
+pub struct PagedAppSearch {
+    pub apps_usage: Vec<AppUsageDTO>,
+    pub total: i64
+}
+
+#[derive(Serialize)]
 pub struct TopUsageDTO {
     pub window_segments: Vec<AppUsageDTO>,
     pub other_duration: i64,

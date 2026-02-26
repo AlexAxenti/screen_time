@@ -15,9 +15,6 @@ export const Route = createFileRoute("/applications/")({
 	component: Index,
 });
 
-// TODO add count to getApplications
-const TOTAL_COUNT = 50;
-
 function Index() {
 	const today = new Date();
 
@@ -68,7 +65,7 @@ function Index() {
 	const searchValue = searchQuery.trim() || undefined;
 
 	const {
-		data: applications,
+		data: results,
 		isLoading,
 		isError,
 	} = useGetApplications(
@@ -81,9 +78,11 @@ function Index() {
 		searchValue
 	);
 
-	const totalPages = Math.ceil(TOTAL_COUNT / pageSize);
+	const totalCount = results?.total ?? 0;
+
+	const totalPages = Math.ceil(totalCount / pageSize);
 	const showingStart = pageCount * pageSize + 1;
-	const showingEnd = Math.min((pageCount + 1) * pageSize, TOTAL_COUNT);
+	const showingEnd = Math.min((pageCount + 1) * pageSize, totalCount);
 
 	const handlePageSizeChange = (newSize: number) => {
 		setPageSize(newSize);
@@ -115,7 +114,7 @@ function Index() {
 			/>
 
 			<ApplicationsList
-				applications={applications}
+				applications={results?.apps_usage || []}
 				isLoading={isLoading}
 				isError={isError}
 			/>
@@ -147,7 +146,7 @@ function Index() {
 
 				<Stack direction="row" alignItems="center" spacing={1}>
 					<Typography variant="body2" color="text.secondary">
-						Showing {showingStart}-{showingEnd} of {TOTAL_COUNT} applications
+						Showing {showingStart}-{showingEnd} of {totalCount} applications
 					</Typography>
 					<IconButton
 						onClick={handlePrevPage}

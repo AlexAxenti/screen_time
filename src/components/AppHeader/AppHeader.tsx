@@ -1,9 +1,10 @@
-import { AppBar, Toolbar, useMediaQuery, useTheme } from "@mui/material";
+import { AppBar, Box, Toolbar, useMediaQuery, useTheme } from "@mui/material";
 import { useMatchRoute } from "@tanstack/react-router";
 import HeaderTitle from "./components/HeaderTitle";
 import MobileDrawer from "./components/MobileDrawer";
 import NavLinks from "./components/NavLinks";
 import HeaderSearchBar from "./components/HeaderSearchBar";
+import RefreshCacheButton from "./components/RefreshCacheButton";
 
 const AppHeader = () => {
 	const theme = useTheme();
@@ -46,11 +47,16 @@ const AppHeader = () => {
 
 				{!isMobile && <HeaderSearchBar />}
 
-				{isMobile ? (
-					<MobileDrawer isActiveRoute={isActiveRoute} />
-				) : (
-					<NavLinks isActiveRoute={isActiveRoute} />
-				)}
+				<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+					<RefreshCacheButton />
+
+					{isMobile ? (
+						<MobileDrawer isActiveRoute={isActiveRoute} />
+					) : (
+						<NavLinks isActiveRoute={isActiveRoute} />
+					)}
+				</Box>
+				
 			</Toolbar>
 		</AppBar>
 	);

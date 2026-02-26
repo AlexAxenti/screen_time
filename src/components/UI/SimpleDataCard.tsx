@@ -6,6 +6,7 @@ import InfoTooltip from "./InfoTooltip";
 interface SimpleDataCardProps {
 	dataValue: string | number;
 	dataLabel: string;
+	isLoading: boolean;
 	tooltip?: string;
 	sx?: object;
 }
@@ -15,6 +16,7 @@ const SimpleDataCard = ({
 	dataLabel,
 	tooltip,
 	sx,
+	isLoading,
 }: SimpleDataCardProps) => {
 	return (
 		<Card
@@ -23,6 +25,7 @@ const SimpleDataCard = ({
 				textAlign: "center",
 				backgroundColor: "background.default",
 				position: "relative",
+				height: "92px",
 				...sx,
 			}}
 		>
@@ -31,8 +34,8 @@ const SimpleDataCard = ({
 					<InfoTooltip text={tooltip} placement="left" />
 				</Box>
 			)}
-			<Typography variant="h4" color="text.secondary">
-				{dataValue}
+			<Typography variant="h4" color="text.secondary" sx={{ height: "30px" }}>
+				{!isLoading && dataValue}
 			</Typography>
 			<Typography variant="body2" color="text.primary" sx={{ marginTop: 1 }}>
 				{dataLabel}

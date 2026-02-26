@@ -7,7 +7,7 @@ use std::sync::Mutex;
 use std::thread::JoinHandle;
 use std::sync::mpsc::Sender;
 
-use tauri::{Manager, RunEvent};
+use tauri::{Emitter, Manager, RunEvent};
 
 use crate::ControlMsg;
 use crate::types::models::{CloseBehavior, TauriRuntimeSettings};
@@ -15,6 +15,7 @@ use crate::types::models::{CloseBehavior, TauriRuntimeSettings};
 pub struct AppState {
     pub tx_control: Sender<ControlMsg>,
     pub runtime_settings: Mutex<TauriRuntimeSettings>,
+    pub is_paused: Mutex<bool>
 }
 
 pub fn run(
@@ -26,6 +27,7 @@ pub fn run(
     let app_state = AppState { 
         tx_control, 
         runtime_settings: Mutex::new(runtime_settings),
+        is_paused: Mutex::new(false)
     };
 
     tauri::Builder::default()
@@ -45,11 +47,21 @@ pub fn run(
                 if matches!(settings.close_behavior, CloseBehavior::Hide) {
                     api.prevent_close();
                     let _ = window.hide();
+                    let _ = window.emit("app:reset-to-dashboard", ());
                 }
             }
         })
         .invoke_handler(commands::handler())
         .setup(|app| {
+            let state = app.state::<AppState>();
+            let settings = state.runtime_settings.lock().expect("Failed to acquire runtime settings lock");
+
+            if !settings.is_onboarded {
+                println!("Starting app {}", settings.is_onboarded);
+                setup::create_webview_window(app.handle());
+            };
+
+            drop(settings);
             setup::setup_menu(app)
         })
         .build(tauri::generate_context!())

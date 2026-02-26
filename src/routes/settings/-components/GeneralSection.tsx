@@ -82,6 +82,7 @@ const GeneralSection = () => {
 					defaultValue={2}
 					slotProps={{ htmlInput: { min: 1, max: 60 } }}
 					sx={{ width: 80 }}
+					disabled
 				/>
 			</SettingRow>
 		</Card>

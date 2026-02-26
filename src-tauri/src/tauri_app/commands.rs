@@ -1,8 +1,8 @@
 use crate::{
     ControlMsg, sql_client::{reader::{
-        ApplicationSortValue, SortDirection, query_app_avg_time_of_day_usage, query_app_metadata, query_app_titles, query_app_usage, query_app_usage_summary, query_heat_map_values, query_settings, query_untracked_apps, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
+        ApplicationSortValue, SortDirection, query_app_avg_time_of_day_usage, query_app_metadata, query_app_titles, query_app_usage, query_app_usage_summary, query_app_usage_total, query_heat_map_values, query_settings, query_untracked_apps, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage
     }, writer::{update_application_tracked, update_settings as update_settings_db}}, tauri_app::startup::configure_start_on_startup, types::{dtos::{
-        AppInfoDTO, AppMetadataDTO, AppUsageDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
+        AppInfoDTO, AppMetadataDTO, AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, PagedAppSearch, TopUsageDTO, UsageFragmentationDTO, UsageSummaryDTO
     }, models::Settings}
 };
 use tauri::{Runtime, State, ipc::Invoke};
@@ -103,7 +103,7 @@ fn get_applications(
     search_value: Option<String>,
     sort_value: Option<String>, 
     sort_direction: Option<String>
-) -> Vec<AppUsageDTO> {
+) -> PagedAppSearch {
     let sort_value = sort_value.unwrap_or("window_exe".to_string());
     let sort_direction = sort_direction.unwrap_or("ASC".to_string());
     
@@ -126,10 +126,12 @@ fn get_applications(
         sort_direction,
         Some(page_count),
         Some(page_size),
-        search_value,
+        search_value.clone(),
     ).expect("Failed to read from DB");
+
+    let total_count = query_app_usage_total(start_time, end_time, search_value).expect("Failed to read from DB");
     
-    window_segments
+    PagedAppSearch { apps_usage: window_segments, total: total_count }
 }
 
 // todo naming ambiguous

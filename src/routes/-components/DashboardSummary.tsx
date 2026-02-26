@@ -9,15 +9,15 @@ interface DashboardSummaryProps {
 	endOfRangeMs: number;
 }
 
+//TODO create reusable generic with ApplicationDetailSummary
 function DashboardSummary({
 	startOfRangeMs,
 	endOfRangeMs,
 }: DashboardSummaryProps) {
-	const { data: usageSummary } = useGetUsageSummary(
+	const { data: usageSummary, isLoading } = useGetUsageSummary(
 		startOfRangeMs,
 		endOfRangeMs,
 	);
-	if (!usageSummary) return null;
 
 	return (
 		<TitledCard>
@@ -31,19 +31,26 @@ function DashboardSummary({
 				}}
 			>
 				<SimpleDataCard
-					dataValue={formatMsToHoursOrMinutes(usageSummary.total_duration)}
+					dataValue={formatMsToHoursOrMinutes(usageSummary?.total_duration || 0)}
 					dataLabel="Total Focus Time"
+					isLoading={isLoading}
 				/>
 
 				<SimpleDataCard
-					dataValue={usageSummary.segments_count === 0 ? usageSummary.segments_count : usageSummary.segments_count - 1}
+					dataValue={
+						usageSummary ? 
+						(usageSummary?.segments_count === 0 ? usageSummary?.segments_count : usageSummary?.segments_count - 1) : 
+						0
+					}
 					dataLabel="Focus Switches"
 					tooltip="Counts how often the active foreground application changed during tracked time."
+					isLoading={isLoading}
 				/>
 
 				<SimpleDataCard
-					dataValue={usageSummary.exe_count}
+					dataValue={usageSummary?.exe_count || 0}
 					dataLabel="Unique Apps"
+					isLoading={isLoading}
 				/>
 			</Box>
 		</TitledCard>
