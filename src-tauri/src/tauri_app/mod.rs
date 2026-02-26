@@ -12,10 +12,10 @@ use tauri::{Emitter, Manager, RunEvent};
 use crate::ControlMsg;
 use crate::types::models::{CloseBehavior, TauriRuntimeSettings};
 
-pub struct AppState {
-    pub tx_control: Sender<ControlMsg>,
-    pub runtime_settings: Mutex<TauriRuntimeSettings>,
-    pub is_paused: Mutex<bool>
+struct AppState {
+    tx_control: Sender<ControlMsg>,
+    runtime_settings: Mutex<TauriRuntimeSettings>,
+    is_paused: Mutex<bool>
 }
 
 pub fn run(

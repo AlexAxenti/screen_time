@@ -3,7 +3,7 @@ use crate::{WindowSegment, sql_client::init::connect_db_file, types::models::{Cl
 use rusqlite::{Connection, params};
 
 //TODO batching and error handling
-//TODO move to seperate mod?
+//TODO refactor like read mod
 pub fn run_writer_loop(rx_segments: Receiver<WindowSegment>) {
     let db_connection = connect_db_file();
 
