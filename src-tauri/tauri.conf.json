@@ -1,6 +1,6 @@
 {
 	"productName": "ScreenTime",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"identifier": "com.screentime.screentime",
 	"build": {
 		"devUrl": "http://localhost:5173",

@@ -24,6 +24,8 @@ pub fn run(
     mut sampler_handle: Option<JoinHandle<()>>,
     runtime_settings: TauriRuntimeSettings
 ) {
+    let tx_control_for_run = tx_control.clone();
+
     let app_state = AppState { 
         tx_control, 
         runtime_settings: Mutex::new(runtime_settings),
@@ -72,11 +74,14 @@ pub fn run(
                     if code.is_none() {
                         api.prevent_exit();
                     } else {
+                        let _ = tx_control_for_run.send(ControlMsg::Shutdown);
                         println!("exit code: {:?}", code);
                     }
                 }
                 RunEvent::Exit => {
                     println!("Shutdown cleaning");
+                    let _ = tx_control_for_run.send(ControlMsg::Shutdown);
+
                     if let Some(h) = sampler_handle.take() {
                         h.join().unwrap();
                         println!("Sampler thread closed");
