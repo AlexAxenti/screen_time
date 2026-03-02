@@ -65,20 +65,23 @@ const SetupSlide = ({
 						}}
 					>
 						<Typography variant="body2" color="text.secondary" sx={{ minWidth: 52, textAlign: "right" }}>
-							Destroy
+							Hide
 						</Typography>
 						<Switch
-							checked={closeBehavior === "hide"}
+							checked={closeBehavior === "destroy"}
 							onChange={() =>
 								onCloseBehaviorChange(
-									closeBehavior === "hide"
-										? "destroy"
-										: "hide"
+									closeBehavior === "destroy"
+										? "hide"
+										: "destroy"
 								)
 							}
 						/>
 						<Typography variant="body2" color="text.secondary">
-							Hide
+							Destroy{" "}
+							<Typography component="span" variant="caption" color="text.disabled" sx={{ marginLeft: 0.5 }}>
+								(recommended)
+							</Typography>
 						</Typography>
 					</Box>
 				</Box>
@@ -113,7 +116,10 @@ const SetupSlide = ({
 							}
 						/>
 						<Typography variant="body2" color="text.secondary">
-							Yes
+							Yes{" "}
+							<Typography component="span" variant="caption" color="text.disabled" sx={{ marginLeft: 0.5 }}>
+								(recommended)
+							</Typography>
 						</Typography>
 					</Box>
 				</Box>

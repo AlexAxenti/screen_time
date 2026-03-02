@@ -40,16 +40,16 @@ const GeneralSection = () => {
 				label="Window Close Behavior"
 				description="Hide keeps the window in memory for faster reopening. Destroy frees memory but takes longer to reopen."
 			>
-				<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-					<Typography variant="body2" color="text.secondary">
-						Destroy
+				<Box sx={{ display: "flex", alignItems: "center", gap: 1, width: '200px' }}>
+					<Typography variant="body2" color="text.secondary" sx={{ minWidth: 52, textAlign: "right" }}>
+						Hide
 					</Typography>
 					<Switch
-						checked={settings?.close_behavior === "hide"}
+						checked={settings?.close_behavior === "destroy"}
 						onChange={handleToggleCloseBehavior}
 					/>
 					<Typography variant="body2" color="text.secondary">
-						Hide
+						Destroy
 					</Typography>
 				</Box>
 			</SettingRow>
@@ -58,8 +58,8 @@ const GeneralSection = () => {
 				label="Open on Startup"
 				description="If disabled, you'll need to manually run the executable for screen time tracking to begin."
 			>
-				<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-					<Typography variant="body2" color="text.secondary">
+				<Box sx={{ display: "flex", alignItems: "center", gap: 1, width: '200px' }}>
+					<Typography variant="body2" color="text.secondary" sx={{ minWidth: 52, textAlign: "right" }}>
 						No
 					</Typography>
 					<Switch defaultChecked={false} 
