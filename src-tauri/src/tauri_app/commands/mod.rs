@@ -23,6 +23,7 @@ pub fn handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync + 'stat
         usage::get_usage_fragmentation,
         usage::get_weeks_daily_usage,
         usage::get_usage_heat_map,
-        usage::get_app_avg_time_of_day_usage
+        usage::get_app_avg_time_of_day_usage,
+        usage::get_app_overall_summary
     ]
 }

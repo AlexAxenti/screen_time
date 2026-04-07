@@ -102,10 +102,10 @@ const WeeklyUsageChart = ({
 			: null;
 
 	const currentMondayMs = getMondayOfWeekMs(new Date(epochStartOfWeekMs));
-	const prevMondayMs = currentMondayMs - 7 * DAY_MS;
+	const prevMondayMs = getMondayOfWeekMs(new Date(epochStartOfWeekMs - DAY_MS));
 	const nextMondayMs = currentMondayMs + 7 * DAY_MS;
 	const todayMs = getStartOfDayMs(new Date());
-	const canGoRight = nextMondayMs < todayMs;
+	const canGoRight = epochStartOfWeekMs + 7 * DAY_MS <= todayMs;
 
 	return (
 		<Box sx={{ width: "100%", height: "300px", position: "relative" }}>

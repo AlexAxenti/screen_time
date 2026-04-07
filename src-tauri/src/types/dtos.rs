@@ -74,3 +74,10 @@ pub struct AvgTimeOfDayUsage {
     pub total_duration_ms: i64,
     pub avg_ms_per_hour_of_day: i64
 }
+
+#[derive(Serialize)]
+pub struct AppOverallSummaryDTO {
+    pub total_duration_ms: i64,
+    pub first_used_ms: Option<i64>,
+    pub last_used_ms: Option<i64>,
+}

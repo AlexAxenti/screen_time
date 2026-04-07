@@ -1,9 +1,18 @@
 use crate::{
     sql_client::{
         application::{ApplicationSortValue, SortDirection, query_app_usage}, 
-        usage::{query_app_avg_time_of_day_usage, query_app_usage_summary, query_heat_map_values, query_usage_fragmentation, query_usage_summary, query_weeks_daily_usage}
+        usage::{
+            query_app_avg_time_of_day_usage, 
+            query_app_overall_summary, 
+            query_app_usage_summary,
+            query_heat_map_values, 
+            query_usage_fragmentation, 
+            query_usage_summary, 
+            query_weeks_daily_usage
+        }
     }, 
     types::dtos::{
+        AppOverallSummaryDTO,
         AppUsageSummaryDTO, 
         AvgTimeOfDayUsage, 
         DailyUsageDTO, 
@@ -91,4 +100,11 @@ pub fn get_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: Str
     let avg_usage = query_app_avg_time_of_day_usage(start_time, end_time, app_id).expect("Failed to read from DB");
 
     avg_usage
+}
+
+#[tauri::command]
+pub fn get_app_overall_summary(app_id: String) -> AppOverallSummaryDTO {
+    let summary = query_app_overall_summary(app_id).expect("Failed to read from DB");
+
+    summary
 }

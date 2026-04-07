@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Divider } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import UsageFragmentationChart from "../../../components/Charts/UsageFragmentationChart";
@@ -8,6 +8,7 @@ import { getStartOfDayMs, getWeekEndFromStartMs, getWeekStartMs } from "../../..
 import ApplicationDetailSummary from "./-components/ApplicationDetailSummary";
 import AvgTimeOfDayUsageChart from "./-components/AvgTimeOfDayUsageChart";
 import ApplicationDetailsPageHeader from "./-components/ApplicationDetailsPageHeader";
+import ApplicationOverallSummary from "./-components/ApplicationOverallSummary";
 import useGetApplicationMetadata from "../../../hooks/queries/useGetApplicationMetadata";
 
 interface SearchParams {
@@ -65,6 +66,10 @@ function RouteComponent() {
 				weekEndMs={weekEndMs}
 				onWeekChange={handleWeekChange}
 			/>
+
+			<ApplicationOverallSummary appId={exe} />
+
+			<Divider sx={{ my: 2 }} />
 
 			{/* Top Row: Weekly Chart (2/3) + Summary Cards (1/3) */}
 			<Box

@@ -1,6 +1,17 @@
 use rusqlite::params;
 
-use crate::{sql_client::init::connect_db_file, types::dtos::{AppUsageSummaryDTO, AvgTimeOfDayUsage, DailyUsageDTO, DailyUsageHeatmapDTO, UsageFragmentationDTO, UsageSummaryDTO}};
+use crate::{
+    sql_client::init::connect_db_file, 
+    types::dtos::{
+        AppOverallSummaryDTO, 
+        AppUsageSummaryDTO, 
+        AvgTimeOfDayUsage, 
+        DailyUsageDTO, 
+        DailyUsageHeatmapDTO, 
+        UsageFragmentationDTO, 
+        UsageSummaryDTO
+    }
+};
 
 
 pub fn query_usage_summary(start_time: i64, end_time: i64) -> rusqlite::Result<UsageSummaryDTO> {
@@ -270,4 +281,26 @@ pub fn query_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: S
     }
 
     Ok(avg_usage)
+}
+
+pub fn query_app_overall_summary(app_id: String) -> rusqlite::Result<AppOverallSummaryDTO> {
+    let conn = connect_db_file();
+
+    let mut stmt = conn.prepare("SELECT
+        COALESCE(SUM(duration_ms), 0) AS total_duration_ms,
+        MIN(start_time) AS first_used_ms,
+        MAX(start_time) AS last_used_ms
+    FROM window_segments
+    WHERE app_id = ?1
+        AND duration_ms > 0")?;
+
+    let summary = stmt.query_row(params![app_id], |row| {
+        Ok(AppOverallSummaryDTO {
+            total_duration_ms: row.get(0)?,
+            first_used_ms: row.get(1)?,
+            last_used_ms: row.get(2)?,
+        })
+    });
+
+    summary
 }

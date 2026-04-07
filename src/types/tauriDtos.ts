@@ -64,3 +64,9 @@ export interface AvgTimeOfDayUsage {
 	total_duration_ms: number;
 	avg_ms_per_hour_of_day: number;
 }
+
+export interface AppOverallSummary {
+	total_duration_ms: number;
+	first_used_ms: number | null;
+	last_used_ms: number | null;
+}
