@@ -23,3 +23,7 @@ The app is built as a Rust background agent along with a Tauri + React desktop U
 For performance and communication, the agent uses multiple threads (foreground sampling vs sql writing) with channel-based communication.
 
 The background usage of the agent is very small, usually ~2 MB of RAM. The desktop UI also comes with a 'destroy on close' settings option that prevents background minimization to avoid unnecessary RAM usage while the UI is unused.
+
+## Extra Details
+
+Visit my [website](https://alexaxenti.com/projects/ScreenTimeTracker) for extra details and photos of this app.
