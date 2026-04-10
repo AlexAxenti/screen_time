@@ -253,7 +253,7 @@ pub fn query_heat_map_values(start_time: i64, end_time: i64, app_id: Option<Stri
     Ok(daily_usage)
 }
 
-pub fn query_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: String) -> rusqlite::Result<Vec<AvgTimeOfDayUsage>> {
+pub fn query_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: Option<String>) -> rusqlite::Result<Vec<AvgTimeOfDayUsage>> {
     let conn = connect_db_file();
 
     let mut stmt = conn.prepare("WITH RECURSIVE
@@ -269,7 +269,10 @@ pub fn query_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: S
         MAX(start_time, (SELECT range_start FROM params)) AS start_time,
         MIN(end_time, (SELECT range_end FROM params)) AS end_time
     FROM window_segments
-    WHERE app_id = (SELECT app_id FROM params)
+    WHERE (
+        (SELECT app_id FROM params) IS NULL
+        OR app_id = (SELECT app_id FROM params)
+    )
         AND start_time < (SELECT range_end FROM params)
         AND end_time > (SELECT range_start FROM params)
     ),

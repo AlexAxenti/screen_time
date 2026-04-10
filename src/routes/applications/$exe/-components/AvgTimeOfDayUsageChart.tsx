@@ -7,7 +7,7 @@ import { formatMsToHoursOrMinutes } from "../../../../lib/durationFormatHelpers"
 interface UsageFragmentationChartProps {
 	startOfRangeMs: number;
 	endOfRangeMs: number;
-	appId: string;
+	appId?: string;
 }
 
 //TODO move to helpers?

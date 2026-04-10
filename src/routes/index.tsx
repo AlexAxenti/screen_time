@@ -2,7 +2,6 @@ import { Box, useTheme } from "@mui/material";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import "./index.css";
 import { useState } from "react";
-import UsageFragmentationChart from "../components/Charts/UsageFragmentationChart";
 import WeeklyUsageChart from "../components/Charts/WeeklyUsageChart";
 import TitledCard from "../components/UI/TitledCard";
 import { getStartOfDayMs, getWeekEndFromStartMs, getWeekStartMs } from "../lib/epochDayHelpers";
@@ -10,6 +9,7 @@ import DashboardSummary from "./-components/DashboardSummary";
 import TopExesChart from "./-components/TopExesChart/TopExesChart";
 import Timeline from "../components/Timeline/Timeline";
 import PageHeader from "../components/UI/PageHeader";
+import AvgTimeOfDayUsageChart from "./applications/$exe/-components/AvgTimeOfDayUsageChart";
 
 export const Route = createFileRoute("/")({
 	component: Index,
@@ -66,7 +66,11 @@ function Index() {
 					marginBottom: 3,
 				}}
 			>
-				<TitledCard title="Weekly Overview">
+				<TitledCard 
+					title="Weekly Overview" 
+					titleTooltip="Select a bar below to narrow down the dashboard's time range to that specific day." 
+					titleTooltipPlacement="right"
+				>
 					<WeeklyUsageChart
 						epochStartOfWeekMs={weekStartMs}
 						epochEndOfWeekMs={weekEndMs}
@@ -90,6 +94,8 @@ function Index() {
 			>
 				<TitledCard
 					title="Top Applications Used"
+					titleTooltip="Click on an application's bar to navigate to that application's detailed view page."
+					titleTooltipPlacement="right"
 					headerAction={
 						<Link
 							to="/applications"
@@ -104,8 +110,8 @@ function Index() {
 						endOfRangeMs={rangeEndMs}
 					/>
 				</TitledCard>
-				<TitledCard title="Focus Time Blocks">
-					<UsageFragmentationChart
+				<TitledCard title="Usage Distribution">
+					<AvgTimeOfDayUsageChart 
 						startOfRangeMs={rangeStartMs}
 						endOfRangeMs={rangeEndMs}
 					/>

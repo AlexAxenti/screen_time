@@ -1,8 +1,11 @@
 import { Box, Card, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import InfoTooltip from "./InfoTooltip";
 
 interface DashboardCardProps {
 	title?: string;
+	titleTooltip?: string;
+	titleTooltipPlacement?: "right" | "left" | "top" | "bottom";
 	headerAction?: ReactNode;
 	children: ReactNode;
 	sx?: object;
@@ -10,6 +13,8 @@ interface DashboardCardProps {
 
 const DashboardCard = ({
 	title,
+	titleTooltip,
+	titleTooltipPlacement,
 	headerAction,
 	children,
 	sx,
@@ -37,14 +42,20 @@ const DashboardCard = ({
 					}}
 				>
 					{title && (
-						<Typography
-							variant="h5"
-							sx={{
-								fontWeight: 500,
-							}}
-						>
-							{title}
-						</Typography>
+						<>
+							<Typography
+								variant="h5"
+								sx={{
+									fontWeight: 500,
+									mr: 1,
+								}}
+							>
+								{title}
+							</Typography>
+							{titleTooltip && (
+								<InfoTooltip text={titleTooltip} placement={titleTooltipPlacement || "right"} />
+							)}
+						</>
 					)}
 					{headerAction && (
 						<Box sx={{ position: "absolute", right: 0 }}>{headerAction}</Box>

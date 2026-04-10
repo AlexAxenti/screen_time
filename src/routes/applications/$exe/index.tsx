@@ -80,7 +80,11 @@ function RouteComponent() {
 					marginBottom: 3,
 				}}
 			>
-				<TitledCard title="Weekly Overview">
+				<TitledCard 
+					title="Weekly Overview" 
+					titleTooltip="Select a bar below to narrow down the dashboard's time range to that specific day." 
+					titleTooltipPlacement="right"
+				>
 					<WeeklyUsageChart
 						epochStartOfWeekMs={weekStartMs}
 						epochEndOfWeekMs={weekEndMs}
@@ -104,15 +108,19 @@ function RouteComponent() {
 					gap: 3,
 				}}
 			>
-				<TitledCard title="Usage Distribution">
-					<AvgTimeOfDayUsageChart 
+				<TitledCard 
+					title="Focus Time Blocks"
+					titleTooltip="Shows how your active time is split across continuous usage segments of different lengths. A segment represents uninterrupted activity. Shorter or longer segments can reflect many workflows, such as quick task switching, or extended time on a single activity."
+					titleTooltipPlacement="right"
+				>
+					<UsageFragmentationChart
 						startOfRangeMs={rangeStartMs}
 						endOfRangeMs={rangeEndMs}
 						appId={exe}
 					/>
 				</TitledCard>
-				<TitledCard title="Focus Time Blocks">
-					<UsageFragmentationChart
+				<TitledCard title="Usage Distribution">
+					<AvgTimeOfDayUsageChart 
 						startOfRangeMs={rangeStartMs}
 						endOfRangeMs={rangeEndMs}
 						appId={exe}

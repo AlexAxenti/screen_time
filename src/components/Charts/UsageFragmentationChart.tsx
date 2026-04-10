@@ -7,7 +7,6 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import InfoTooltip from "../UI/InfoTooltip";
 import useGetUsageFragmentation from "../../hooks/queries/useGetUsageFragmentation";
 import type { UsageFragmentation } from "../../types/tauriDtos";
 
@@ -62,12 +61,6 @@ const UsageFragmentationChart = ({
 
 	return (
 		<Box sx={{ width: "100%", height: "300px", position: "relative" }}>
-			<Box sx={{ position: "absolute", top: -40, right: 0 }}>
-				<InfoTooltip
-					text="Shows how your active time is split across continuous usage segments of different lengths. A segment represents uninterrupted activity. Shorter or longer segments can reflect many workflows, such as quick task switching, or extended time on a single activity."
-					placement="left"
-				/>
-			</Box>
 			<ResponsiveContainer width="100%" height="100%">
 				<BarChart
 					data={normalizeBuckets(usageFragmentation ?? [])}

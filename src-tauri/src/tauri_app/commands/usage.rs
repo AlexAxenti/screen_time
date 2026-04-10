@@ -96,7 +96,7 @@ pub fn get_usage_heat_map(start_time: i64, end_time: i64, app_id: Option<String>
 }
 
 #[tauri::command]
-pub fn get_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: String) -> Vec<AvgTimeOfDayUsage> {
+pub fn get_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: Option<String>) -> Vec<AvgTimeOfDayUsage> {
     let avg_usage = query_app_avg_time_of_day_usage(start_time, end_time, app_id).expect("Failed to read from DB");
 
     avg_usage
