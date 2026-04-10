@@ -18,11 +18,11 @@ pub fn query_usage_summary(start_time: i64, end_time: i64) -> rusqlite::Result<U
     let conn = connect_db_file();
 
     let mut stmt = conn.prepare("SELECT 
-            COALESCE(SUM(duration_ms), 0) AS total_duration,
+            COALESCE(SUM(MIN(end_time, ?2) - MAX(start_time, ?1)), 0) AS total_duration,
             COUNT(*) AS segments_count, 
             COUNT(DISTINCT window_exe) AS exe_count
         FROM window_segments 
-        WHERE start_time >= ?1 AND start_time < ?2")?;
+        WHERE start_time < ?2 AND end_time > ?1")?;
 
     let summary = stmt.query_row(params![start_time, end_time], |row| {
         Ok(UsageSummaryDTO {
@@ -39,15 +39,15 @@ pub fn query_app_usage_summary(start_time: i64, end_time: i64, app_id: String) -
     let conn = connect_db_file();
 
     let mut stmt = conn.prepare("SELECT
-        COALESCE(SUM(ws.duration_ms), 0) AS total_duration_ms,
+        COALESCE(SUM(MIN(ws.end_time, ?2) - MAX(ws.start_time, ?1)), 0) AS total_duration_ms,
         COALESCE(COUNT(*), 0) AS segment_count,
         COALESCE(
-            CAST(AVG(ws.duration_ms) AS INTEGER),
+            CAST(AVG(MIN(ws.end_time, ?2) - MAX(ws.start_time, ?1)) AS INTEGER),
             0
         ) AS avg_segment_duration_ms
         FROM window_segments ws
-        WHERE ws.start_time >= ?1
-            AND ws.start_time <  ?2
+        WHERE ws.start_time < ?2
+            AND ws.end_time > ?1
             AND ws.duration_ms > 0
             AND (?3 = '' OR ws.app_id = ?3);")?;
 
@@ -67,28 +67,33 @@ pub fn query_usage_fragmentation(start_time: i64, end_time: i64, app_id: Option<
 
     let app_id = app_id.unwrap_or_default();
 
-    let mut stmt = conn.prepare("SELECT
+    let mut stmt = conn.prepare("WITH clamped AS (
+        SELECT
+            MIN(end_time, ?2) - MAX(start_time, ?1) AS clamped_duration_ms
+        FROM window_segments
+        WHERE start_time < ?2
+            AND end_time > ?1
+            AND (?3 = '' OR app_id = ?3)
+    )
+    SELECT
     CASE
-        WHEN duration_ms < 60000   THEN 'lt_1m'
-        WHEN duration_ms < 120000  THEN '1_2m'
-        WHEN duration_ms < 300000  THEN '2_5m'
-        WHEN duration_ms < 900000  THEN '5_15m'
-        WHEN duration_ms < 3600000 THEN '15_60m'
+        WHEN clamped_duration_ms < 60000   THEN 'lt_1m'
+        WHEN clamped_duration_ms < 120000  THEN '1_2m'
+        WHEN clamped_duration_ms < 300000  THEN '2_5m'
+        WHEN clamped_duration_ms < 900000  THEN '5_15m'
+        WHEN clamped_duration_ms < 3600000 THEN '15_60m'
         ELSE '60m_plus'
     END AS duration_bucket,
     CASE
-        WHEN duration_ms < 60000   THEN 1
-        WHEN duration_ms < 120000  THEN 2
-        WHEN duration_ms < 300000  THEN 3
-        WHEN duration_ms < 900000  THEN 4
-        WHEN duration_ms < 3600000 THEN 5
+        WHEN clamped_duration_ms < 60000   THEN 1
+        WHEN clamped_duration_ms < 120000  THEN 2
+        WHEN clamped_duration_ms < 300000  THEN 3
+        WHEN clamped_duration_ms < 900000  THEN 4
+        WHEN clamped_duration_ms < 3600000 THEN 5
         ELSE 6
     END AS bucket_order,
     COUNT(*) AS count
-    FROM window_segments
-    WHERE start_time >= ?1 
-        AND start_time < ?2
-        AND (?3 = '' OR app_id = ?3)
+    FROM clamped
     GROUP BY duration_bucket, bucket_order
     ORDER BY bucket_order;")?;
 
@@ -112,21 +117,56 @@ pub fn query_weeks_daily_usage(start_time: i64, end_time: i64, app_id: Option<St
 
     let app_id = app_id.unwrap_or_default();
 
-    let mut stmt = conn.prepare("SELECT
-        date(start_time / 1000, 'unixepoch', 'localtime') AS day,
-        CAST(strftime('%s', date(start_time / 1000, 'unixepoch', 'localtime')) AS INTEGER) * 1000
-            AS day_start_ms,
-        SUM(duration_ms) AS total_duration_ms,
-    COUNT(*) AS segment_count,
-    COUNT(DISTINCT window_exe) AS unique_exes
-    FROM window_segments
-    WHERE start_time >= ?1
-        AND start_time <  ?2
-        AND duration_ms IS NOT NULL
-        AND duration_ms > 0
-        AND (?3 = '' OR app_id = ?3)
-    GROUP BY day
-    ORDER BY day;")?;
+    let mut stmt = conn.prepare("WITH RECURSIVE day_buckets AS (
+        SELECT
+            date(?1 / 1000, 'unixepoch', 'localtime') AS day_local,
+            CAST(strftime('%s', date(?1 / 1000, 'unixepoch', 'localtime') || ' 00:00:00', 'utc') AS INTEGER) * 1000 AS day_start_ms,
+            CAST(strftime('%s', date(?1 / 1000, 'unixepoch', 'localtime', '+1 day') || ' 00:00:00', 'utc') AS INTEGER) * 1000 AS day_end_ms
+
+        UNION ALL
+
+        SELECT
+            date(day_local, '+1 day'),
+            day_end_ms,
+            CAST(strftime('%s', date(day_local, '+2 day') || ' 00:00:00', 'utc') AS INTEGER) * 1000
+        FROM day_buckets
+        WHERE day_end_ms < ?2
+    ),
+    clipped_days AS (
+        SELECT
+            day_local,
+            day_start_ms,
+            day_end_ms,
+            CASE
+                WHEN day_start_ms < ?1 THEN ?1
+                ELSE day_start_ms
+            END AS bucket_start_ms,
+            CASE
+                WHEN day_end_ms > ?2 THEN ?2
+                ELSE day_end_ms
+            END AS bucket_end_ms
+        FROM day_buckets
+        WHERE day_start_ms < ?2
+        AND day_end_ms > ?1
+    )
+    SELECT
+        clipped_days.day_local AS day,
+        clipped_days.day_start_ms,
+        COALESCE(SUM(
+            MIN(ws.end_time, clipped_days.bucket_end_ms) -
+            MAX(ws.start_time, clipped_days.bucket_start_ms)
+        ), 0) AS total_duration_ms,
+        COUNT(ws.id) AS segment_count,
+        COUNT(DISTINCT ws.window_exe) AS unique_exes
+    FROM clipped_days
+    LEFT JOIN window_segments ws
+        ON ws.start_time < clipped_days.bucket_end_ms
+    AND ws.end_time > clipped_days.bucket_start_ms
+    AND ws.duration_ms IS NOT NULL
+    AND ws.duration_ms > 0
+    AND (?3 = '' OR ws.app_id = ?3)
+    GROUP BY clipped_days.day_local, clipped_days.day_start_ms
+    ORDER BY clipped_days.day_start_ms;")?;
 
     let usage_iter = stmt.query_map(params![start_time, end_time, app_id], |row| {
         Ok(DailyUsageDTO {
@@ -151,17 +191,52 @@ pub fn query_heat_map_values(start_time: i64, end_time: i64, app_id: Option<Stri
 
     let app_id = app_id.unwrap_or_default();
 
-    let mut stmt = conn.prepare("SELECT
-    CAST(strftime('%s', date(ws.start_time / 1000, 'unixepoch', 'localtime')) AS INTEGER) * 1000
-        AS day_start_ms,
-    SUM(ws.duration_ms) AS total_duration_ms
-    FROM window_segments ws
-    WHERE ws.start_time >= ?1
-        AND ws.start_time <  ?2
-        AND ws.duration_ms > 0
-        AND (?3 = '' OR ws.app_id = ?3)
-    GROUP BY day_start_ms
-    ORDER BY day_start_ms ASC;")?;
+    let mut stmt = conn.prepare("WITH RECURSIVE day_buckets AS (
+        SELECT
+            date(?1 / 1000, 'unixepoch', 'localtime') AS day_local,
+            CAST(strftime('%s', date(?1 / 1000, 'unixepoch', 'localtime') || ' 00:00:00', 'utc') AS INTEGER) * 1000 AS day_start_ms,
+            CAST(strftime('%s', date(?1 / 1000, 'unixepoch', 'localtime', '+1 day') || ' 00:00:00', 'utc') AS INTEGER) * 1000 AS day_end_ms
+
+        UNION ALL
+
+        SELECT
+            date(day_local, '+1 day'),
+            day_end_ms,
+            CAST(strftime('%s', date(day_local, '+2 day') || ' 00:00:00', 'utc') AS INTEGER) * 1000
+        FROM day_buckets
+        WHERE day_end_ms < ?2
+    ),
+    clipped_days AS (
+        SELECT
+            day_local,
+            day_start_ms,
+            day_end_ms,
+            CASE
+                WHEN day_start_ms < ?1 THEN ?1
+                ELSE day_start_ms
+            END AS bucket_start_ms,
+            CASE
+                WHEN day_end_ms > ?2 THEN ?2
+                ELSE day_end_ms
+            END AS bucket_end_ms
+        FROM day_buckets
+        WHERE day_start_ms < ?2
+        AND day_end_ms > ?1
+    )
+    SELECT
+        clipped_days.day_start_ms,
+        COALESCE(SUM(
+            MIN(ws.end_time, clipped_days.bucket_end_ms) -
+            MAX(ws.start_time, clipped_days.bucket_start_ms)
+        ), 0) AS total_duration_ms
+    FROM clipped_days
+    LEFT JOIN window_segments ws
+        ON ws.start_time < clipped_days.bucket_end_ms
+    AND ws.end_time > clipped_days.bucket_start_ms
+    AND ws.duration_ms > 0
+    AND (?3 = '' OR ws.app_id = ?3)
+    GROUP BY clipped_days.day_start_ms
+    ORDER BY clipped_days.day_start_ms ASC;")?;
 
     let usage_iter = stmt.query_map(params![start_time, end_time, app_id], |row| {
         Ok(DailyUsageHeatmapDTO {
@@ -187,16 +262,16 @@ pub fn query_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: S
     VALUES (?1, ?2, ?3)
     ),
 
-    -- 1️. Filter segments by start_time in range
+    -- 1️. Filter overlapping segments and clamp to range
     filtered AS (
     SELECT
         id,
-        start_time,
-        end_time
+        MAX(start_time, (SELECT range_start FROM params)) AS start_time,
+        MIN(end_time, (SELECT range_end FROM params)) AS end_time
     FROM window_segments
     WHERE app_id = (SELECT app_id FROM params)
-        AND start_time >= (SELECT range_start FROM params)
-        AND start_time <  (SELECT range_end FROM params)
+        AND start_time < (SELECT range_end FROM params)
+        AND end_time > (SELECT range_start FROM params)
     ),
 
     -- 2️. Split segments at hour boundaries

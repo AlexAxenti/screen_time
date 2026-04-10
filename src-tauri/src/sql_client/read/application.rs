@@ -45,12 +45,12 @@ pub fn query_app_usage(
         ws.app_id,
         ws.window_exe, 
         COALESCE(a.display_name, MIN(ws.window_exe)) AS display_name,
-        SUM(ws.duration_ms) AS duration,
+        SUM(MIN(ws.end_time, ?2) - MAX(ws.start_time, ?1)) AS duration,
         COUNT(*) AS segment_count
     FROM window_segments ws
     LEFT JOIN applications a
         ON a.app_id = ws.app_id
-    WHERE start_time >= ?1 AND start_time < ?2
+    WHERE ws.start_time < ?2 AND ws.end_time > ?1
     GROUP BY ws.app_id
     HAVING (?3 = '' OR display_name LIKE '%' || ?3 || '%')
     {}
@@ -94,7 +94,7 @@ pub fn query_app_usage_total(
         FROM window_segments ws
         LEFT JOIN applications a
             ON a.app_id = ws.app_id
-        WHERE ws.start_time >= ?1 AND ws.start_time < ?2
+        WHERE ws.start_time < ?2 AND ws.end_time > ?1
         GROUP BY ws.app_id
         HAVING (?3 = '' OR display_name LIKE '%' || ?3 || '%')
     )")?;
