@@ -36,7 +36,7 @@ pub fn setup_menu(app: &mut App) -> std::result::Result<(), Box<dyn std::error::
     let _tray = TrayIconBuilder::new()
         .icon(app.default_window_icon().unwrap().clone())
         .menu(&menu)
-        .tooltip("Screen Time Tracker")
+        .tooltip("Screen Time")
         .build(app)
         .expect("failed to build tray icon");
 
