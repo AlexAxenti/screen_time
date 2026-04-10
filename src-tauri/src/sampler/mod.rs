@@ -92,7 +92,9 @@ pub fn start(
                 app_exe_name: window_exe.clone()
             };
 
-            tx_apps.send(new_app_info).expect("Failed to send new app info");
+            tx_apps.send(new_app_info).unwrap_or_else(|e| {
+                eprintln!("Failed to send new app info: {e}");
+            });
 
             applications_found.insert(app_id.clone());
         }
@@ -109,7 +111,9 @@ pub fn start(
     }
 
     drop(tx_apps);
-    apps_worker_handle.join().expect("Failed to close apps worker thread");
+    if let Err(e) = apps_worker_handle.join() {
+        eprintln!("Failed to close apps worker thread: {e:?}");
+    }
     println!("Apps thread closed");
 }
 
@@ -153,7 +157,9 @@ fn flush_segment(
 ) {
     if let Some(mut seg) = segment.take() {
         seg.finalize(end_time);
-        tx_segments.send(seg).expect("Segment sending failed");
+        if let Err(e) = tx_segments.send(seg) {
+            eprintln!("Failed to send segment: {e}");
+        }
     }
 }
 

@@ -22,8 +22,22 @@ fn main() {
     //TODO move db init fn
     init_db();
     //fetch settings
-    let settings = query_settings().expect("Failed to read app settings");
-    let untracked_app_ids = query_untracked_app_ids().expect("Failed to get untracked app ids");
+    let settings = match query_settings() {
+        Ok(s) => s,
+        Err(e) => {
+            //TODO this should probably panic
+            eprintln!("Failed to read app settings: {e}");
+            panic!("Failed to read app settings");
+        }
+    };
+    let untracked_app_ids = match query_untracked_app_ids() {
+        Ok(ids) => ids,
+        Err(e) => {
+            //TODO this should probably panic
+            eprintln!("Failed to get untracked app ids: {e}");
+            panic!("Failed to get untracked app ids");
+        }
+    };
 
     //TODO Thread error handling
     let (tx_segments, rx_segments): 

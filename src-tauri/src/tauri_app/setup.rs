@@ -9,7 +9,8 @@ use tauri::{Manager, WebviewWindowBuilder};
 
 pub fn setup_menu(app: &mut App) -> std::result::Result<(), Box<dyn std::error::Error>> {
     let state = app.state::<AppState>();
-    let is_paused = *state.is_paused.lock().expect("Failed to access is paused mutex");
+    let is_paused = *state.is_paused.lock()
+        .map_err(|e| format!("Failed to access is paused mutex: {e}"))?;
 
     let resume_item = Arc::new(
         MenuItemBuilder::with_id("resume", "Resume")
@@ -30,15 +31,15 @@ pub fn setup_menu(app: &mut App) -> std::result::Result<(), Box<dyn std::error::
         .text("dashboard", "Open Dashboard")
         .separator()
         .text("quit", "Quit")
-        .build()
-        .expect("failed to build menu");
+        .build()?;
 
     let _tray = TrayIconBuilder::new()
-        .icon(app.default_window_icon().unwrap().clone())
+        .icon(app.default_window_icon()
+            .ok_or("No default window icon found")?
+            .clone())
         .menu(&menu)
         .tooltip("Screen Time")
-        .build(app)
-        .expect("failed to build tray icon");
+        .build(app)?;
 
     let resume_item_cb = Arc::clone(&resume_item);
     let pause_item_cb  = Arc::clone(&pause_item);
@@ -57,7 +58,13 @@ pub fn setup_menu(app: &mut App) -> std::result::Result<(), Box<dyn std::error::
             }
             "resume" => {
                 println!("Resuming");
-                let mut paused = state.is_paused.lock().expect("Failed to access is paused mutex");
+                let mut paused = match state.is_paused.lock() {
+                    Ok(p) => p,
+                    Err(e) => {
+                        eprintln!("Failed to access is paused mutex: {e}");
+                        return;
+                    }
+                };
                 if !*paused {
                     return;
                 }
@@ -70,7 +77,13 @@ pub fn setup_menu(app: &mut App) -> std::result::Result<(), Box<dyn std::error::
             }
             "pause" => {
                 println!("Pausing");
-                let mut paused = state.is_paused.lock().expect("Failed to access is paused mutex");
+                let mut paused = match state.is_paused.lock() {
+                    Ok(p) => p,
+                    Err(e) => {
+                        eprintln!("Failed to access is paused mutex: {e}");
+                        return;
+                    }
+                };
                 if *paused {
                     return;
                 }

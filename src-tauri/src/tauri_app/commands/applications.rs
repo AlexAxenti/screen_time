@@ -11,9 +11,13 @@ use crate::{
 
 #[tauri::command]
 pub fn get_application_metadata(app_id: String) -> AppMetadataDTO {
-    let app_metadata = query_app_metadata(&app_id).expect("Failed to read from DB");
-
-    app_metadata
+    match query_app_metadata(&app_id) {
+        Ok(data) => data,
+        Err(e) => {
+            eprintln!("get_application_metadata failed: {e}");
+            AppMetadataDTO::default()
+        }
+    }
 }
 
 //TODO naming abiguous
@@ -42,7 +46,7 @@ pub fn get_applications_list(
         SortDirection::Descending
     };
     
-    let window_segments = query_app_usage(
+    let window_segments = match query_app_usage(
         start_time, 
         end_time, 
         sort_value, 
@@ -50,9 +54,21 @@ pub fn get_applications_list(
         Some(page_count),
         Some(page_size),
         search_value.clone(),
-    ).expect("Failed to read from DB");
+    ) {
+        Ok(data) => data,
+        Err(e) => {
+            eprintln!("get_applications_list query failed: {e}");
+            return PagedAppSearchDTO::default();
+        }
+    };
 
-    let total_count = query_app_usage_total(start_time, end_time, search_value).expect("Failed to read from DB");
+    let total_count = match query_app_usage_total(start_time, end_time, search_value) {
+        Ok(count) => count,
+        Err(e) => {
+            eprintln!("get_applications_list total count failed: {e}");
+            return PagedAppSearchDTO::default();
+        }
+    };
     
     PagedAppSearchDTO { apps_usage: window_segments, total: total_count }
 }
@@ -60,7 +76,11 @@ pub fn get_applications_list(
 // todo naming ambiguous
 #[tauri::command]
 pub fn search_application_titles(query: String, tracked: Option<bool>) -> Vec<AppInfoDTO> {
-    let app_titles = query_app_titles(query, tracked).expect("Failed to read from DB");
-
-    app_titles
+    match query_app_titles(query, tracked) {
+        Ok(data) => data,
+        Err(e) => {
+            eprintln!("search_application_titles failed: {e}");
+            Vec::new()
+        }
+    }
 }

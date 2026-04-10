@@ -29,7 +29,7 @@ pub fn get_top_usage(start_time: i64, end_time: i64, app_count: usize) -> TopUsa
     let sort_value = ApplicationSortValue::Duration;
     let sort_direction = SortDirection::Descending;
 
-    let mut window_segments = query_app_usage(
+    let mut window_segments = match query_app_usage(
         start_time, 
         end_time, 
         sort_value, 
@@ -37,7 +37,13 @@ pub fn get_top_usage(start_time: i64, end_time: i64, app_count: usize) -> TopUsa
                 None,
         None,
         None,
-    ).expect("Failed to read from DB");
+    ) {
+        Ok(data) => data,
+        Err(e) => {
+            eprintln!("get_top_usage failed: {e}");
+            return TopUsageDTO::default();
+        }
+    };
 
     let total_time: i64 = window_segments.iter()
         .map(|segment| segment.duration)
@@ -62,49 +68,77 @@ pub fn get_top_usage(start_time: i64, end_time: i64, app_count: usize) -> TopUsa
 
 #[tauri::command]
 pub fn get_usage_summary(start_time: i64, end_time: i64) -> UsageSummaryDTO {
-    let usage_summary = query_usage_summary(start_time, end_time).expect("Failed to read from DB");
-
-    usage_summary
+    match query_usage_summary(start_time, end_time) {
+        Ok(data) => data,
+        Err(e) => {
+            eprintln!("get_usage_summary failed: {e}");
+            UsageSummaryDTO::default()
+        }
+    }
 }
 
 #[tauri::command]
 pub fn get_app_usage_summary(start_time: i64, end_time: i64, app_id: String) -> AppUsageSummaryDTO {
-    let app_usage_summary = query_app_usage_summary(start_time, end_time, app_id).expect("Failed to read from DB");
-
-    app_usage_summary
+    match query_app_usage_summary(start_time, end_time, app_id) {
+        Ok(data) => data,
+        Err(e) => {
+            eprintln!("get_app_usage_summary failed: {e}");
+            AppUsageSummaryDTO::default()
+        }
+    }
 }
 
 #[tauri::command]
 pub fn get_usage_fragmentation(start_time: i64, end_time: i64, app_id: Option<String>) -> Vec<UsageFragmentationDTO> {
-    let usage_fragmentation = query_usage_fragmentation(start_time, end_time, app_id).expect("Failed to read from DB");
-
-    usage_fragmentation
+    match query_usage_fragmentation(start_time, end_time, app_id) {
+        Ok(data) => data,
+        Err(e) => {
+            eprintln!("get_usage_fragmentation failed: {e}");
+            Vec::new()
+        }
+    }
 }
 
 #[tauri::command]
 pub fn get_weeks_daily_usage(start_time: i64, end_time: i64, app_id: Option<String>) -> Vec<DailyUsageDTO> {
-    let weeks_daily_usage = query_weeks_daily_usage(start_time, end_time, app_id).expect("Failed to read from DB");
-
-    weeks_daily_usage
+    match query_weeks_daily_usage(start_time, end_time, app_id) {
+        Ok(data) => data,
+        Err(e) => {
+            eprintln!("get_weeks_daily_usage failed: {e}");
+            Vec::new()
+        }
+    }
 }
 
 #[tauri::command]
 pub fn get_usage_heat_map(start_time: i64, end_time: i64, app_id: Option<String>) -> Vec<DailyUsageHeatmapDTO> {
-    let daily_usage = query_heat_map_values(start_time, end_time, app_id).expect("Failed to read from DB");
-
-    daily_usage
+    match query_heat_map_values(start_time, end_time, app_id) {
+        Ok(data) => data,
+        Err(e) => {
+            eprintln!("get_usage_heat_map failed: {e}");
+            Vec::new()
+        }
+    }
 }
 
 #[tauri::command]
 pub fn get_app_avg_time_of_day_usage(start_time: i64, end_time: i64, app_id: Option<String>) -> Vec<AvgTimeOfDayUsage> {
-    let avg_usage = query_app_avg_time_of_day_usage(start_time, end_time, app_id).expect("Failed to read from DB");
-
-    avg_usage
+    match query_app_avg_time_of_day_usage(start_time, end_time, app_id) {
+        Ok(data) => data,
+        Err(e) => {
+            eprintln!("get_app_avg_time_of_day_usage failed: {e}");
+            Vec::new()
+        }
+    }
 }
 
 #[tauri::command]
 pub fn get_app_overall_summary(app_id: String) -> AppOverallSummaryDTO {
-    let summary = query_app_overall_summary(app_id).expect("Failed to read from DB");
-
-    summary
+    match query_app_overall_summary(app_id) {
+        Ok(data) => data,
+        Err(e) => {
+            eprintln!("get_app_overall_summary failed: {e}");
+            AppOverallSummaryDTO::default()
+        }
+    }
 }
