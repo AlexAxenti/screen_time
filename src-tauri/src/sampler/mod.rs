@@ -99,7 +99,7 @@ pub fn start(
             applications_found.insert(app_id.clone());
         }
 
-        let app_is_ignored = app_is_ignored(&window_exe, &app_id, &untracked_app_ids_set);
+        let app_is_ignored = is_app_ignored(&window_exe, &app_id, &untracked_app_ids_set);
 
         let sampled_segment = WindowSegment::new(
             app_id,
@@ -164,7 +164,7 @@ fn flush_segment(
 }
 
 // TODO have a list from tauri in the future
-fn app_is_ignored(
+fn is_app_ignored(
     exe_name: &str,
     app_id: &str,
     untracked_app_ids_set: &HashSet<String>
