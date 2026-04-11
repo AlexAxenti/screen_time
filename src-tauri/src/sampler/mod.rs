@@ -99,7 +99,7 @@ pub fn start(
             applications_found.insert(app_id.clone());
         }
 
-        let is_tracked = app_is_tracked(&window_exe, &app_id, &untracked_app_ids_set);
+        let app_is_ignored = app_is_ignored(&window_exe, &app_id, &untracked_app_ids_set);
 
         let sampled_segment = WindowSegment::new(
             app_id,
@@ -107,7 +107,7 @@ pub fn start(
             window_exe,
             sample_start_time);        
 
-        update_state(&mut main_segment, sampled_segment, is_tracked, sample_start_time, &tx_segments);
+        update_state(&mut main_segment, sampled_segment, app_is_ignored, sample_start_time, &tx_segments);
     }
 
     drop(tx_apps);
@@ -120,12 +120,12 @@ pub fn start(
 fn update_state(
     main_segment: &mut Option<WindowSegment>, 
     sampled_segment: WindowSegment, 
-    is_unfocused: bool, 
+    should_ignore: bool, 
     sample_start_time: SystemTime,
     tx_segments: &Sender<WindowSegment>
 ) {
     if main_segment.is_none() {
-        if !is_unfocused {
+        if !should_ignore {
             println!("New focus: {} | {}", sampled_segment.window_name, sampled_segment.window_exe);
             
             *main_segment = Some(sampled_segment);
@@ -136,7 +136,7 @@ fn update_state(
             .map(|seg| seg.app_id == sampled_segment.app_id)
             .unwrap_or(false);
 
-        if is_unfocused {
+        if should_ignore {
             flush_segment(main_segment, sample_start_time, tx_segments);
         } else if same_exe {
             return;
@@ -164,7 +164,7 @@ fn flush_segment(
 }
 
 // TODO have a list from tauri in the future
-fn app_is_tracked(
+fn app_is_ignored(
     exe_name: &str,
     app_id: &str,
     untracked_app_ids_set: &HashSet<String>
