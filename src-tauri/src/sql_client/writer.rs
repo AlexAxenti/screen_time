@@ -44,11 +44,14 @@ fn save_segment_to_db(segment: WindowSegment, db_connection: &Connection) {
         end_int, 
         duration_ms,
         created_at,
-    ]).expect("Failed to write!");
+    ]).unwrap_or_else(|e| {
+        eprintln!("Failed to write segment to DB: {e}");
+        0
+    });
 }
 
 //Todo sepearte 'write' functions from loop functions above
-pub fn save_application_to_db(app_id: &str, exe_path: &str, exe_name: &str, display_name: &str) {
+pub fn save_application_to_db(app_id: &str, exe_path: &str, exe_name: &str, display_name: &str) -> rusqlite::Result<()> {
     let created_at = system_time_to_millis(SystemTime::now());
 
     let conn = connect_db_file();
@@ -69,20 +72,24 @@ pub fn save_application_to_db(app_id: &str, exe_path: &str, exe_name: &str, disp
         display_name, 
         created_at, 
         created_at,
-    ]).expect("Failed to write!");
+    ])?;
+
+    Ok(())
 } 
 
-pub fn update_application_tracked(app_id: &str, is_tracked: bool) {
+pub fn update_application_tracked(app_id: &str, is_tracked: bool) -> rusqlite::Result<()> {
     let conn = connect_db_file();
     let is_tracked_int = if is_tracked { 1 } else { 0 };
 
     conn.execute(
         "UPDATE applications SET is_tracked = ?1 WHERE app_id = ?2",
         params![is_tracked_int, app_id]
-    ).expect("Failed to update is_tracked!");
+    )?;
+
+    Ok(())
 }
 
-pub fn update_settings(settings: &Settings) {
+pub fn update_settings(settings: &Settings) -> rusqlite::Result<()> {
     let conn = connect_db_file();
 
     let start_on_startup: i64 = if settings.start_on_startup { 1 } else { 0 };
@@ -97,5 +104,7 @@ pub fn update_settings(settings: &Settings) {
     conn.execute(
         "UPDATE settings SET start_on_startup = ?1, close_behavior = ?2, idle_duration_ms = ?3, is_onboarded = ?4 WHERE id = 1",
         params![start_on_startup, close_behavior, settings.idle_duration_ms, is_onboarded]
-    ).expect("Failed to update settings!");
+    )?;
+
+    Ok(())
 }

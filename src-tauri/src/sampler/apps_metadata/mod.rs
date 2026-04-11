@@ -20,13 +20,24 @@ fn ensure_app_exists(app: AppInfo) {
     let app_exe_path = &app.app_exe_path;
     let app_exe_name = &app.app_exe_name;
 
-    let app_exists = check_for_application(app_id).expect("Failed to check if app exists");
+    let app_exists = match check_for_application(app_id) {
+        Ok(exists) => exists,
+        Err(e) => {
+            eprintln!("Failed to check if app exists ({}): {e}", app_id);
+            return;
+        }
+    };
 
     // If not exists, write to db
     if !app_exists {
-        let display_name = get_exe_display_name_from_version_info(app_exe_path)
-            .expect("Failed to get exe display name")
-            .unwrap_or(app.app_exe_name.clone());
+        let display_name = match get_exe_display_name_from_version_info(app_exe_path) {
+            Ok(Some(name)) => name,
+            Ok(None) => app.app_exe_name.clone(),
+            Err(e) => {
+                eprintln!("Failed to get exe display name for {}: {e}", app_exe_path);
+                app.app_exe_name.clone()
+            }
+        };
 
         let icons_dir = icons_dir();
 
@@ -38,7 +49,9 @@ fn ensure_app_exists(app: AppInfo) {
 
         println!("App display name found: {}", display_name);
 
-        save_application_to_db(app_id, app_exe_path, app_exe_name, &display_name);
+        if let Err(e) = save_application_to_db(app_id, app_exe_path, app_exe_name, &display_name) {
+            eprintln!("Failed to save application to DB ({}): {e}", app_id);
+        }
     }
 }
 

@@ -8,50 +8,97 @@ pub fn connect_db_file() -> Connection {
 
     if !app_data_dir.exists() { 
         println!("Creating dir");
-        fs::create_dir_all(&app_data_dir).expect("failed to create folder");
+        if let Err(e) = fs::create_dir_all(&app_data_dir) {
+            //TODO this should probably panic
+            eprintln!("Failed to create app data folder: {e}");
+            panic!("Failed to create app data folder");
+        }
     }
 
     let sqlite_file_path = app_data_dir.join("usage.sqlite3");
 
     let Ok(conn) = Connection::open(sqlite_file_path) else {
+        //TODO this should probably panic
+        eprintln!("Failed to open db file");
         panic!("Failed to open db file");
     };
 
-    conn.pragma_update(None, "journal_mode", &"WAL").unwrap();
-    conn.pragma_update(None, "synchronous", &"NORMAL").unwrap();
-    conn.busy_timeout(Duration::from_secs(3)).unwrap();
+    if let Err(e) = conn.pragma_update(None, "journal_mode", &"WAL") {
+        //TODO this should probably panic
+        eprintln!("Failed to set journal_mode: {e}");
+        panic!("Failed to set journal_mode");
+    }
+    if let Err(e) = conn.pragma_update(None, "synchronous", &"NORMAL") {
+        //TODO this should probably panic
+        eprintln!("Failed to set synchronous mode: {e}");
+        panic!("Failed to set synchronous mode");
+    }
+    if let Err(e) = conn.busy_timeout(Duration::from_secs(3)) {
+        //TODO this should probably panic
+        eprintln!("Failed to set busy_timeout: {e}");
+        panic!("Failed to set busy_timeout");
+    }
 
     conn
 }
 
 pub fn init_migrations_table(conn: &Connection) {
-    conn.execute("CREATE TABLE IF NOT EXISTS schema_migrations (
+    if let Err(e) = conn.execute("CREATE TABLE IF NOT EXISTS schema_migrations (
         version INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
         applied_at INTEGER NOT NULL
-    );", ()).expect("Failed to initialize migrations table");
+    );", ()) {
+        //TODO this should probably panic
+        eprintln!("Failed to initialize migrations table: {e}");
+        panic!("Failed to initialize migrations table");
+    }
 }
 
 pub fn run_migrations(conn: &mut Connection) {
-    let current_migration_version: i64 = conn
-        .query_row("SELECT COALESCE(MAX(version), 0) FROM schema_migrations", [], |row| row.get(0))             // Option<i64>
-        .expect("Failed to get migration version");
+    let current_migration_version: i64 = match conn
+        .query_row("SELECT COALESCE(MAX(version), 0) FROM schema_migrations", [], |row| row.get(0)) {
+        Ok(v) => v,
+        Err(e) => {
+            //TODO this should probably panic
+            eprintln!("Failed to get migration version: {e}");
+            panic!("Failed to get migration version");
+        }
+    };
 
     for migration in MIGRATIONS.iter().filter(
         |m| m.migration_version > current_migration_version
     ) {
         println!("Running migration {}", migration.migration_version);
         
-        let tx = conn.transaction().expect("Failed to create transaction");
+        let tx = match conn.transaction() {
+            Ok(tx) => tx,
+            Err(e) => {
+                //TODO this should probably panic
+                eprintln!("Failed to create transaction for migration {}: {e}", migration.migration_version);
+                panic!("Failed to create transaction");
+            }
+        };
 
-        tx.execute_batch(migration.migration_sql).expect("Failed to execute migration");
+        if let Err(e) = tx.execute_batch(migration.migration_sql) {
+            //TODO this should probably panic
+            eprintln!("Failed to execute migration {}: {e}", migration.migration_version);
+            panic!("Failed to execute migration");
+        }
 
-        tx.execute(
+        if let Err(e) = tx.execute(
             "INSERT INTO schema_migrations (version, name, applied_at) VALUES (?1, ?2, strftime('%s','now'))",
             params![migration.migration_version, migration.migration_name],
-        ).expect("Failed to add migration row");
+        ) {
+            //TODO this should probably panic
+            eprintln!("Failed to add migration row for {}: {e}", migration.migration_version);
+            panic!("Failed to add migration row");
+        }
 
-        tx.commit().expect("Failed to commit transaction");
+        if let Err(e) = tx.commit() {
+            //TODO this should probably panic
+            eprintln!("Failed to commit migration {}: {e}", migration.migration_version);
+            panic!("Failed to commit migration");
+        }
     }
 }
 

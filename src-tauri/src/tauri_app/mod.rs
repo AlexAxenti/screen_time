@@ -41,10 +41,13 @@ pub fn run(
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 let state = window.state::<AppState>();
 
-                let settings = state
-                    .runtime_settings
-                    .lock()
-                    .expect("Failed to access runtime settings");
+                let settings = match state.runtime_settings.lock() {
+                    Ok(s) => s,
+                    Err(e) => {
+                        eprintln!("Failed to access runtime settings on close: {e}");
+                        return;
+                    }
+                };
 
                 if matches!(settings.close_behavior, CloseBehavior::Hide) {
                     api.prevent_close();
@@ -56,7 +59,8 @@ pub fn run(
         .invoke_handler(commands::handler())
         .setup(|app| {
             let state = app.state::<AppState>();
-            let settings = state.runtime_settings.lock().expect("Failed to acquire runtime settings lock");
+            let settings = state.runtime_settings.lock()
+                .map_err(|e| format!("Failed to acquire runtime settings lock: {e}"))?;
 
             if !settings.is_onboarded {
                 println!("Starting app {}", settings.is_onboarded);
@@ -67,7 +71,11 @@ pub fn run(
             setup::setup_menu(app)
         })
         .build(tauri::generate_context!())
-        .expect("error while building tauri application")
+        .unwrap_or_else(|e| {
+            //TODO this should probably panic
+            eprintln!("Error while building tauri application: {e}");
+            panic!("Error while building tauri application");
+        })
         .run(move |_app_handle, event| {
             match event {
                 RunEvent::ExitRequested { api, code, .. } => {
@@ -83,11 +91,15 @@ pub fn run(
                     let _ = tx_control_for_run.send(ControlMsg::Shutdown);
 
                     if let Some(h) = sampler_handle.take() {
-                        h.join().unwrap();
+                        if let Err(e) = h.join() {
+                            eprintln!("Sampler thread panicked during exit: {e:?}");
+                        }
                         println!("Sampler thread closed");
                     }
                     if let Some(h) = sql_handle.take() {
-                        h.join().unwrap();
+                        if let Err(e) = h.join() {
+                            eprintln!("Sql thread panicked during exit: {e:?}");
+                        }
                         println!("Sql thread closed");
                     }
                 }

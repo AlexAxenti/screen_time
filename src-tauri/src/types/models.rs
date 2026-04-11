@@ -51,16 +51,28 @@ pub struct Settings {
     pub is_onboarded: bool,
 }
 
+impl Default for Settings {
+    fn default() -> Self {
+        Self {
+            start_on_startup: true,
+            close_behavior: CloseBehavior::Destroy,
+            idle_duration_ms: 120000,
+            is_onboarded: false,
+        }
+    }
+}
+
 pub struct TauriRuntimeSettings {
     pub close_behavior: CloseBehavior,
     pub start_on_startup: bool,
     pub is_onboarded: bool
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum CloseBehavior {
     Hide,
+    #[default]
     Destroy
 }
 
