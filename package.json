@@ -1,7 +1,7 @@
 {
 	"name": "screen_time",
 	"private": true,
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"description": "screen time app",
 	"homepage": "https://github.com/AlexAxenti/screen_time#readme",
 	"bugs": {
