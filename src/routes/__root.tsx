@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createRootRoute, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import AppHeader from "../components/AppHeader/AppHeader";
 import OnboardingFlow from "../components/OnboardingFlow/OnboardingFlow";
@@ -10,7 +10,12 @@ import useGetApplicationSettings from "../hooks/queries/useGetApplicationSetting
 export const Route = createRootRoute({
 	component: () => {
 		const navigate = useNavigate();
+		const { pathname } = useLocation();
 		const { data: settings } = useGetApplicationSettings();
+
+		useEffect(() => {
+			window.scrollTo(0, 0);
+		}, [pathname]);
 
 		useEffect(() => {
 			let unlisten: null | (() => void) = null;
